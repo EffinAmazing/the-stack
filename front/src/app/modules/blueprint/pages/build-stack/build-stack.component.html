@@ -1,0 +1,12 @@
+<div class="main">
+    <div class="mt-container"> 
+      <h2> Build your stack </h2>   
+
+      <div class="stackContainer">
+        <div class="stackActions"></div>
+        <div class="stackWorkflow">
+          <div class="toolNode" *ngFor="let node of nodes">{{ node.tool?.name }}</div>
+        </div>
+      </div>
+    </div>
+</div>

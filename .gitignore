@@ -1,0 +1,5 @@
+/front/node_modules
+/back/node_modules
+/front/package-lock.json
+/back/package-lock.json
+/front/dist
