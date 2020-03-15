@@ -11,6 +11,7 @@ const app = express();
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
+mongoose.connect(config.MONGOURI + config.DB_NAME , {useNewUrlParser: true});
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

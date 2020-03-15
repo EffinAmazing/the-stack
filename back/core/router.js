@@ -1,9 +1,11 @@
-var express = require('express');
-var BlueprintsController = require('./controllers/blueprints');
-var router = express.Router();
+const express = require('express');
+const BlueprintsController = require('./controllers/blueprints');
+const ToolsNodes = require('./controllers/toolsnodes');
+const router = express.Router();
 
-var blueprints = new BlueprintsController();
-
+const blueprints = new BlueprintsController();
+const toolsNodes = new ToolsNodes();
+// console.log(blueprints);
 router.all('*', function(req, res, next){
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Cache-Control");
@@ -16,8 +18,10 @@ router.get("/", function(req, res, next){
         result: "ok"
     })
 })
-router.get("/blueprints/tools", blueprints.getDomainTools);
+router.get("/blueprints/tools", blueprints.getDomainTools.bind(blueprints));
 router.post("/blueprints/", blueprints.updateBlueprint);
 router.put("/plueprints/:id", blueprints.updateBlueprint);
+
+router.put("/toolsnodes/:id", toolsNodes.update.bind(toolsNodes));
 
 module.exports = router;

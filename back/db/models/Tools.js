@@ -4,7 +4,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 
 class ToolsModel extends AbstaractModel{
     constructor(){
-        super('toolsmodel');
+        super('tools');
 
         this.schema = mongoose.Schema({
             name: String,
@@ -18,6 +18,21 @@ class ToolsModel extends AbstaractModel{
         });
 
         this.initModel();
+    }
+
+    async proceedTools(tools){
+        let toDo = tools.map(async (item)=>{
+            try{
+                let dbItem = await this.modelDB.findOne({ name: item.name });
+                return this.mapDocument( dbItem );
+            } catch(err) {
+                let dbItem = await this.create(item);
+                return this.mapDocument( dbItem );
+            }
+        })
+
+        let res = await Promise.all(toDo);
+        return res;
     }
 }
 

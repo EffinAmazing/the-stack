@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var async = require('async');
 
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
@@ -15,6 +16,21 @@ class AbstaractModel {
                 this.modelDB = mongoose.model(this.name, this.schema);
             }
         }
+    }    
+
+    mapDocument(doc){
+        let mapDoc = {};
+        
+        for (const key of Object.keys(doc._doc)) {
+          if (key === '_id' || key === '__v') {
+            if(key === '_id') mapDoc['id'] = doc['_id'];
+          } else {
+            mapDoc[key] = doc[key];
+          }
+          
+        }
+
+        return mapDoc;
     }
 
     async clearModel(name) {
@@ -48,7 +64,7 @@ class AbstaractModel {
         ];
         callbacks = await this.prepareCallbacks(callbacks, after);
         
-        let result = await async.series(callbacks);
+        let result = await async.waterfall(callbacks);
         return result;
     }
 
@@ -58,7 +74,7 @@ class AbstaractModel {
         }];
         callbacks = await this.prepareCallbacks(callbacks, after);
         
-        let result = await async.series(callbacks);
+        let result = await async.waterfall(callbacks);
         return result;
     }
 
@@ -70,7 +86,22 @@ class AbstaractModel {
         ];
         callbacks = await this.prepareCallbacks(callbacks, after);
 
-        let result = await async.series(callbacks);
+        let result = await async.waterfall(callbacks);
+        return result;
+    }
+
+    async updateOne(id, data, after){
+        var callbacks = [
+            (cb)=>{
+                this.modelDB.updateOne({_id: id}, data, cb);
+            },
+            (data, cb) => {
+                this.modelDB.findById(id, {}, cb);
+            }
+        ];
+        callbacks = await this.prepareCallbacks(callbacks, after);
+
+        let result = await async.waterfall(callbacks);
         return result;
     }
 
@@ -82,7 +113,7 @@ class AbstaractModel {
         ];
         callbacks = await this.prepareCallbacks(callbacks, after);
 
-        let result = await async.series(callbacks);
+        let result = await async.waterfall(callbacks);
         return result;
     }
 }

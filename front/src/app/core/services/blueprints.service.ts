@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { Tool } from "../../shared/models/tool";
+import { BluePrintResp, BluePrintTool } from "../../shared/models/tool";
 import { ResponseMappers } from '../../shared/mappers/response-mapper.helper';
 
 @Injectable({
@@ -12,7 +12,11 @@ export class BlueprintsService {
 
   constructor( private http: HttpClient, private mapper: ResponseMappers ) { }
 
-  getDomainTools(domain: string): Observable<Tool[]> {
-    return this.mapper.mapResponse(this.http.get<Tool[]>(`${this.serverURI}blueprints/tools?domain=${domain}`));
+  getDomainTools(domain: string): Observable<BluePrintResp> {
+    return this.mapper.mapResponse(this.http.get<BluePrintResp>(`${this.serverURI}blueprints/tools?domain=${domain}`));
+  }
+
+  updateNodeTool(nodeID: string, data ): Observable<BluePrintTool>{
+    return this.mapper.mapResponse(this.http.put<BluePrintTool>(`${this.serverURI}toolsnodes/${nodeID}`, { data }));
   }
 }

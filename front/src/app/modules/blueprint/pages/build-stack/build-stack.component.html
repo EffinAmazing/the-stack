@@ -3,9 +3,28 @@
       <h2> Build your stack </h2>   
 
       <div class="stackContainer">
-        <div class="stackActions"></div>
+        <div class="stackActions">
+          <button mat-raised-button (click)="handleHideList()"> List </button>
+        </div>
+        <div [ngClass]="{'toolsList': true, 'hide': hideList}"> 
+          <div class="node-item" *ngFor="let node of nodes"> 
+            <mat-card>
+              <div class="item-categories"> <b>Categories: </b>  {{ node.tool && node.tool.categories?(node.tool.categories.join(',')):''  }} </div>
+              <p class="item-name"> <b>Name: </b> {{ node.tool?.name }} </p>
+              <p class="item-description"> {{ node.tool?.description }} </p>
+              <div class="actions">
+                <mat-slide-toggle (change)="handleHideNodeItem(node)"
+                    class="example-margin"
+                    [checked]="node.hide"
+                    [color]="'accent'">
+                    Hide
+                </mat-slide-toggle>
+              </div>           
+            </mat-card>
+          </div>
+        </div>
         <div class="stackWorkflow">
-          <div class="toolNode" *ngFor="let node of nodes">{{ node.tool?.name }}</div>
+          <div class="toolNode" *ngFor="let node of showNodes" cdkDrag [cdkDragFreeDragPosition]="node.position.x && node.position.y?node.position:{x: 0, y: 0}" (cdkDragReleased)="relisedMove($event, node)">{{ node.tool?.name }}</div>
         </div>
       </div>
     </div>
