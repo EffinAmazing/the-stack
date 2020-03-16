@@ -58,7 +58,17 @@ export class BuildStackComponent implements OnInit {
       const tool = this.nodes[nodeIndex].tool;
       this.nodes[nodeIndex] = res;
       this.nodes[nodeIndex]['tool'] = tool;
+      this.margeShowNodes();
     });
+  }
+
+  private margeShowNodes(){
+    this.showNodes = [];
+    this.nodes.forEach((item) => {
+      if (!item.hide) {
+        this.showNodes.push(item);
+      }
+    })
   }
 
 }
