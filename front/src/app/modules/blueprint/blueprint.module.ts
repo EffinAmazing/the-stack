@@ -10,10 +10,12 @@ import { CommonBehaviorsModule } from '../../shared/modules/material/common-beha
 import { ButtonsIndicatorsModule } from '../../shared/modules/material/buttons-indicators/buttons-indicators.module';
 import { FormsControlsModule } from '../../shared/modules/material/forms-controls/forms-controls.module';
 import { LayoutModule } from '../../shared/modules/material/layout/layout.module';
+import { BuilderComponent } from './components/builder/builder.component';
+import { ToolsListComponent } from './components/tools-list/tools-list.component';
 
 
 @NgModule({
-  declarations: [BuildStackComponent, ShareComponent],
+  declarations: [BuildStackComponent, ShareComponent, BuilderComponent, ToolsListComponent],
   imports: [
     CommonModule,
     BlueprintRoutingModule,

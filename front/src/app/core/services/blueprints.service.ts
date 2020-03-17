@@ -19,4 +19,8 @@ export class BlueprintsService {
   updateNodeTool(nodeID: string, data ): Observable<BluePrintTool>{
     return this.mapper.mapResponse(this.http.put<BluePrintTool>(`${this.serverURI}toolsnodes/${nodeID}`, { data }));
   }
+
+  hideNodes(ids: string[]): Observable<any> {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolshide/`, { ids } ));
+  }
 }

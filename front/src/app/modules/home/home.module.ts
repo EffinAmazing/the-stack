@@ -1,5 +1,6 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA  } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 
 import { HomeRoutingModule } from './home-routing.module';
@@ -17,7 +18,9 @@ import { FormsControlsModule } from "../../shared/modules/material/forms-control
     HomeRoutingModule,
     SharedModule,
     FormsControlsModule,
-    ButtonsIndicatorsModule
+    ButtonsIndicatorsModule,
+    FormsModule,
+    ReactiveFormsModule
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
 })

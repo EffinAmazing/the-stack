@@ -46,6 +46,14 @@ class ToolsNodesModel extends AbstaractModel {
         console.log(doc);
         return this.mapDocument(doc);
     }
+
+    async hideList(ids){
+        let res = await async.every(ids, (item, callback) => {
+            this.modelDB.update({ _id: item }, { hide: true }, callback);
+        });
+
+        return res;
+    }
 }
 
 module.exports = ToolsNodesModel;

@@ -3,6 +3,7 @@ const BluePrintModel = require('../../db/models/Blueprints');
 const ToolsServices = require('../../services/sitetechonlogies');
 const ToolsModel = require('../../db/models/Tools');
 const ToolsNodesModel = require('../../db/models/ToolsNodes');
+const axios = require('axios');
 
 class BluePrints {
     constructor(){
@@ -15,6 +16,14 @@ class BluePrints {
         console.log(req.query);
 
         async.waterfall([
+            (cb)=>{
+                // 0. check domain
+                axios.get('http://' + req.query.domain).then((data) => {
+                    cb(null)
+                }).catch((err)=>{
+                    cb(new Error("Website Is Not Found"));
+                })
+            },
             (cb) => {
                 
                 // 1. get blueprint of domain
@@ -30,6 +39,13 @@ class BluePrints {
                 
                 // 2. get tools of domain
                 ToolsServices.getToolsOfDomain(req.query.domain).then((list)=>{
+                    list.push( {
+                        categories: ['Domains'],
+                        name: "req.query.domain",
+                        description: "",
+                        link: 'http://' + req.query.domain,
+                        tag: "Domain Name"
+                    } );
                     cb(null, { blueprint: blueprint, tools: list });
                 }).catch((err)=>{
                     cb(err, null);

@@ -1,0 +1,37 @@
+<div>
+    <div class="stackWorkflow" #stackWorkFlow (mousemove)="handleMouseMove($event)" (click)="handleClickOnWorkspace()">
+        <svg id="paint"  width="1080" height="600">
+          <defs>
+            <marker 
+              id="arrow-marker" 
+              markerWidth="8" 
+              markerHeight="12" 
+              refX="4" 
+              refY="6" 
+              orient="auto-start-reverse" 
+              markerUnits="userSpaceOnUse">
+                <path d="M2,0 L8,6 L2,12 L0,10 L4,6 L0,2 z" style="stroke-width: 1;z-index: 5;"></path>
+              </marker>
+            </defs>
+        </svg>
+        <div class="toolNode" *ngFor="let node of showNodes" 
+          cdkDrag 
+          [cdkDragFreeDragPosition]="hasCoords(node.position)?node.position:{x: 0, y: 0}" 
+          (cdkDragReleased)="relisedMove($event, node)"
+          (cdkDragMoved)="$event.event.stopPropagation();  handleNodeMove($event, node)"
+          (cdkDragStarted)="handleStartDrag(node)"
+          (mouseenter)="handleMouseOverNode($event, node)"
+          (mouseleave)="handleMouseOutNode($event, node)" >
+            {{ node.tool?.name }}
+            <div class="pointers">
+              <div class="pointer-Left" (click)="handleAddArrowClick($event, 'Left', node)"></div>
+              <div class="pointer-Right" (click)="handleAddArrowClick($event, 'Right', node)"></div>
+              <div class="pointer-LeftTop" (click)="handleAddArrowClick($event, 'LeftTop', node)"></div>
+              <div class="pointer-RightTop" (click)="handleAddArrowClick($event, 'RightTop', node)"></div>
+              <div class="pointer-MiddleTop" (click)="handleAddArrowClick($event, 'MiddleTop', node)"></div>
+              <div class="pointer-LeftBottom" (click)="handleAddArrowClick($event, 'LeftBottom', node)"></div>
+              <div class="pointer-RightBottom" (click)="handleAddArrowClick($event, 'RightBottom', node)"></div>
+              <div class="pointer-MiddleBottom" (click)="handleAddArrowClick($event, 'MiddleBottom', node)"></div>
+            </div>
+    </div>
+</div>

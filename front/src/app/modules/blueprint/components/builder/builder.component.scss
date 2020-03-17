@@ -1,0 +1,120 @@
+.stackWorkflow {
+    position: relative;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,.2);
+    border-radius: 3px;
+    -webkit-transition: .3s;
+    transition: .3s;
+    padding: 20px 20px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    height: 620px;
+    overflow: hidden;
+}
+
+.toolNode{
+    z-index: 100;
+    padding: 8px;
+    min-width: 80px;
+    font-size: 1em;
+    background: #fff;
+    text-align: center;
+    color: #0087e2;
+    border-radius: 5px;
+    border: 1px solid #1c57a4;
+    opacity: 1;
+    display: inline-block;
+    position: absolute;
+    cursor: move;
+    transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+
+    .pointers{
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        &>div{
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            cursor: pointer;
+        
+            &:before{
+                content: '+';
+                display: inline-block;
+                color: honeydew;
+                font-size: 9px;
+                text-align: center;
+                line-height: 9px;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background-color: green;
+                opacity: 0;
+            }
+
+            &:hover:before{
+                opacity: 1;
+            }
+        }
+
+        .pointer-Left{
+            margin-top: -9px;
+            top: 50%;
+            left: -9px;
+        }
+        .pointer-Right{
+            margin-top: -9px;
+            top: 50%;
+            right: -9px;
+        }
+        .pointer-LeftTop{ 
+            top: -9px;
+            left: 9px;
+        }
+        .pointer-RightTop{   
+            top: -9px;
+            right: 9px;
+        }
+        .pointer-MiddleTop{
+            top: -9px;
+            left: 50%;
+            margin-left: -9px;
+        }
+        .pointer-LeftBottom{
+            bottom: -9px;
+            left: 9px;
+        }
+        .pointer-RightBottom{  
+            bottom: -9px;
+            right: 9px;
+        }
+        .pointer-MiddleBottom{ 
+            bottom: -9px;
+            left: 50%;
+            margin-left: -9px;
+        }
+    }
+
+    &:hover .pointers>div:before{
+        opacity: 1;
+    }
+}
+
+#paint{
+    position: absolute;
+    #arrow-marker{
+        stroke: #1c57a4;
+        fill: #1c57a4;
+    }
+
+    .line{
+        stroke: #1c57a4;
+        fill: #1c57a4;
+    }
+}

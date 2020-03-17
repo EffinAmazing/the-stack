@@ -27,6 +27,28 @@ class ToolsNodes {
             })
         }
     }
+
+    hidelist(req, res, next){
+        let ids = req.body.ids;
+        console.log(ids, req.body);
+        if (ids) {
+            this.model.hideList(ids).then((result) => {
+                res.json({
+                    result: result
+                })
+            }).catch((err)=>{
+                res.json({ 
+                    result: "Error",
+                    message: err.message
+                })
+            })
+        } else {
+            res.json({ 
+                result: "Error",
+                message: "incorrect data"
+            })
+        }
+    }
 }
 
 module.exports = ToolsNodes;

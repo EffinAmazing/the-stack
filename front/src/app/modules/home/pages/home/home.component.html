@@ -6,12 +6,13 @@
                 <h2> Input Domain </h2>
                 <div>
                     <mat-form-field appearance="outline" class="input-domain">
-                        <mat-label>Domain name</mat-label>
-                        <input matInput placeholder="Placeholder">
+                        <mat-label>Domain name:</mat-label>
+                        <input matInput placeholder="" [formControl]="domain" required>
+                        <mat-error *ngIf="domain.invalid"> Please enter a valid domain </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="submit-domain">
-                    <button mat-raised-button color="primary">Submit</button>
+                    <button mat-raised-button color="primary" (click)="submitDomain()">Submit</button>
                 </div>
             </div>
         </div>

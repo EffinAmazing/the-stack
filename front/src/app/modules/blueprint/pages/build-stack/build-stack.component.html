@@ -1,15 +1,21 @@
 <div class="main">
     <div class="mt-container"> 
-      <h2> Build your stack </h2>   
+      <h2> Build Your Stack </h2>   
 
       <div class="stackContainer">
-        <div class="stackActions">
-          <button mat-raised-button (click)="handleHideList()"> List </button>
+        <div class="stackActions" *ngIf="loaded" >
+          <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> All Tools </button>
         </div>
-        
-        <div class="stackWorkflow">
-          <div class="toolNode" *ngFor="let node of showNodes" cdkDrag [cdkDragFreeDragPosition]="node.position.x && node.position.y?node.position:{x: 0, y: 0}" (cdkDragReleased)="relisedMove($event, node)">{{ node.tool?.name }}</div>
+        <div class="loading-data-section" *ngIf="!loaded && !isError">
+          <mat-spinner></mat-spinner>
+          <p class="loading-message"> Data being processed please wait... </p>
         </div>
+        <div *ngIf="isError" class="error-loading-alert">
+          <mat-icon color="accent">warning</mat-icon>
+          <p class="error-message"> {{errMessage}} </p>
+          <button mat-button color="primary" (click)="moveToHome()"> Try Again </button>
+        </div>
+        <app-builder *ngIf="loaded" [loadedNodes]="changedNodes$" (positionNodeChanged)="updatedNodePosiotion($event)"></app-builder>
       </div>
       <div [ngClass]="{'toolsList': true, 'hide': hideList}"> 
         <div class="header-tools"> 
@@ -17,15 +23,15 @@
           <button mat-icon-button (click)="handleHideList()"><mat-icon>clear</mat-icon></button>
         </div>
         <div class="tools-node-items">
-          <div class="node-item" *ngFor="let node of nodes"> 
+          <div class="node-item" *ngFor="let nodeId of nodesList"> 
             <mat-card>
-              <div class="item-categories"> <b>Categories: </b>  {{ node.tool && node.tool.categories?(node.tool.categories.join(',')):''  }} </div>
-              <p class="item-name"> <b>Name: </b> {{ node.tool?.name }} </p>
-              <p class="item-description"> {{ node.tool?.description }} </p>
+              <div class="item-categories"> <b>Categories: </b>  {{ nodes[nodeId].tool && nodes[nodeId].tool.categories?(nodes[nodeId].tool.categories.join(',')):''  }} </div>
+              <p class="item-name"> <b>Name: </b> {{ nodes[nodeId].tool?.name }} </p>
+              <p class="item-description"> {{ nodes[nodeId].tool?.description }} </p>
               <div class="actions">
-                <mat-slide-toggle (change)="handleHideNodeItem(node)"
+                <mat-slide-toggle (change)="handleHideNodeItem(nodes[nodeId])"
                     class="example-margin"
-                    [checked]="node.hide"
+                    [checked]="nodes[nodeId].hide"
                     [color]="'accent'">
                     Hide
                 </mat-slide-toggle>

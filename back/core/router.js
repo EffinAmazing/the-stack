@@ -23,5 +23,6 @@ router.post("/blueprints/", blueprints.updateBlueprint);
 router.put("/plueprints/:id", blueprints.updateBlueprint);
 
 router.put("/toolsnodes/:id", toolsNodes.update.bind(toolsNodes));
+router.post("/toolshide/", toolsNodes.hidelist.bind(toolsNodes));
 
 module.exports = router;
