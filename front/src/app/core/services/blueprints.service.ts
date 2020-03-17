@@ -8,7 +8,7 @@ import { ResponseMappers } from '../../shared/mappers/response-mapper.helper';
   providedIn: 'root'
 })
 export class BlueprintsService {
-  serverURI: string = "http://localhost:9000/";
+  serverURI: string = "http://198.211.96.29:9000/";
 
   constructor( private http: HttpClient, private mapper: ResponseMappers ) { }
 

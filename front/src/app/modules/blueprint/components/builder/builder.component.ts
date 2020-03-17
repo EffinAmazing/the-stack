@@ -48,33 +48,36 @@ export class BuilderComponent implements OnInit {
     this.loadedNodes.subscribe((data) => {
       this.nodes = [];
       this.showNodes = [];
-      data.list.forEach((nodeId) => {
-        const item = data.nodes[nodeId];
-        this.nodes.push(item);
-        if (!item.hide) {
-          if (typeof item.position.x !== 'number') {
-            const yIndex = Math.floor(index / maxItems);
-            const xIndex = (index - yIndex * maxItems);
-            item.position.y = yIndex * offsetY;
-            item.position.x = xIndex * offsetX;
-            arrToChange.push({nodeId: item.id, position: item.position});
-            index++;
+      console.log(data);
+      if (data.list) {
+        data.list.forEach((nodeId) => {
+          const item = data.nodes[nodeId];
+          this.nodes.push(item);
+          if (!item.hide) {
+            if (typeof item.position.x !== 'number') {
+              const yIndex = Math.floor(index / maxItems);
+              const xIndex = (index - yIndex * maxItems);
+              item.position.y = yIndex * offsetY;
+              item.position.x = xIndex * offsetX;
+              arrToChange.push({nodeId: item.id, position: item.position});
+              index++;
+            }
+            console.log(item.position);
+            this.showNodes.push(item);
           }
-          console.log(item.position);
-          this.showNodes.push(item);
-        }
-      });
+        });
 
-      const promises = arrToChange.map(async (props) => {
-        this.positionNodeChanged.emit(props);
-        return props;
-      });
+        const promises = arrToChange.map(async (props) => {
+          this.positionNodeChanged.emit(props);
+          return props;
+        });
 
-      Promise.all(promises).then((result) => {
-        console.log(result);
-      }).catch((err) => {
-        console.log(err);
-      });
+        Promise.all(promises).then((result) => {
+          console.log(result);
+        }).catch((err) => {
+          console.log(err);
+        });
+      }
     });
   }
 
