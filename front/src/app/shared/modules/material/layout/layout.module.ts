@@ -1,15 +1,17 @@
 import { NgModule } from '@angular/core';
 import {MatCardModule} from '@angular/material/card';
-
+import { MatExpansionModule } from '@angular/material/expansion';
 
 
 @NgModule({
   declarations: [],
   imports: [
-    MatCardModule
+    MatCardModule,
+    MatExpansionModule
   ],
   exports: [
-    MatCardModule
+    MatCardModule,
+    MatExpansionModule
   ]
 })
 export class LayoutModule { }

@@ -17,6 +17,7 @@ export class BuilderComponent implements OnInit {
   @Output() positionNodeChanged: EventEmitter<any> = new EventEmitter();
   @Output() arrowAdded: EventEmitter<any> = new EventEmitter();
   @Output() arrowUpdated: EventEmitter<any> = new EventEmitter();
+  @Output() hideNode: EventEmitter<any> = new EventEmitter();
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
 
@@ -65,7 +66,6 @@ export class BuilderComponent implements OnInit {
               arrToChange.push({nodeId: item.id, position: item.position});
               index++;
             }
-            console.log(item.position);
             this.showNodes.push(item);
           }
         });
@@ -348,6 +348,11 @@ export class BuilderComponent implements OnInit {
           .attr('d', lineGenerator([ [this.activeArrow.start.x, this.activeArrow.start.y], [pos.x, pos.y] ]));
       }
     }
+  }
+
+  public hideNodeFormStack(node) {
+    console.log("hideNodeFormStack", node);
+    this.hideNode.emit(node);
   }
 
 }

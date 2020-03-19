@@ -101,8 +101,36 @@
         }
     }
 
-    &:hover .pointers>div:before{
-        opacity: 1;
+    .hide-item-from-stack{
+        position: absolute;
+        top: -10px;
+        border-radius: 50%;
+        background-color: #fff;
+        width: 20px;
+        height: 20px;
+        overflow: hidden;
+        cursor: pointer;
+        right: -10px;
+        display: none;
+
+        .mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            color: #A33;
+        }
+    }
+
+    &:hover{
+        .hide-item-from-stack{
+            display: block;
+        }
+
+        .pointers>div:before{
+            opacity: 1;
+        }
+
+
     }
 }
 

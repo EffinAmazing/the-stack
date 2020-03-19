@@ -20,9 +20,17 @@
           [loadedArrows]="changedArrows$"
           (positionNodeChanged)="updatedNodePosiotion($event)"
           (arrowAdded)="handleAddArrow($event)"
-          (arrowUpdated)="handleUpdateArrow($event)"></app-builder>
+          (arrowUpdated)="handleUpdateArrow($event)"
+          (hideNode)="handleHideNode($event)"></app-builder>
+
+        <app-tools-list  [ngClass]="{'hideTools': hideList}" *ngIf="loaded" 
+          [loadedNodes]="changedNodes$" 
+          [loadedCategories]="changedCategories$"
+          (toogleVisibilityNode)="handleHideNodeItem($event)"
+          (closeTools)="handleCloseTools()"
+          ></app-tools-list>
       </div>
-      <div [ngClass]="{'toolsList': true, 'hide': hideList}"> 
+      <div [ngClass]="{'toolsList': true, 'hide': true}"> 
         <div class="header-tools"> 
           <div class="title"> </div>
           <button mat-icon-button (click)="handleHideList()"><mat-icon>clear</mat-icon></button>

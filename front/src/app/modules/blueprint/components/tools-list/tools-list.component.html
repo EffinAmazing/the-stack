@@ -1,1 +1,18 @@
-<p>tools-list works!</p>
+<div class="tools-list-categoreies">
+    <h2> Tools </h2>
+    <div class="close" (click)="close()"> <mat-icon color="primary">clear</mat-icon> </div>
+    <div class="categories-list">
+        <mat-accordion [multi]="true">
+            <mat-expansion-panel *ngFor="let item of categoriesList">
+                <mat-expansion-panel-header>
+                    <mat-panel-title> {{item.name}} </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="nodes-holder">
+                    <div class="node-items" *ngFor="let nodeId of item.nodes"> {{ nodes[nodeId].tool.name }} 
+                        <div class="actions" (click)="toggleNodeFormStack(nodes[nodeId])"> <mat-icon class="visible" *ngIf="!nodes[nodeId].hide" >visibility</mat-icon>  <mat-icon class="hidden" *ngIf="nodes[nodeId].hide">visibility_off</mat-icon> </div>
+                    </div>
+                </div>
+            </mat-expansion-panel>
+        </mat-accordion>
+    </div>
+</div>

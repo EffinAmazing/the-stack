@@ -19,6 +19,7 @@ export class BuildStackComponent implements OnInit {
   categories: any = { "None": [] };
   changedNodes$: BehaviorSubject<any> = new BehaviorSubject({});
   changedArrows$: BehaviorSubject<any> = new BehaviorSubject([]);
+  changedCategories$: BehaviorSubject<any> = new BehaviorSubject({});
   nodesForUpdate: any = [];
   hideList = true;
   loaded = false;
@@ -116,17 +117,22 @@ export class BuildStackComponent implements OnInit {
     });
   }
 
+  public handleCloseTools(){
+    this.hideList = true;
+  }
+
   private completedProceedNodes() {
     console.log(this.nodesForUpdate);
     this.loaded = true;
     if (this.nodesForUpdate.length) {
       this.service.hideNodes(this.nodesForUpdate).subscribe((data) => {
         this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList });
-
+        this.changedCategories$.next( this.categories );
         this.getArrowsList();
       });
     } else {
       this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList });
+      this.changedCategories$.next( this.categories );
       this.getArrowsList();
     }
   }
@@ -176,6 +182,15 @@ export class BuildStackComponent implements OnInit {
     this.service.updateArrow(data).toPromise().then((result) => {
       console.log(result);
     }).catch(err => console.log(err));
+  }
+
+  public handleHideNode(data) {
+    console.log("handleHideNode", data);
+    this.service.updateNodeTool(data.id, { hide: true }).subscribe((res) => {
+      res.tool = this.nodes[data.id].tool;
+      this.nodes[data.id] = res;
+      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList  });
+    });
   }
 
   private margeShowNodes() {
