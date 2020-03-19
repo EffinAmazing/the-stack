@@ -15,7 +15,10 @@ const lineGenerator = d3.line().curve(d3.curveCardinal);
 export class BuilderComponent implements OnInit {
   @ViewChild('stackWorkFlow') stackWorkFlow: ElementRef;
   @Output() positionNodeChanged: EventEmitter<any> = new EventEmitter();
+  @Output() arrowAdded: EventEmitter<any> = new EventEmitter();
+  @Output() arrowUpdated: EventEmitter<any> = new EventEmitter();
   @Input() loadedNodes: Observable<any>;
+  @Input() loadedArrows: Observable<any>;
 
   nodes: BluePrintTool[] = [];
   // nodes: BluePrintTool[] = [];
@@ -48,7 +51,7 @@ export class BuilderComponent implements OnInit {
     this.loadedNodes.subscribe((data) => {
       this.nodes = [];
       this.showNodes = [];
-      console.log(data);
+      // console.log(data);
       if (data.list) {
         data.list.forEach((nodeId) => {
           const item = data.nodes[nodeId];
@@ -79,6 +82,22 @@ export class BuilderComponent implements OnInit {
         });
       }
     });
+
+    this.loadedArrows.subscribe((list) => {
+      list.forEach((item) => {
+        this.listOfArrows.push(item);
+        this.svgD3.append('path')
+        .attr('id', item.lineId)
+        .attr('class', 'line')
+        .attr('d', lineGenerator(this.genrateDots(
+          [item.start.x, item.start.y],
+          [item.end.x, item.end.y])))
+        .attr('stroke', '#1c57a4')
+        .attr('stroke-width', 2)
+        .attr('fill', 'transparent')
+        .attr('marker-end', 'url(#arrow-marker)');
+      });
+    });
   }
 
   public relisedMove(data, node: BluePrintTool) {
@@ -87,6 +106,12 @@ export class BuilderComponent implements OnInit {
     /*  */
 
     this.positionNodeChanged.emit({ nodeId: node.id, position: data.source._dragRef._activeTransform  });
+
+    const updatedLines = this.connectedLines.map(async (item) => {
+      return this.arrowUpdated.emit(item);
+    });
+
+    Promise.all(updatedLines).then(() => { console.log('completed update'); }).catch(err => console.log(err));
 
     this.connectedLines = [];
 
@@ -104,7 +129,7 @@ export class BuilderComponent implements OnInit {
     if (this.activeArrow) {
       if (!this.activeArrow.relesed) {
         if (this.activeArrow.end.nodeId) {
-          this.listOfArrows.push({
+          const Arrow = {
             start: {
               x: this.activeArrow.start.x,
               y: this.activeArrow.start.y,
@@ -117,7 +142,10 @@ export class BuilderComponent implements OnInit {
               pos: this.activeArrow.end.pos
             },
             lineId: this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId
-          });
+          };
+
+          this.listOfArrows.push(Arrow);
+          this.arrowAdded.emit(Arrow);
 
           this.svgD3.select('path#' + this.activeArrow.lineId).attr('id', this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId );
 
@@ -149,7 +177,7 @@ export class BuilderComponent implements OnInit {
       if (!pointers.classList.contains('pointers')) {
         pointers = evt.event.target.parentNode;
       }
-      console.log(this.connectedLines);
+      // console.log(this.connectedLines);
       this.connectedLines.forEach((item) => {
         let offsetX = dotRadius;
         if (item.start.nodeId ===  node.id) {
@@ -184,7 +212,7 @@ export class BuilderComponent implements OnInit {
           this.svgD3.select('path#' + item.lineId)
             .attr('d', lineGenerator(this.genrateDots(
               [item.start.x, item.start.y],
-              [item.end.x, item.end.y], item.end.pos !== 'Left' || item.end.pos !== 'Right' ? 'Top' : '')));
+              [item.end.x, item.end.y], item.end.pos !== 'Left' && item.end.pos !== 'Right' ? 'Top' : '')));
         }
       });
     }
@@ -246,6 +274,7 @@ export class BuilderComponent implements OnInit {
 
     arr.push([ start[0] + diffX * 0.35, start[1] + diffY * 0.15]);
     if (typeof Ypos === 'string' && Ypos !== '') {
+      console.log(Ypos);
       arr.push([ start[0] + diffX * 0.90, start[1] + diffY * 0.65]);
     } else {
       arr.push([ start[0] + diffX * 0.70, start[1] + diffY * 0.85]);
@@ -302,7 +331,6 @@ export class BuilderComponent implements OnInit {
   public handleMouseMove(evt) {
     // console.log(this.activeArrow);
     if (this.activeArrow) {
-      console.log('move');
       if (!this.activeArrow.end.nodeId) {
         const container = this.stackWorkFlow.nativeElement;
         const rectContainer = container.getBoundingClientRect();
@@ -314,7 +342,7 @@ export class BuilderComponent implements OnInit {
 
         this.activeArrow.end.x = pos.x;
         this.activeArrow.end.y = pos.y;
-        console.log(lineGenerator([ [this.activeArrow.start.x, this.activeArrow.start.y], [pos.x, pos.y] ]));
+        // console.log(lineGenerator([ [this.activeArrow.start.x, this.activeArrow.start.y], [pos.x, pos.y] ]));
 
         this.svgD3.select('path#' + this.activeArrow.lineId)
           .attr('d', lineGenerator([ [this.activeArrow.start.x, this.activeArrow.start.y], [pos.x, pos.y] ]));

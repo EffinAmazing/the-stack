@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
-import { Tool, BluePrintTool } from '../../../../shared/models/tool';
+import { Tool, BluePrintTool, BluePrint } from '../../../../shared/models/tool';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as d3 from 'd3';
@@ -12,11 +12,13 @@ import * as d3 from 'd3';
 })
 export class BuildStackComponent implements OnInit {
   @ViewChild('stackWorkFlow') stackWorkFlow: ElementRef;
+  blueprint: BluePrint;
   nodes: BluePrintTool[] = [];
   nodesList: string[] = [];
   showNodes: BluePrintTool[] = [];
   categories: any = { "None": [] };
   changedNodes$: BehaviorSubject<any> = new BehaviorSubject({});
+  changedArrows$: BehaviorSubject<any> = new BehaviorSubject([]);
   nodesForUpdate: any = [];
   hideList = true;
   loaded = false;
@@ -35,6 +37,7 @@ export class BuildStackComponent implements OnInit {
       this.service.getDomainTools(this.domain).subscribe((data) => {
         console.log(data);
         let hidden = 0;
+        this.blueprint = data.blueprint;
         data.nodes.forEach((item) => {
           const tool = data.tools.find((atool) =>  atool.id === item.toolId );
           item.tool = tool;
@@ -119,9 +122,21 @@ export class BuildStackComponent implements OnInit {
     if (this.nodesForUpdate.length) {
       this.service.hideNodes(this.nodesForUpdate).subscribe((data) => {
         this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList });
+
+        this.getArrowsList();
       });
     } else {
       this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList });
+      this.getArrowsList();
+    }
+  }
+
+  private getArrowsList() {
+    // 
+    if (this.blueprint.id) {
+      this.service.getArrows(this.blueprint.id).subscribe((data) => {
+        this.changedArrows$.next(data);
+      });
     }
   }
 
@@ -147,6 +162,20 @@ export class BuildStackComponent implements OnInit {
       this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList  });
       // this.margeShowNodes();
     });
+  }
+
+  public handleAddArrow(data) {
+    console.log(data);
+    this.service.addArrow(this.blueprint.id, data).toPromise().then((result) => {
+      console.log(result);
+    }).catch(err => console.log(err));
+  }
+
+  public handleUpdateArrow(data) {
+    console.log(data);
+    this.service.updateArrow(data).toPromise().then((result) => {
+      console.log(result);
+    }).catch(err => console.log(err));
   }
 
   private margeShowNodes() {

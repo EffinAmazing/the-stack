@@ -15,7 +15,12 @@
           <p class="error-message"> {{errMessage}} </p>
           <button mat-button color="primary" (click)="moveToHome()"> Try Again </button>
         </div>
-        <app-builder *ngIf="loaded" [loadedNodes]="changedNodes$" (positionNodeChanged)="updatedNodePosiotion($event)"></app-builder>
+        <app-builder *ngIf="loaded" 
+          [loadedNodes]="changedNodes$" 
+          [loadedArrows]="changedArrows$"
+          (positionNodeChanged)="updatedNodePosiotion($event)"
+          (arrowAdded)="handleAddArrow($event)"
+          (arrowUpdated)="handleUpdateArrow($event)"></app-builder>
       </div>
       <div [ngClass]="{'toolsList': true, 'hide': hideList}"> 
         <div class="header-tools"> 

@@ -8,7 +8,7 @@ import { ResponseMappers } from '../../shared/mappers/response-mapper.helper';
   providedIn: 'root'
 })
 export class BlueprintsService {
-  serverURI: string = "http://198.211.96.29:9000/";
+  serverURI = 'http://localhost:9000/';
 
   constructor( private http: HttpClient, private mapper: ResponseMappers ) { }
 
@@ -22,5 +22,17 @@ export class BlueprintsService {
 
   hideNodes(ids: string[]): Observable<any> {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolshide/`, { ids } ));
+  }
+
+  addArrow(blueprintId, data): Observable<any> {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}arrows/`, { data, blueprintId }));
+  }
+
+  updateArrow( data){
+    return this.mapper.mapResponse(this.http.put(`${this.serverURI}arrows/${data.id}`, { data }));
+  }
+
+  getArrows(blueprintId): Observable<any> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}arrows/?blueprint=${blueprintId}`));
   }
 }
