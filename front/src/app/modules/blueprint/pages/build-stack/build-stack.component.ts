@@ -1,6 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
 import { Tool, BluePrintTool, BluePrint } from '../../../../shared/models/tool';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteStackDialogComponent } from '../../components/delete-stack-dialog/delete-stack-dialog.component';
+import { CreateNewStackDialogComponent } from '../../components/create-new-stack-dialog/create-new-stack-dialog.component';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as d3 from 'd3';
@@ -28,7 +31,11 @@ export class BuildStackComponent implements OnInit {
   isError = false;
   errMessage = 'Something went wrong plaese check domain and try again';
 
-  constructor(private service: BlueprintsService, private route: ActivatedRoute, private router: Router) {
+  constructor(
+      private service: BlueprintsService, 
+      private route: ActivatedRoute, 
+      private router: Router,
+      public deleteDialog: MatDialog) {
     this.route.queryParams.subscribe((params: any) => {
       this.domain = params.domain;
     });
@@ -140,13 +147,17 @@ export class BuildStackComponent implements OnInit {
   }
 
   public handleRemoveArrow() {
-    this.handleRemoveArrows([this.selectedArrow.lineId]);
-    document.querySelector(`path#${this.selectedArrow.lineId}`).remove();
-    this.selectedArrow = null;
+    if (this.selectedArrow) {
+      console.log(this.selectedArrow);
+      const lineId = this.selectedArrow.lineId;
+      this.handleRemoveArrows([lineId], true);
+      document.querySelector(`path#${lineId}`).remove();
+      this.selectedArrow = null;
+    }
   }
 
   public updatedNodePosiotion(data) {
-    //console.log('aaa', data);
+    // console.log('aaa', data);
     this.service.updateNodeTool(data.nodeId, { position: data.position }).subscribe((res) => {
       const tool = this.nodes[data.nodeId].tool;
       res.tool = this.nodes[data.nodeId].tool;
@@ -188,12 +199,14 @@ export class BuildStackComponent implements OnInit {
     this.selectedArrow = null;
   }
 
-  public handleRemoveArrows(ids) {
-    console.log(ids);
+  public handleRemoveArrows(ids, blockReload?: any ) {
+    this.selectedArrow = null;
     this.service.removeArrows(ids).toPromise().then((result) => {
-      this.service.getArrows(this.blueprint.id).toPromise().then((data) => {
-        this.changedArrows$.next(data);
-      }).catch((err) => console.log(err));
+      if (!blockReload) {
+        this.service.getArrows(this.blueprint.id).toPromise().then((data) => {
+          this.changedArrows$.next(data);
+        }).catch((err) => console.log(err));
+      }
     }).catch((error) => {
       console.log(error);
     });
@@ -242,8 +255,40 @@ export class BuildStackComponent implements OnInit {
     this.service.updateNodeTool(data.id, { hide: true }).subscribe((res) => {
       res.tool = this.nodes[data.id].tool;
       this.nodes[data.id] = res;
-      console.log('-----------------------updateNodeTool--------------------------------');
+      // console.log('-----------------------updateNodeTool--------------------------------');
       this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, hiddenItem: data.id  });
+    });
+  }
+
+  public removeStack() {
+    const dialogRef = this.deleteDialog.open(DeleteStackDialogComponent, {
+      width: '320px',
+      data: { domain: this.blueprint.domain }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+      console.log(result);
+      if ( result ) {
+        console.log(this.service);
+        this.service.removeBluePrint(this.blueprint.id).toPromise().then(() => {
+          this.router.navigateByUrl('/home');
+        }).catch(err => alert(err));
+      }
+    });
+  }
+
+  public createNewStack() {
+    const dialogRef = this.deleteDialog.open(CreateNewStackDialogComponent, {
+      width: '320px',
+      data: { domain: this.blueprint.domain }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+        this.router.navigateByUrl('/blueprints/build?domain=' + result, { skipLocationChange: false });
+        window.location.href = '/blueprints/build?domain=' + result;
+      }
     });
   }
 

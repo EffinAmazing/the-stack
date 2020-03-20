@@ -22,7 +22,8 @@ router.get("/", function(req, res, next){
 })
 router.get("/blueprints/tools", blueprints.getDomainTools.bind(blueprints));
 router.post("/blueprints/", blueprints.updateBlueprint);
-router.put("/plueprints/:id", blueprints.updateBlueprint);
+router.put("/blueprints/:id", blueprints.updateBlueprint);
+router.delete('/blueprints/:id', blueprints.removeBluePrint.bind(blueprints));
 
 router.put("/toolsnodes/:id", toolsNodes.update.bind(toolsNodes));
 router.post("/toolshide/", toolsNodes.hidelist.bind(toolsNodes));

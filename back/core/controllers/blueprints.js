@@ -143,32 +143,41 @@ class BluePrints {
     removeBluePrint(req, res, next){
         const id = req.params.id;
         if(id) {
+            console.log('req.params.id', req.params.id);
             async.waterfall([
                 (cb)=>{
+                    console.log("_arrows");
                     this._arrows.removeAllByBlueprintId(id).then(()=>{
                         cb(null);
                     }).catch((err)=>{ cb(err) })
                 },
                 (cb)=>{
+                    console.log("_toolsNodes");
                     this._toolsNodes.removeAllForBlueprintId(id).then(()=>{
                         cb(null);
                     }).catch((err)=>{ cb(err) })
                 },
                 (cb) => {
+                    console.log("_bluePrints");
+                    console.log(id);
                     this._bluePrints.delete(id, []).then((r)=>{
+                        console.log(r);
                         cb(null, r);
-                    }).catch(err => cb(err, null));
+                    }).catch(err => {
+                        console.log(err);
+                        cb(err, null)
+                    });
                 }
             ], function(err, result){
                 if(err) {
                     res.json({
-                        result: "Ok"
-                    });
-                } else {
-                    res.json({
                         result: "Error",
                         message: err.message
                     })
+                } else {
+                    res.json({
+                        result: "Ok"
+                    });
                 }
             })
         } else {

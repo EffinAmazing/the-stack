@@ -8,7 +8,7 @@
               <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> All Tools </button>
           </div>
           <div>
-
+            <button mat-raised-button color="primary" (click)="createNewStack()"> Create new stack </button>
           </div>
           <div>
             <button mat-raised-button *ngIf="selectedArrow" (click)="handleDeselectArrow()"> <mat-icon>layers_clear</mat-icon> </button>
@@ -41,6 +41,10 @@
           (toogleVisibilityNode)="handleHideNodeItem($event)"
           (closeTools)="handleCloseTools()"
           ></app-tools-list>
+
+        <div class="bottom-actions" *ngIf="loaded" > 
+          <button mat-raised-button class="delete-arrow-action" (click)="removeStack()"> Delete stack </button>
+        </div>
       </div>
       <div [ngClass]="{'toolsList': true, 'hide': true}"> 
         <div class="header-tools"> 

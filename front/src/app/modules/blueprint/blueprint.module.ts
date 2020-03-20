@@ -12,10 +12,13 @@ import { FormsControlsModule } from '../../shared/modules/material/forms-control
 import { LayoutModule } from '../../shared/modules/material/layout/layout.module';
 import { BuilderComponent } from './components/builder/builder.component';
 import { ToolsListComponent } from './components/tools-list/tools-list.component';
+import { DeleteStackDialogComponent } from './components/delete-stack-dialog/delete-stack-dialog.component';
+import { CreateNewStackDialogComponent } from './components/create-new-stack-dialog/create-new-stack-dialog.component';
+import { PopupsModalsModule } from "../../shared/modules/material/popups-modals/popups-modals.module";
 
 
 @NgModule({
-  declarations: [BuildStackComponent, ShareComponent, BuilderComponent, ToolsListComponent],
+  declarations: [BuildStackComponent, ShareComponent, BuilderComponent, ToolsListComponent, DeleteStackDialogComponent, CreateNewStackDialogComponent],
   imports: [
     CommonModule,
     BlueprintRoutingModule,
@@ -24,7 +27,8 @@ import { ToolsListComponent } from './components/tools-list/tools-list.component
     CommonBehaviorsModule,
     ButtonsIndicatorsModule,
     FormsControlsModule,
-    LayoutModule
+    LayoutModule,
+    PopupsModalsModule
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
 

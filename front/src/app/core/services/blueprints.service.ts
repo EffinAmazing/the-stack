@@ -39,4 +39,8 @@ export class BlueprintsService {
   removeArrows(ids): Observable<any> {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}arrows/remove`, {ids}));
   }
+
+  removeBluePrint(id): Observable<any> {
+    return this.mapper.mapResponse(this.http.delete(`${this.serverURI}blueprints/${id}`));
+  }
 }

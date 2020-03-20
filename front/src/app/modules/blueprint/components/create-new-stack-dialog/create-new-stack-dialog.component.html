@@ -1,0 +1,12 @@
+<h1 mat-dialog-title></h1>
+<div mat-dialog-content>
+  <p> Input Domain </p>
+  <mat-form-field appearance="outline" class="input-domain">
+    <mat-label>Domain name:</mat-label>
+    <input matInput (input)="handleInput($event)">
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button (click)="submitDomain()" >Submit</button>
+</div>
