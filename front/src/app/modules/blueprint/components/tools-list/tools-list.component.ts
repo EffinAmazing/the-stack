@@ -2,6 +2,8 @@ import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter }
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
 import { Observable } from 'rxjs';
 
+const host = 'http://198.211.96.29:9000';
+
 @Component({
   selector: 'app-tools-list',
   templateUrl: './tools-list.component.html',
@@ -27,11 +29,19 @@ export class ToolsListComponent implements OnInit {
       const categories = Object.keys(data);
 
       for (const iterator of categories) {
-        console.log(data[iterator]);
-        this.categoriesList.push({
-          name: iterator,
-          nodes: data[iterator]
-        });
+        // console.log(data[iterator]);
+        const lowerCase = iterator.toLocaleLowerCase();
+        if ( lowerCase.indexOf('analytic') !== -1 ||  lowerCase.indexOf('tracking') || lowerCase.indexOf('marketing')) {
+          this.categoriesList.unshift({
+            name: iterator,
+            nodes: data[iterator]
+          });
+        } else {
+          this.categoriesList.push({
+            name: iterator,
+            nodes: data[iterator]
+          });
+        }
       }
     });
 
@@ -43,6 +53,14 @@ export class ToolsListComponent implements OnInit {
 
   public close() {
     this.closeTools.emit(true);
+  }
+
+  public processImageSrc(link) {
+    if (link.indexOf('http://') !== -1 || link.indexOf('https://') !== -1 ) {
+      return link;
+    } else {
+      return host + link;
+    }
   }
 
 }

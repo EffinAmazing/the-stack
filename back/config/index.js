@@ -16,5 +16,5 @@ if (process.env.NODE_ENV !== "development") {
 module.exports = {
     PORT: 9000,
     MONGOURI: 'mongodb://localhost:27017/',
-    DB_NAME: 'marchtool'
+    DB_NAME: 'marchtach'
 }

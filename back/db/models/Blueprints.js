@@ -19,7 +19,7 @@ class BluePrintModel extends AbstaractModel{
     async getByDomain(domain){
         try {
           let blueprint = await this.modelDB.findOne({ domain: domain }).exec();
-          console.log(blueprint);
+          // console.log(blueprint);
           return this.mapDocument( blueprint );
         } catch (err) {
             let blueprint = await this.create({

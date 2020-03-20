@@ -22,6 +22,7 @@
           (cdkDragStarted)="handleStartDrag(node)"
           (mouseenter)="handleMouseOverNode($event, node)"
           (mouseleave)="handleMouseOutNode($event, node)" >
+            <img class="node-icon"  [src]="node.tool.logo?processImageSrc(node.tool.logo):'/assets/images/layers.png'" />
             {{ node.tool?.name }}
             <div class="pointers">
               <div class="pointer-Left" (click)="handleAddArrowClick($event, 'Left', node)"></div>

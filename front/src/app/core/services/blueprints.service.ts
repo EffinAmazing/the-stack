@@ -28,11 +28,15 @@ export class BlueprintsService {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}arrows/`, { data, blueprintId }));
   }
 
-  updateArrow( data){
+  updateArrow( data) {
     return this.mapper.mapResponse(this.http.put(`${this.serverURI}arrows/${data.id}`, { data }));
   }
 
   getArrows(blueprintId): Observable<any> {
     return this.mapper.mapResponse(this.http.get(`${this.serverURI}arrows/?blueprint=${blueprintId}`));
+  }
+
+  removeArrows(ids): Observable<any> {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}arrows/remove`, {ids}));
   }
 }

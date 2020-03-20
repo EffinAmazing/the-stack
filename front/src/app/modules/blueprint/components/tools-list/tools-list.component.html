@@ -3,12 +3,14 @@
     <div class="close" (click)="close()"> <mat-icon color="primary">clear</mat-icon> </div>
     <div class="categories-list">
         <mat-accordion [multi]="true">
-            <mat-expansion-panel *ngFor="let item of categoriesList">
+            <mat-expansion-panel *ngFor="let item of categoriesList" [expanded]="true">
                 <mat-expansion-panel-header>
                     <mat-panel-title> {{item.name}} </mat-panel-title>
                 </mat-expansion-panel-header>
                 <div class="nodes-holder">
-                    <div class="node-items" *ngFor="let nodeId of item.nodes"> {{ nodes[nodeId].tool.name }} 
+                    <div class="node-items" *ngFor="let nodeId of item.nodes"> 
+                        <img class="node-icon"  [src]="nodes[nodeId].tool.logo?processImageSrc(nodes[nodeId].tool.logo):'/assets/images/layers.png'" />
+                        {{ nodes[nodeId].tool.name }} 
                         <div class="actions" (click)="toggleNodeFormStack(nodes[nodeId])"> <mat-icon class="visible" *ngIf="!nodes[nodeId].hide" >visibility</mat-icon>  <mat-icon class="hidden" *ngIf="nodes[nodeId].hide">visibility_off</mat-icon> </div>
                     </div>
                 </div>

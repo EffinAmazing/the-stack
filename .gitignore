@@ -3,3 +3,5 @@
 /front/package-lock.json
 /back/package-lock.json
 /node_modules
+/back/testscripts
+/back/public/domain-logos/*

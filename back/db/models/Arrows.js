@@ -37,9 +37,20 @@ class ArrowsModel extends AbstaractModel {
         let listArrows = await this.modelDB.find({ blueprintId: blueprintId }).exec();
         let mapped = await async.map(listArrows, (item, cb)=>{
             cb(null, this.mapDocument(item));
-        })
+        });
 
         return mapped;
+    }
+
+    async removeAllByBlueprintId(blueprintId){
+        let result = await this.modelDB.deleteMany({ blueprintId: blueprintId }).exec();
+        return result;
+    }
+
+    async removeArrows(arrowsList){
+        let result = await this.modelDB.remove({ lineId: { $in: arrowsList } }).exec()
+
+        return result;
     }
 }
 

@@ -30,6 +30,6 @@ router.post("/toolshide/", toolsNodes.hidelist.bind(toolsNodes));
 router.post("/arrows/", arrows.add.bind(arrows));
 router.get("/arrows/", arrows.list.bind(arrows));
 router.put("/arrows/:id", arrows.update.bind(arrows));
-router.delete("/arrows/:id", arrows.remove.bind(arrows));
+router.post("/arrows/remove", arrows.remove.bind(arrows));
 
 module.exports = router;

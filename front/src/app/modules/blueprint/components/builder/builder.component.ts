@@ -6,6 +6,7 @@ import * as d3 from 'd3';
 const containerOffset = 20;
 const dotRadius = 9;
 const lineGenerator = d3.line().curve(d3.curveCardinal);
+const host = 'http://198.211.96.29:9000';
 
 @Component({
   selector: 'app-builder',
@@ -18,9 +19,11 @@ export class BuilderComponent implements OnInit {
   @Output() arrowAdded: EventEmitter<any> = new EventEmitter();
   @Output() arrowUpdated: EventEmitter<any> = new EventEmitter();
   @Output() hideNode: EventEmitter<any> = new EventEmitter();
+  @Output() removeArrows: EventEmitter<any> = new EventEmitter();
+  @Output() selectArrow: EventEmitter<any> = new EventEmitter();
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
-
+  selectedArrow: any;
   nodes: BluePrintTool[] = [];
   // nodes: BluePrintTool[] = [];
   showNodes: BluePrintTool[] = [];
@@ -46,7 +49,7 @@ export class BuilderComponent implements OnInit {
     const offsetX = 200;
     const offsetY = 60;
     const maxItems = 5;
-    let arrToChange = [];
+    const arrToChange = [];
 
     let index = 0;
     this.loadedNodes.subscribe((data) => {
@@ -81,6 +84,22 @@ export class BuilderComponent implements OnInit {
           console.log(err);
         });
       }
+
+      if (data.hiddenItem) {
+        console.log("data.hiddenItem", data.hiddenItem);
+        const arrowsToRemove = this.listOfArrows.filter((item) => item.lineId.indexOf(data.hiddenItem) !== -1 );
+        const ids = [];
+        console.log(arrowsToRemove);
+        if (arrowsToRemove.length) {
+          arrowsToRemove.forEach(element => {
+            ids.push(element.lineId);
+            console.log(element.lineId);
+            this.svgD3.select('path#' + element.lineId).remove();
+          });
+
+          this.removeArrows.emit(ids);
+        }
+      }
     });
 
     this.loadedArrows.subscribe((list) => {
@@ -96,8 +115,30 @@ export class BuilderComponent implements OnInit {
         .attr('stroke-width', 2)
         .attr('fill', 'transparent')
         .attr('marker-end', 'url(#arrow-marker)');
+
+        const lines = document.querySelectorAll('path.line');
+        lines.forEach((line) => {
+          line.addEventListener('click', () => {
+            if (this.selectedArrow) {
+              this.svgD3.select('path#' + this.selectedArrow.lineId).attr('stroke-width', 2);
+            }
+
+            this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === line.id );
+            this.selectArrow.emit(this.selectedArrow);
+            line.setAttribute('stroke-width', '4');
+          });
+        });
+
       });
     });
+  }
+
+  public processImageSrc(link) {
+    if (link.indexOf('http://') !== -1 || link.indexOf('https://') !== -1 ) {
+      return link;
+    } else {
+      return host + link;
+    }
   }
 
   public relisedMove(data, node: BluePrintTool) {
@@ -148,6 +189,17 @@ export class BuilderComponent implements OnInit {
           this.arrowAdded.emit(Arrow);
 
           this.svgD3.select('path#' + this.activeArrow.lineId).attr('id', this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId );
+
+          const line = document.querySelector(`path#${this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId}`);
+          line.addEventListener('click', () => {
+            if (this.selectedArrow) {
+              this.svgD3.select('path#' + this.selectedArrow.lineId).attr('stroke-width', 2);
+            }
+
+            this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === line.id );
+            this.selectArrow.emit(this.selectedArrow);
+            line.setAttribute('stroke-width', '4');
+          });
 
           this.activeArrow = null;
         } else {

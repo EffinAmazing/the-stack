@@ -30,7 +30,7 @@ class ToolsNodes {
 
     hidelist(req, res, next){
         let ids = req.body.ids;
-        console.log(ids, req.body);
+        
         if (ids) {
             this.model.hideList(ids).then((result) => {
                 res.json({

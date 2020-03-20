@@ -71,9 +71,9 @@ class Arrows {
     }
 
     remove(req, res, next) {
-        let id = req.params.id;
-        if( id ) {
-            this.model.delete(id, [])
+        let lineIds = req.body.ids;
+        if( lineIds ) {
+            this.model.removeArrows(lineIds, [])
                 .then((result)=>{
                     res.json({
                         result: result

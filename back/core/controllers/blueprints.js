@@ -3,6 +3,7 @@ const BluePrintModel = require('../../db/models/Blueprints');
 const ToolsServices = require('../../services/sitetechonlogies');
 const ToolsModel = require('../../db/models/Tools');
 const ToolsNodesModel = require('../../db/models/ToolsNodes');
+const ArrowsModel = require('../../db/models/Arrows');
 const axios = require('axios');
 
 class BluePrints {
@@ -10,6 +11,7 @@ class BluePrints {
         this._bluePrints = new BluePrintModel();
         this._tools = new ToolsModel();
         this._toolsNodes = new ToolsNodesModel();
+        this._arrows = new ArrowsModel();
     }
 
     getDomainTools(req, res, next) {
@@ -35,45 +37,66 @@ class BluePrints {
                     cb(err, null);
                 });
             },
-            (blueprint, cb) => {
-                
-                // 2. get tools of domain
-                ToolsServices.getToolsOfDomain(req.query.domain).then((list)=>{
-                    list.push( {
-                        categories: ['Domains'],
-                        name: "req.query.domain",
-                        description: "",
-                        link: 'http://' + req.query.domain,
-                        tag: "Domain Name"
-                    } );
-                    cb(null, { blueprint: blueprint, tools: list });
-                }).catch((err)=>{
-                    cb(err, null);
-                });
-            },
-            (data, cb) => {
-
-                // 3. marge tools with tools in DB
-                this._tools.proceedTools(data.tools).then((res) => {
-                    data.tools = res;
-                    cb(null, data);
-                }).catch((err) => {
-                    cb(err, null);
-                });
-            },
-            (data, cb) => {
-                
-                // 4. create bluprint nodes with tools
+            (blueprint, cb)=>{
+                let data = {
+                    blueprint: blueprint,
+                    nodes: [],
+                    tools: []
+                }
                 this._toolsNodes.getNodesByBlueprint(data.blueprint.id).then((res)=>{
-                    data['nodes'] = res;
+                    data.nodes = res;
                     cb(null, data)
                 }).catch((err)=>{
-                    data['nodes'] = [];
                     cb(null, data);
                 })
             },
+            (data, cb) => {
+                if ( data.nodes.length !== 0 ) {
+                    async.map(data.nodes, (item, _cb) => { _cb(null, item.toolId) }, (err, docs) => {
+                        if(err) {
+                            cb(err,null);
+                        } else {
+                            this._tools.getToolsByIds(docs)
+                                .then(res=> {
+                                    data.tools = res;
+                                    cb(null, data);
+                                }).catch(err=>cb(err, data))
+                        }
+                    });
+                   
+                } else {
+                    
+                    // 2. get tools of domain
+                    ToolsServices.getToolsOfDomain(req.query.domain).then((list)=>{
+                        /* */
+                        ToolsServices.getDomainTool(req.query.domain).then((tool) => {
+                            list.push(tool);
+                            data.tools = list;
+                            cb(null, data);
+                        })
+                        
+                    }).catch((err)=>{
+                        cb(err, null);
+                    });
+
+                }
+            },
+            (data, cb) => {
+                console.log('marge tools with tools in DB');
+                // 3. marge tools with tools in DB
+                if(data.nodes.length === 0){
+                    this._tools.proceedTools(data.tools).then((res) => {
+                        data.tools = res;
+                        cb(null, data);
+                    }).catch((err) => {
+                        cb(err, null);
+                    });
+                } else {
+                    cb(null, data);
+                }
+            },
             (data, cb)=>{
-                console.log("data.nodes", data.nodes);
+                //console.log("data.nodes", data.nodes);
                 if( !data.nodes.length ) {
                     this._toolsNodes.createNodesForTools(data.blueprint.id, data.tools).then((res)=>{
                         console.log("res");
@@ -90,6 +113,7 @@ class BluePrints {
         ],function(err,result){
             // 5. return data
             if(err) {
+                console.log(err);
                 res.json({
                     result: "Error",
                     message: err.message
@@ -114,6 +138,45 @@ class BluePrints {
         res.json({
             result: "Ok"
         })
+    }
+
+    removeBluePrint(req, res, next){
+        const id = req.params.id;
+        if(id) {
+            async.waterfall([
+                (cb)=>{
+                    this._arrows.removeAllByBlueprintId(id).then(()=>{
+                        cb(null);
+                    }).catch((err)=>{ cb(err) })
+                },
+                (cb)=>{
+                    this._toolsNodes.removeAllForBlueprintId(id).then(()=>{
+                        cb(null);
+                    }).catch((err)=>{ cb(err) })
+                },
+                (cb) => {
+                    this._bluePrints.delete(id, []).then((r)=>{
+                        cb(null, r);
+                    }).catch(err => cb(err, null));
+                }
+            ], function(err, result){
+                if(err) {
+                    res.json({
+                        result: "Ok"
+                    });
+                } else {
+                    res.json({
+                        result: "Error",
+                        message: err.message
+                    })
+                }
+            })
+        } else {
+            res.json({
+                result: "Error",
+                message: "Bad Request"
+            })
+        }
     }
 }
 

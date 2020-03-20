@@ -43,7 +43,6 @@ class ToolsNodesModel extends AbstaractModel {
 
     async updateOne(id, data){
         let doc = await super.updateOne(id, data);
-        console.log(doc);
         return this.mapDocument(doc);
     }
 
@@ -53,6 +52,11 @@ class ToolsNodesModel extends AbstaractModel {
         });
 
         return res;
+    }
+
+    async removeAllForBlueprintId(blueprintId){
+        let result = await this.modelDB.deleteMany({ blueprintId: blueprintId }).exec();
+        return result;
     }
 }
 

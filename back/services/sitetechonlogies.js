@@ -1,52 +1,73 @@
 const fs = require('fs');
 const path = require('path');
 const async = require('async');
+const axios = require('axios');
+const download = require('./download');
 
-function getTestDataFromFile(){
-    
-    let pathURI = path.resolve("../test-data/", 'effinamazing.com.json');
+const API_KEY = '06ea65ec-8f65-4a9a-9ff7-8f2883ee7966';
 
-    let promise = new Promise((resolve, reject)=>{
-        fs.readFile(pathURI,'utf8', function(err, data){
-            if(err){
-                reject(err);
-            } else {
-                let A = JSON.parse(data)
-                let Technologies = A.Results[0].Result.Paths[0].Technologies;
+async function getTestDataFromFile(domain){
+    let url = `https://api.builtwith.com/v14/api.json?KEY=${API_KEY}&LOOKUP=${domain}`;
+
+    // url = `http://localhost:9000/cashed/effinamazing.com.json`;
+    // let pathURI = path.resolve("../test-data/", 'effinamazing.com.json');
+    let response = await axios({
+        method: 'GET',
+        url:   url,
+        responseType: "text/json"
+    })
+
+  
+    let A = response.data;
+    let Technologies = A.Results[0].Result.Paths[0].Technologies;
     
-                async.map(Technologies, (item, cb)=>{
-                    cb(null, { 
-                        categories: item.Categories,
-                        name: item.Name,
-                        description: item.Description,
-                        link: item.Link,
-                        tag: item.Tag
-                    })
+    const results = await async.map(Technologies, (item, cb)=>{
+        cb(null, { 
+            categories: item.Categories,
+            name: item.Name,
+            description: item.Description,
+            link: item.Link,
+            tag: item.Tag
+        })
+
+    });
+            
+    return results;
+}
+
+exports.getDomainTool = async function(domain) {
+    const _path = path.resolve(__dirname, '../public/domain-logos', domain + '.png');
     
-                }, function(err, results){
-                    if(err){
-                        reject(err);
-                    } else {
-                        resolve(results);
-                    }                    
-                })
-            }
-        });
+    await download.dwonloadImage(_path, 'https://logo.clearbit.com/' + domain);
+
+    let  tool = {
+        categories: ['WebSite'],
+        name: domain,
+        logo: '/domain-logos/' + domain + '.png',
+        description: "WebSite",
+        link: 'http://' + domain,
+        tag: "domain"
+    }
+
+    return tool;
+}
+
+exports.loadToolLogo = async function(name){
+    let response = await axios({
+        method: 'GET',
+        url:   `https://api.builtwith.com/trends/v6/api.json?KEY=${API_KEY}&TECH=${name}`,
+        responseType: "text/json"
     });
 
-    return promise;
+    let tech = response.data.Tech;
+
+    return tech.Icon;
 }
 
 exports.getToolsOfDomain = async function(domain){
 
-    let data = await getTestDataFromFile();
+    let data = await getTestDataFromFile(domain);
 
     return data
-    /*fs.readFile(pathURI,'utf8', function(err, data){
-        if (err) {
-            
-        } else {
-            
-        }
-    });*/
+    /* */
 }

@@ -4,7 +4,16 @@
 
       <div class="stackContainer">
         <div class="stackActions" *ngIf="loaded" >
-          <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> All Tools </button>
+          <div>
+              <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> All Tools </button>
+          </div>
+          <div>
+
+          </div>
+          <div>
+            <button mat-raised-button *ngIf="selectedArrow" (click)="handleDeselectArrow()"> <mat-icon>layers_clear</mat-icon> </button>
+            <button mat-raised-button *ngIf="selectedArrow" class="delete-arrow-action" (click)="handleRemoveArrow()"> <mat-icon>clear</mat-icon>  Delete Arrow </button>
+          </div>
         </div>
         <div class="loading-data-section" *ngIf="!loaded && !isError">
           <mat-spinner></mat-spinner>
@@ -21,7 +30,10 @@
           (positionNodeChanged)="updatedNodePosiotion($event)"
           (arrowAdded)="handleAddArrow($event)"
           (arrowUpdated)="handleUpdateArrow($event)"
-          (hideNode)="handleHideNode($event)"></app-builder>
+          (hideNode)="handleHideNode($event)"
+          (removeArrows)="handleRemoveArrows($event)"
+          (selectArrow)="handleSlectArrow($event)"
+          ></app-builder>
 
         <app-tools-list  [ngClass]="{'hideTools': hideList}" *ngIf="loaded" 
           [loadedNodes]="changedNodes$" 

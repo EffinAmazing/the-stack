@@ -21,6 +21,7 @@ export class BuildStackComponent implements OnInit {
   changedArrows$: BehaviorSubject<any> = new BehaviorSubject([]);
   changedCategories$: BehaviorSubject<any> = new BehaviorSubject({});
   nodesForUpdate: any = [];
+  selectedArrow: any;
   hideList = true;
   loaded = false;
   domain = '';
@@ -36,6 +37,9 @@ export class BuildStackComponent implements OnInit {
   ngOnInit(): void {
     if (this.domain) {
       this.service.getDomainTools(this.domain).subscribe((data) => {
+        if (typeof data === 'string') {
+          return this.isError = true;
+        }
         console.log(data);
         let hidden = 0;
         this.blueprint = data.blueprint;
@@ -92,7 +96,7 @@ export class BuildStackComponent implements OnInit {
     } else {
       this.nodesList.forEach((nodeId) => {
         const item = this.nodes[nodeId];
-        if (!item.tool.categories && !item.hide) {
+        if (!item.hide && this.verifyOrderRoHide(item.tool.categories)) {
           item.hide = true;
           this.nodesForUpdate.push(item.id);
           hidden++;
@@ -108,8 +112,41 @@ export class BuildStackComponent implements OnInit {
     }
   }
 
+  private verifyOrderRoHide(categories) {
+    if (!categories) {
+      return true;
+    } else {
+      let hide = false;
+      categories.forEach((cat) => {
+        if (
+          cat.toLowerCase().indexOf('framework') !== -1 ||
+          cat.toLowerCase().indexOf('hosting') !== -1 ||
+          cat.toLowerCase().indexOf('hosting') !== -1 ||
+          cat.toLowerCase().indexOf('player') !== -1 ||
+          cat.toLowerCase().indexOf('wordpress') !== -1 ||
+          cat.toLowerCase().indexOf('programming') !== -1 ||
+          cat.toLowerCase().indexOf('javascript') !== -1 ||
+          cat.toLowerCase().indexOf('slider') !== -1) {
+          hide = true;
+        }
+      });
+
+      return hide;
+    }
+  }
+
+  public handleSlectArrow(data) {
+    this.selectedArrow = data;
+  }
+
+  public handleRemoveArrow() {
+    this.handleRemoveArrows([this.selectedArrow.lineId]);
+    document.querySelector(`path#${this.selectedArrow.lineId}`).remove();
+    this.selectedArrow = null;
+  }
+
   public updatedNodePosiotion(data) {
-    console.log('aaa', data);
+    //console.log('aaa', data);
     this.service.updateNodeTool(data.nodeId, { position: data.position }).subscribe((res) => {
       const tool = this.nodes[data.nodeId].tool;
       res.tool = this.nodes[data.nodeId].tool;
@@ -117,7 +154,7 @@ export class BuildStackComponent implements OnInit {
     });
   }
 
-  public handleCloseTools(){
+  public handleCloseTools() {
     this.hideList = true;
   }
 
@@ -138,12 +175,28 @@ export class BuildStackComponent implements OnInit {
   }
 
   private getArrowsList() {
-    // 
+
     if (this.blueprint.id) {
-      this.service.getArrows(this.blueprint.id).subscribe((data) => {
+      this.service.getArrows(this.blueprint.id).toPromise().then((data) => {
         this.changedArrows$.next(data);
-      });
+      }).catch((err) => { console.log(err); });
     }
+  }
+
+  public handleDeselectArrow(){
+    document.querySelector(`path#${this.selectedArrow.lineId}`).setAttribute('stroke-width', '2');
+    this.selectedArrow = null;
+  }
+
+  public handleRemoveArrows(ids) {
+    console.log(ids);
+    this.service.removeArrows(ids).toPromise().then((result) => {
+      this.service.getArrows(this.blueprint.id).toPromise().then((data) => {
+        this.changedArrows$.next(data);
+      }).catch((err) => console.log(err));
+    }).catch((error) => {
+      console.log(error);
+    });
   }
 
   public moveToHome() {
@@ -185,11 +238,12 @@ export class BuildStackComponent implements OnInit {
   }
 
   public handleHideNode(data) {
-    console.log("handleHideNode", data);
+    // console.log("handleHideNode", data);
     this.service.updateNodeTool(data.id, { hide: true }).subscribe((res) => {
       res.tool = this.nodes[data.id].tool;
       this.nodes[data.id] = res;
-      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList  });
+      console.log('-----------------------updateNodeTool--------------------------------');
+      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, hiddenItem: data.id  });
     });
   }
 
