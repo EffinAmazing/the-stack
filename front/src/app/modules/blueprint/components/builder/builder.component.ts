@@ -274,8 +274,8 @@ export class BuilderComponent implements OnInit {
           const pointerItem = block.querySelector('.pointer-' + item.start.pos);
 
           const pos = {
-            y: coordiants.y + pointerItem.offsetTop + 8,
-            x: coordiants.x + pointerItem.offsetLeft + 8
+            y: coordiants.y + pointerItem.offsetTop,
+            x: coordiants.x + pointerItem.offsetLeft
           };
 
           item.start.x = pos.x;
@@ -303,7 +303,7 @@ export class BuilderComponent implements OnInit {
           this.svgD3.select('path#' + item.lineId)
             .attr('d', lineGenerator(this.genrateDots(
               [item.start.x, item.start.y],
-              [item.end.x, item.end.y], item.end.pos !== 'Left' && item.end.pos !== 'Right' ? 'Top' : '')));
+              [item.end.x, item.end.y])));
         }
       });
     }
@@ -341,8 +341,8 @@ export class BuilderComponent implements OnInit {
       if ( Xpos + Ypos === 'Right') { offsetX = dotRadius * 2; }
       if ( Xpos + Ypos === 'Left') { offsetX = dotRadius / 2; }
       const pos = {
-        y: rect.y - Y - containerOffset + dotRadius,
-        x: rect.x - X - containerOffset + offsetX
+        y: rect.y - Y - containerOffset,
+        x: rect.x - X - containerOffset
       };
 
       this.activeArrow.end.x = pos.x;
@@ -351,15 +351,19 @@ export class BuilderComponent implements OnInit {
       this.svgD3.select('path#' + this.activeArrow.lineId)
         .attr('d', lineGenerator(this.genrateDots(
           [this.activeArrow.start.x, this.activeArrow.start.y],
-          [this.activeArrow.end.x, this.activeArrow.end.y], Ypos)));
+          [this.activeArrow.end.x, this.activeArrow.end.y])));
 
     }
   }
 
-  private genrateDots(start, end, Ypos?) {
+  private genrateDots(start, end, StartPos?, EndPos?) {
     const arr = [start];
     const diffX = end[0] - start[0];
     const diffY = end[1] - start[1];
+
+    if (StartPos && EndPos) {
+
+    }
 
     arr.push([ start[0] + diffX * 0.35, start[1] + diffY * 0.15]);
     if (typeof Ypos === 'string' && Ypos !== '') {
@@ -390,8 +394,8 @@ export class BuilderComponent implements OnInit {
       const Y = rectContainer.y;
 
       const pos = {
-        y: rect.y - Y - containerOffset + dotRadius,
-        x: rect.x - X - containerOffset + dotRadius
+        y: rect.y - Y - containerOffset,
+        x: rect.x - X - containerOffset
       };
 
       this.activeArrow = {
@@ -435,10 +439,21 @@ export class BuilderComponent implements OnInit {
   }
 
   public hideNodeFormStack(node) {
+
     this.nodes[node.id].hide = true;
     const index = this.showNodes.findIndex((item) => item.id === node.id);
     if (index !== -1) {
       this.showNodes.splice(index, 1);
+    }
+    const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 );
+    const ids = [];
+    if (arrowsToRemove.length) {
+      arrowsToRemove.forEach(element => {
+        ids.push(element.lineId);
+        this.svgD3.select('path#' + element.lineId).remove();
+      });
+
+      setTimeout(() => { this.removeArrows.emit(ids); }, 0);
     }
     this.hideNode.emit(node);
   }

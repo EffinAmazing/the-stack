@@ -10,69 +10,28 @@ export class SocialShareService {
 
   constructor() { }
 
-  shareInFaceBook(text, image) {
+  prepareContent(popup) {
+    popup.document.body.innerHTML = `<style> * { font-family: Roboto, sans-serif; } </style>
+    <h1 align="center"> Please wait, data is processing ... </h1>
+    <p align="center"> it will take few seconds </p>`;
+  }
+
+  shareInFaceBook(text, image, popup) {
     const url = 'https://www.facebook.com/sharer/sharer.php?u=' + image;
-    const left = (screen.width / 2) - (this.width / 2);
-    const top = (screen.height / 2) - (this.height / 2);
 
-    const isOpen = window.open(
-      url,
-      '_blank',
-      'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,width=' +
-        this.width + ',height=' + this.height + ',top=' + top + ',left=' + left);
-
-    if (!isOpen) {
-      setTimeout(() => {
-        console.log(' link click ');
-        const a = document.createElement('a');
-        a.href = url;
-        a.target = '_blank';
-        a.click();
-      }, 100);
-    }
+    popup.location.href = url;
+    /* */
   }
 
-  shareInTwitter(img) {
+  shareInTwitter(img, popup) {
     const url = 'https://twitter.com/home?status=' + img;
-    const left = (screen.width / 2) - (this.width / 2);
-    const top = (screen.height / 2) - (this.height / 2);
 
-    const isOpen = window.open(
-      url,
-      '_blank',
-      'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,width=' +
-        this.width + ',height=' + this.height + ',top=' + top + ',left=' + left);
-
-    if (!isOpen) {
-      setTimeout(() => {
-        console.log(' link click ');
-        const a = document.createElement('a');
-        a.href = url;
-        a.target = '_blank';
-        a.click();
-      }, 100);
-    }
+    popup.location.href = url;
   }
 
-  shareInLinkedIn(image, title) {
+  shareInLinkedIn(image, title, popup) {
     const url = 'https://www.linkedin.com/shareArticle?mini=true&url=' + image + '&title=' + title;
-    const left = (screen.width / 2) - (this.width / 2);
-    const top = (screen.height / 2) - (this.height / 2);
 
-    const isOpen = window.open(
-      url,
-      '_blank',
-      'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,width=' +
-        this.width + ',height=' + this.height + ',top=' + top + ',left=' + left);
-
-    if (!isOpen) {
-      setTimeout(() => {
-        console.log(' link click ');
-        const a = document.createElement('a');
-        a.href = url;
-        a.target = '_blank';
-        a.click();
-      }, 100);
-    }
+    popup.location.href = url;
   }
 }

@@ -150,6 +150,13 @@ export class BuildStackComponent implements OnInit {
   }
 
   public handleShare(media) {
+    const width = 500;
+    const height = 300;
+    const left = (screen.width / 2) - (width / 2);
+    const top = (screen.height / 2) - (height / 2);
+    const popup = window.open('', '_blank',
+      `menubar=no,toolbar=no,resizable=yes,scrollbars=yes,width=${width},height=${height},top=${top},left=${left}`);
+    this.social.prepareContent(popup);
     this.isWaiting = true;
     html2canvas(document.querySelector('#stackWorkflow'), {
       backgroundColor: '#ffffff',
@@ -164,13 +171,13 @@ export class BuildStackComponent implements OnInit {
 
             switch (media) {
               case 'facebook':
-                this.social.shareInFaceBook('', environment.serverURI + link);
+                this.social.shareInFaceBook('', environment.serverURI + link, popup);
                 break;
               case 'twitter':
-                this.social.shareInTwitter(environment.serverURI + link);
+                this.social.shareInTwitter(environment.serverURI + link, popup);
                 break;
               case 'linkedin':
-                this.social.shareInLinkedIn(environment.serverURI + link, this.blueprint.domain + ' tools stack');
+                this.social.shareInLinkedIn(environment.serverURI + link, this.blueprint.domain + ' tools stack', popup);
                 break;
               default:
                 break;
@@ -359,6 +366,7 @@ export class BuildStackComponent implements OnInit {
         this.router.onSameUrlNavigation = 'reload';
         this.router.navigateByUrl('/stack/build?domain=' + result, { skipLocationChange: false });
         window.location.href = window.location.origin + window.location.pathname + '#/stack/build?domain=' + result;
+        window.location.reload();
       }
     });
   }
