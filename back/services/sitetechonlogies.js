@@ -9,7 +9,7 @@ const API_KEY = '06ea65ec-8f65-4a9a-9ff7-8f2883ee7966';
 async function getTestDataFromFile(domain){
     let url = `https://api.builtwith.com/v14/api.json?KEY=${API_KEY}&LOOKUP=${domain}`;
 
-    url = `http://localhost:9000/cashed/effinamazing.com.json`;
+    // url = `http://localhost:9000/cashed/effinamazing.com.json`;
     // let pathURI = path.resolve("../test-data/", 'effinamazing.com.json');
     let response = await axios({
         method: 'GET',
