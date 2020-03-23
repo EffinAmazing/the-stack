@@ -15,11 +15,21 @@ export class SocialShareService {
     const left = (screen.width / 2) - (this.width / 2);
     const top = (screen.height / 2) - (this.height / 2);
 
-    window.open(
+    const isOpen = window.open(
       url,
-      '',
+      '_blank',
       'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,width=' +
         this.width + ',height=' + this.height + ',top=' + top + ',left=' + left);
+
+    if (!isOpen) {
+      setTimeout(() => {
+        console.log(' link click ');
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.click();
+      }, 100);
+    }
   }
 
   shareInTwitter(img) {
@@ -27,22 +37,42 @@ export class SocialShareService {
     const left = (screen.width / 2) - (this.width / 2);
     const top = (screen.height / 2) - (this.height / 2);
 
-    window.open(
+    const isOpen = window.open(
       url,
-      '',
+      '_blank',
       'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,width=' +
         this.width + ',height=' + this.height + ',top=' + top + ',left=' + left);
+
+    if (!isOpen) {
+      setTimeout(() => {
+        console.log(' link click ');
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.click();
+      }, 100);
+    }
   }
 
-  shareInLinkedIn(image) {
-    const url = 'https://www.linkedin.com/shareArticle?mini=true&url=' + image;
+  shareInLinkedIn(image, title) {
+    const url = 'https://www.linkedin.com/shareArticle?mini=true&url=' + image + '&title=' + title;
     const left = (screen.width / 2) - (this.width / 2);
     const top = (screen.height / 2) - (this.height / 2);
 
-    window.open(
+    const isOpen = window.open(
       url,
-      '',
+      '_blank',
       'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,width=' +
         this.width + ',height=' + this.height + ',top=' + top + ',left=' + left);
+
+    if (!isOpen) {
+      setTimeout(() => {
+        console.log(' link click ');
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.click();
+      }, 100);
+    }
   }
 }

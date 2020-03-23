@@ -9,7 +9,7 @@ import {  environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class BlueprintsService {
-  serverURI = environment.serverURI;
+  serverURI = environment.serverURI + '/';
 
   constructor( private http: HttpClient, private mapper: ResponseMappers ) { }
 

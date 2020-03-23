@@ -6,9 +6,10 @@
       <div class="stackContainer">
         <div class="share-block" *ngIf="loaded">
           <span class="title"> Share Image </span>
-          <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" src="/assets/images/facebook.svg" /> </button>
-          <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" src="/assets/images/linkedin.svg" /> </button>
-          <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" src="/assets/images/twitter.svg" /> </button>
+          <div class="waiting-process" *ngIf="isWaiting"> <mat-spinner [diameter]="25"></mat-spinner> </div>
+          <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/facebook.svg'" /> </button>
+          <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/linkedin.svg'" /> </button>
+          <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/twitter.svg'" /> </button>
         </div> 
         <div class="stackActions" *ngIf="loaded" >
           <div>

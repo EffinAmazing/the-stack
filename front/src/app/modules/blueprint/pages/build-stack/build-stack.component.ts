@@ -33,6 +33,7 @@ export class BuildStackComponent implements OnInit {
   loaded = false;
   domain = '';
   isError = false;
+  isWaiting = false;
   errMessage = 'Something went wrong plaese check domain and try again';
 
   constructor(
@@ -140,7 +141,16 @@ export class BuildStackComponent implements OnInit {
     }
   }
 
+  public getAssetsFolder() {
+    if (typeof window['assets'] !== 'undefined') {
+      return window['assets'];
+    } else {
+      return '/';
+    }
+  }
+
   public handleShare(media) {
+    this.isWaiting = true;
     html2canvas(document.querySelector('#stackWorkflow'), {
       backgroundColor: '#ffffff',
       logging: true,
@@ -160,11 +170,13 @@ export class BuildStackComponent implements OnInit {
                 this.social.shareInTwitter(environment.serverURI + link);
                 break;
               case 'linkedin':
-                this.social.shareInLinkedIn(environment.serverURI + link);
+                this.social.shareInLinkedIn(environment.serverURI + link, this.blueprint.domain + ' tools stack');
                 break;
               default:
                 break;
             }
+
+            this.isWaiting = false;
           }).catch(err => console.log(err));
         }, 'image/jpeg');
       });

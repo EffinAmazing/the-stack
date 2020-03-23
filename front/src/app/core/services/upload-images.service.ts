@@ -8,7 +8,7 @@ import {  environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class UploadImagesService {
-  serverURI = environment.serverURI;
+  serverURI = environment.serverURI + '/';
 
   constructor( private http: HttpClient, private mapper: ResponseMappers) {  }
 
