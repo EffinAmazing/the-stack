@@ -18,10 +18,23 @@ const options = {
     autoClean: true
 };
 
-const optionsSSL = {
+let optionsSSL = {
     key: fs.readFileSync('key.pem'),
     cert: fs.readFileSync('cert.pem')
 }
+
+if(process.env.NODE_ENV === 'prod') {
+    // Certificate
+    const privateKey = fs.readFileSync('/etc/letsencrypt/live/mtsb-api.effinamazing.com/fullchain.pem', 'utf8');
+    const certificate = fs.readFileSync('/etc/letsencrypt/live/mtsb-api.effinamazing.com/privkey.pem', 'utf8');
+    const ca = fs.readFileSync('/etc/letsencrypt/live/mtsb-api.effinamazing.com/chain.pem', 'utf8');
+
+    optionsSSL = {
+        key: privateKey,
+        cert: certificate,
+        ca: ca
+    };
+} 
 
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
