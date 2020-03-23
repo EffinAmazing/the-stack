@@ -157,10 +157,10 @@ export class BuildStackComponent implements OnInit {
                 this.social.shareInFaceBook('', environment.serverURI + link);
                 break;
               case 'twitter':
-                this.social.shareInLinkedIn(environment.serverURI + link);
+                this.social.shareInTwitter(environment.serverURI + link);
                 break;
               case 'linkedin':
-                this.social.shareInTwitter(environment.serverURI + link);
+                this.social.shareInLinkedIn(environment.serverURI + link);
                 break;
               default:
                 break;

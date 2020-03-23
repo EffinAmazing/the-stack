@@ -11,7 +11,6 @@ mongoose.set('useCreateIndex', true);
 mongoose.connect(config.MONGOURI + config.DB_NAME , {useNewUrlParser: true});
 
 async function toolLogoUpdate(item, icon, model) {
-    // const icon = await service.loadToolLogo(item.name);
     const dirpath = await service.saveLogo(item._id, icon)
     const res = await model.updateTool(item._id, { logo: '/tools-logos/' + item._id  + '.png'});
 }

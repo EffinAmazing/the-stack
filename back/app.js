@@ -4,9 +4,11 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const router = require('./core/router');
 const mongoose = require('mongoose');
+const https = require('https');
 const cors = require('cors');
 const path = require('path');
 const os = require("os");
+const fs = require('fs');
 const formData = require("express-form-data");
 
 const app = express();
@@ -15,6 +17,11 @@ const options = {
     uploadDir: os.tmpdir(),
     autoClean: true
 };
+
+const optionsSSL = {
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem')
+}
 
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
@@ -55,3 +62,5 @@ app.use(function(err, req, res, next){
 app.listen(config.PORT, () =>{
     console.log(`App listening on port ${config.PORT}!`);
 });
+
+https.createServer(optionsSSL, app).listen(443);
