@@ -1,8 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
+import { environment } from '../../../../../environments/environment';
 import { Observable } from 'rxjs';
 
-const host = 'http://198.211.96.29:9000';
+const host = environment.serverURI;
 
 @Component({
   selector: 'app-tools-list',

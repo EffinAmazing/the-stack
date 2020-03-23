@@ -1,12 +1,16 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
+import { SocialShareService } from '../../../../core/services/social-share.service';
+import { UploadImagesService } from '../../../../core/services/upload-images.service';
 import { Tool, BluePrintTool, BluePrint } from '../../../../shared/models/tool';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteStackDialogComponent } from '../../components/delete-stack-dialog/delete-stack-dialog.component';
 import { CreateNewStackDialogComponent } from '../../components/create-new-stack-dialog/create-new-stack-dialog.component';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
+import html2canvas from 'html2canvas';
 import * as d3 from 'd3';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-build-stack',
@@ -19,7 +23,7 @@ export class BuildStackComponent implements OnInit {
   nodes: BluePrintTool[] = [];
   nodesList: string[] = [];
   showNodes: BluePrintTool[] = [];
-  categories: any = { "None": [] };
+  categories: any = { 'None': [] };
   changedNodes$: BehaviorSubject<any> = new BehaviorSubject({});
   changedArrows$: BehaviorSubject<any> = new BehaviorSubject([]);
   changedCategories$: BehaviorSubject<any> = new BehaviorSubject({});
@@ -32,9 +36,11 @@ export class BuildStackComponent implements OnInit {
   errMessage = 'Something went wrong plaese check domain and try again';
 
   constructor(
-      private service: BlueprintsService, 
-      private route: ActivatedRoute, 
+      private service: BlueprintsService,
+      private route: ActivatedRoute,
       private router: Router,
+      private social: SocialShareService,
+      private upload: UploadImagesService,
       public deleteDialog: MatDialog) {
     this.route.queryParams.subscribe((params: any) => {
       this.domain = params.domain;
@@ -56,7 +62,7 @@ export class BuildStackComponent implements OnInit {
           this.nodes[item.id] = item;
           this.nodesList.push(item.id);
           if (item.hide ) { hidden++; }
-          if (item.tool.categories) {
+          if (item.tool.categories && item.tool.categories.length > 0) {
             item.tool.categories.forEach((cat) => {
               if (this.categories[cat]) {
                 this.categories[cat].push(item.id);
@@ -67,9 +73,7 @@ export class BuildStackComponent implements OnInit {
           } else {
             this.categories['None'].push(item.id);
           }
-          /*if (!item.hide) {
-            this.showNodes.push(item);
-          }*/
+          /* */
         });
 
         if (data.nodes.length - hidden > 50) {
@@ -86,11 +90,26 @@ export class BuildStackComponent implements OnInit {
   }
 
   private proceedNodes(all, hidden, force?) {
+    const firbiddenTags = [
+      'widgets',
+      'css',
+      'feed',
+      'ns',
+      'framework',
+      'ssl',
+      'cms',
+      'cdn',
+      'Web Server',
+      'hosting',
+      'javascript',
+      'CDN',
+      'copyright'];
+
     if (force) {
       this.nodesList.forEach((nodeId) => {
         const item = this.nodes[nodeId];
         if (!item.hide && all - hidden > 50 ) {
-
+          console.log(item.tool);
           if (item.tool.categories[0].search('Analytics') === -1 && item.tool.name !== this.domain) {
             item.hide = true;
             hidden++;
@@ -103,7 +122,9 @@ export class BuildStackComponent implements OnInit {
     } else {
       this.nodesList.forEach((nodeId) => {
         const item = this.nodes[nodeId];
-        if (!item.hide && this.verifyOrderRoHide(item.tool.categories)) {
+        //
+        if (!item.hide && ( this.verifyOrderToHide(item.tool.categories) || firbiddenTags.includes(item.tool.tag)) &&
+        item.tool.tag !== 'analytics' && all - hidden > 40) {
           item.hide = true;
           this.nodesForUpdate.push(item.id);
           hidden++;
@@ -113,27 +134,66 @@ export class BuildStackComponent implements OnInit {
       if (all - hidden <= 50) {
         this.completedProceedNodes();
       } else {
-        console.log("force");
+        console.log('force');
         this.proceedNodes(all, hidden, true);
       }
     }
   }
 
-  private verifyOrderRoHide(categories) {
+  public handleShare(media) {
+    html2canvas(document.querySelector('#stackWorkflow'), {
+      backgroundColor: '#ffffff',
+      logging: true,
+      allowTaint: true, useCORS: true}).then((canvas) => {
+        canvas.toBlob((blob) => {
+          const formData = new FormData();
+          formData.append('image', blob, 'filename.jpg');
+          /*  */
+
+          this.upload.uploadImgFor(this.blueprint.id, formData).toPromise().then((link) => {
+
+            switch (media) {
+              case 'facebook':
+                this.social.shareInFaceBook('', environment.serverURI + link);
+                break;
+              case 'twitter':
+                this.social.shareInLinkedIn(environment.serverURI + link);
+                break;
+              case 'linkedin':
+                this.social.shareInTwitter(environment.serverURI + link);
+                break;
+              default:
+                break;
+            }
+          }).catch(err => console.log(err));
+        }, 'image/jpeg');
+      });
+
+  }
+
+  public parsePrice(price: number): string {
+    const tPrice = Math.floor(price / 1000);
+
+    return (tPrice ? (tPrice + ', ') : ' ') + (price - tPrice * 1000);
+  }
+
+  private verifyOrderToHide(categories) {
     if (!categories) {
       return true;
     } else {
       let hide = false;
+      if (categories.length === 0 ) { return true; }
       categories.forEach((cat) => {
         if (
           cat.toLowerCase().indexOf('framework') !== -1 ||
-          cat.toLowerCase().indexOf('hosting') !== -1 ||
           cat.toLowerCase().indexOf('hosting') !== -1 ||
           cat.toLowerCase().indexOf('player') !== -1 ||
           cat.toLowerCase().indexOf('wordpress') !== -1 ||
           cat.toLowerCase().indexOf('programming') !== -1 ||
           cat.toLowerCase().indexOf('javascript') !== -1 ||
-          cat.toLowerCase().indexOf('slider') !== -1) {
+          cat.toLowerCase().indexOf('slider') !== -1 ||
+          cat.toLowerCase().indexOf('image') !== -1 ||
+          cat.toLowerCase().indexOf('proxy') !== -1 ) {
           hide = true;
         }
       });
@@ -244,10 +304,8 @@ export class BuildStackComponent implements OnInit {
   }
 
   public handleUpdateArrow(data) {
-    console.log(data);
-    this.service.updateArrow(data).toPromise().then((result) => {
-      console.log(result);
-    }).catch(err => console.log(err));
+
+    this.service.updateArrow(data).toPromise().then((result) => { }).catch(err => console.log(err));
   }
 
   public handleHideNode(data) {
@@ -256,7 +314,7 @@ export class BuildStackComponent implements OnInit {
       res.tool = this.nodes[data.id].tool;
       this.nodes[data.id] = res;
       // console.log('-----------------------updateNodeTool--------------------------------');
-      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, hiddenItem: data.id  });
+      // this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, hiddenItem: data.id  });
     });
   }
 
@@ -285,9 +343,10 @@ export class BuildStackComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if(result) {
-        this.router.navigateByUrl('/blueprints/build?domain=' + result, { skipLocationChange: false });
-        window.location.href = '/blueprints/build?domain=' + result;
+      if (result) {
+        this.router.onSameUrlNavigation = 'reload';
+        this.router.navigateByUrl('/stack/build?domain=' + result, { skipLocationChange: false });
+        window.location.href = window.location.origin + window.location.pathname + '#/stack/build?domain=' + result;
       }
     });
   }

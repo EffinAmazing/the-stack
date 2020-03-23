@@ -2,11 +2,13 @@ const express = require('express');
 const BlueprintsController = require('./controllers/blueprints');
 const ToolsNodes = require('./controllers/toolsnodes');
 const Arrows = require('./controllers/arrows');
+const Upload = require('./controllers/uploads');
 const router = express.Router();
 
 const blueprints = new BlueprintsController();
 const toolsNodes = new ToolsNodes();
 const arrows = new Arrows();
+const upload = new Upload();
 // console.log(blueprints);
 router.all('*', function(req, res, next){
     res.header("Access-Control-Allow-Origin", "*");
@@ -32,5 +34,7 @@ router.post("/arrows/", arrows.add.bind(arrows));
 router.get("/arrows/", arrows.list.bind(arrows));
 router.put("/arrows/:id", arrows.update.bind(arrows));
 router.post("/arrows/remove", arrows.remove.bind(arrows));
+
+router.post('/uploads/:id', upload.uploadImage.bind(upload));
 
 module.exports = router;

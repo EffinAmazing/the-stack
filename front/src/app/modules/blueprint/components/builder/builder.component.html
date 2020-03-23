@@ -1,6 +1,7 @@
 <div>
-    <div class="stackWorkflow" #stackWorkFlow (mousemove)="handleMouseMove($event)" (click)="handleClickOnWorkspace()">
-        <svg id="paint"  width="1080" height="600">
+    <div id="stackWorkflow" class="stackWorkflow" #stackWorkFlow (mousemove)="handleMouseMove($event)" (click)="handleClickOnWorkspace()">
+        <div class="for-svg-bg"></div>
+        <svg id="paint"  width="1190" height="640">
           <defs>
             <marker 
               id="arrow-marker" 
@@ -14,15 +15,16 @@
               </marker>
             </defs>
         </svg>
-        <div class="toolNode" *ngFor="let node of showNodes" 
+        <div *ngFor="let node of showNodes"  [ngClass]="{'toolNode': true, 'domain-tool': node.tool.tag === 'domain'}" [id]="'node-' + node.id"
           cdkDrag 
+          cdkDragBoundary=".stackWorkflow"
           [cdkDragFreeDragPosition]="hasCoords(node.position)?node.position:{x: 0, y: 0}" 
           (cdkDragReleased)="relisedMove($event, node)"
           (cdkDragMoved)="$event.event.stopPropagation();  handleNodeMove($event, node)"
           (cdkDragStarted)="handleStartDrag(node)"
           (mouseenter)="handleMouseOverNode($event, node)"
           (mouseleave)="handleMouseOutNode($event, node)" >
-            <img class="node-icon"  [src]="node.tool.logo?processImageSrc(node.tool.logo):'/assets/images/layers.png'" />
+            <img class="node-icon" crossorigin [src]="node.tool.logo?processImageSrc(node.tool.logo):'/assets/images/layers.png'"  />
             {{ node.tool?.name }}
             <div class="pointers">
               <div class="pointer-Left" (click)="handleAddArrowClick($event, 'Left', node)"></div>

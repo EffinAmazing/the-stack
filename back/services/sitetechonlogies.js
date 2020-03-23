@@ -9,7 +9,7 @@ const API_KEY = '06ea65ec-8f65-4a9a-9ff7-8f2883ee7966';
 async function getTestDataFromFile(domain){
     let url = `https://api.builtwith.com/v14/api.json?KEY=${API_KEY}&LOOKUP=${domain}`;
 
-    // url = `http://localhost:9000/cashed/effinamazing.com.json`;
+    url = `http://localhost:9000/cashed/effinamazing.com.json`;
     // let pathURI = path.resolve("../test-data/", 'effinamazing.com.json');
     let response = await axios({
         method: 'GET',
@@ -32,21 +32,36 @@ async function getTestDataFromFile(domain){
 
     });
             
-    return results;
+    return  { 
+        tech: results, 
+        spend: A.Results[0].Result.Spend 
+    };
 }
 
 exports.getDomainTool = async function(domain) {
     const _path = path.resolve(__dirname, '../public/domain-logos', domain + '.png');
+    let  tool;
     
-    await download.dwonloadImage(_path, 'https://logo.clearbit.com/' + domain);
-
-    let  tool = {
-        categories: ['WebSite'],
-        name: domain,
-        logo: '/domain-logos/' + domain + '.png',
-        description: "WebSite",
-        link: 'http://' + domain,
-        tag: "domain"
+    try {
+        let data = await download.dwonloadImage(_path, 'https://logo.clearbit.com/' + domain);
+        
+        tool = {
+            categories: ['WebSite'],
+            name: domain,
+            logo: '/domain-logos/' + domain + '.png',
+            description: "WebSite",
+            link: 'http://' + domain,
+            tag: "domain"
+        }
+    } catch(err){
+        tool = {
+            categories: ['WebSite'],
+            name: domain,
+            logo: '',
+            description: "WebSite",
+            link: 'http://' + domain,
+            tag: "domain"
+        }
     }
 
     return tool;
@@ -62,6 +77,15 @@ exports.loadToolLogo = async function(name){
     let tech = response.data.Tech;
 
     return tech.Icon;
+}
+
+exports.saveLogo = async function(id, url) {
+    const _path = path.resolve(__dirname, '../public/tools-logos', id + '.png');
+    let  tool;
+    
+    let data = await download.dwonloadImage(_path, url);
+
+    return data;
 }
 
 exports.getToolsOfDomain = async function(domain){

@@ -4,15 +4,32 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const router = require('./core/router');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const path = require('path');
+const os = require("os");
+const formData = require("express-form-data");
 
 const app = express();
+
+const options = {
+    uploadDir: os.tmpdir(),
+    autoClean: true
+};
 
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.connect(config.MONGOURI + config.DB_NAME , {useNewUrlParser: true});
 
+app.use(cors());
+// parse data with connect-multiparty. 
+app.use(formData.parse(options));
+// delete from the request all empty files (size == 0)
+app.use(formData.format());
+// change the file objects to fs.ReadStream 
+app.use(formData.stream());
+// union the body and the files
+app.use(formData.union());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());

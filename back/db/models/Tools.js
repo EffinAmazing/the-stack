@@ -23,13 +23,16 @@ class ToolsModel extends AbstaractModel{
     }
 
     async proceedTools(tools){
+        let needLoadImage = [];
         let toDo = tools.map(async (item)=>{
             try{
                 let dbItem = await this.modelDB.findOne({ name: item.name });
                 return this.mapDocument( dbItem );
             } catch(err) {
                 let dbItem = await this.create(item);
-                return this.mapDocument( dbItem );
+                const mapped = this.mapDocument( dbItem );
+                needLoadImage.push(mapped)
+                return mapped;
             }
         })
 
@@ -44,13 +47,27 @@ class ToolsModel extends AbstaractModel{
         return this.mapDocument(doc);
     }
 
+    async toolLogoUpdate(item, icon) {
+        const dirpath = await techservice.saveLogo(item.id, icon);
+        const res = await this.updateTool(item.id, { logo: '/tools-logos/' + item.id  + '.png'});
+        return res;
+    }
+
     updateInBackground(tools){
         async.eachSeries(tools, (item, cb) => {
             techservice.loadToolLogo(item.name).then(res=>{
-                this.updateTool(item.id, { logo: res }).then(res=>console.log(" loaded ")).catch(err=>console.log(" failed "));
-            }).catch((err)=>console.log(err));
+                // this.updateTool(item.id, { logo: res }).then(res=>console.log(" loaded ")).catch(err=>console.log(" failed "));
+                this.toolLogoUpdate(item, res).then(() => {
+                    setTimeout(cb, 300);
+                }).catch(err => {
+                    console.log(err);                
+                    setTimeout(cb, 300);
+                })
+            }).catch((err)=>{
+               console.log(err);                
+               setTimeout(cb, 300);
+            });
             
-            setTimeout(cb, 500);
         }, function(err){
             console.log(err);
         })

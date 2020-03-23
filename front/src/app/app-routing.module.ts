@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { HomeModule } from './modules/home/home.module';
 
 
 const routes: Routes = [
@@ -13,6 +12,11 @@ const routes: Routes = [
   },
   {
     path: "blueprints",
+    redirectTo: 'stack',
+    pathMatch: 'prefix'
+  },
+  {
+    path: "stack",
     loadChildren: async () => {
       const { BlueprintModule } = await import('./modules/blueprint/blueprint.module');
       return BlueprintModule;

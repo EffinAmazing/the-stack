@@ -5,10 +5,12 @@
     -webkit-transition: .3s;
     transition: .3s;
     padding: 20px 20px;
+    width: 1170px;
     margin-bottom: 20px;
     background-color: #fff;
-    height: 620px;
+    height: 660px;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 .toolNode{
@@ -26,6 +28,14 @@
     position: absolute;
     cursor: move;
     transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+
+    &.domain-tool{
+        font-size: 1.3em;
+        color: #333333;
+        font-weight: bold;
+        border-width: 2px;
+        padding: 10px;
+    }
 
     .node-icon {
         width: 20px;
@@ -142,8 +152,18 @@
     }
 }
 
+.for-svg-bg{
+    position: absolute;
+    top: -20px;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: #fff;
+}
+
 #paint{
     position: absolute;
+
     #arrow-marker{
         stroke: #1c57a4;
         fill: #1c57a4;

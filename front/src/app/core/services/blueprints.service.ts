@@ -3,16 +3,18 @@ import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { BluePrintResp, BluePrintTool } from "../../shared/models/tool";
 import { ResponseMappers } from '../../shared/mappers/response-mapper.helper';
+import {  environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BlueprintsService {
-  serverURI = 'http://198.211.96.29:9000/';
+  serverURI = environment.serverURI;
 
   constructor( private http: HttpClient, private mapper: ResponseMappers ) { }
 
   getDomainTools(domain: string): Observable<BluePrintResp> {
+    console.log('serverURI', this.serverURI);
     return this.mapper.mapResponse(this.http.get<BluePrintResp>(`${this.serverURI}blueprints/tools?domain=${domain}`));
   }
 

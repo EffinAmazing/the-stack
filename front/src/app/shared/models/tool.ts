@@ -28,6 +28,9 @@ export interface BluePrint {
     id: string;
     domain: string;
     uniqCode: string;
+    spend?: number;
+    created?: string;
+    updated?: string;
 }
 
 export interface BluePrintResp {

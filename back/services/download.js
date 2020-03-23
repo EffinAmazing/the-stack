@@ -11,10 +11,10 @@ exports.dwonloadImage = async function (path, url) {
     response.data.pipe(fs.createWriteStream(path));
 
     let promise = new Promise((resolve, reject) => {
-        response.data.on('end', () => {  resolve() });
+        response.data.on('end', () => {  resolve(path) });
 
         response.data.on('error', (err) => reject(err));
     })
 
-    return await promise;
+    return promise;
 }

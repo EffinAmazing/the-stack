@@ -1,18 +1,27 @@
 <div class="main">
     <div class="mt-container"> 
-      <h2> Build Your Stack </h2>   
-
+      <h2> Build Your Stack </h2>  
+      
+      
       <div class="stackContainer">
+        <div class="share-block" *ngIf="loaded">
+          <span class="title"> Share Image </span>
+          <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" src="/assets/images/facebook.svg" /> </button>
+          <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" src="/assets/images/linkedin.svg" /> </button>
+          <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" src="/assets/images/twitter.svg" /> </button>
+        </div> 
         <div class="stackActions" *ngIf="loaded" >
           <div>
               <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> All Tools </button>
+              <span class="total-spand-tools" *ngIf="blueprint.spend"> Estimated Tool Spend: <span class="price-amount"> ${{ parsePrice(blueprint.spend) }} </span> </span>
           </div>
           <div>
             <button mat-raised-button color="primary" (click)="createNewStack()"> Create new stack </button>
           </div>
           <div>
-            <button mat-raised-button *ngIf="selectedArrow" (click)="handleDeselectArrow()"> <mat-icon>layers_clear</mat-icon> </button>
+            <button mat-raised-button *ngIf="selectedArrow" (click)="handleDeselectArrow()"> Cancel </button>
             <button mat-raised-button *ngIf="selectedArrow" class="delete-arrow-action" (click)="handleRemoveArrow()"> <mat-icon>clear</mat-icon>  Delete Arrow </button>
+            
           </div>
         </div>
         <div class="loading-data-section" *ngIf="!loaded && !isError">
@@ -46,28 +55,6 @@
           <button mat-raised-button class="delete-arrow-action" (click)="removeStack()"> Delete stack </button>
         </div>
       </div>
-      <div [ngClass]="{'toolsList': true, 'hide': true}"> 
-        <div class="header-tools"> 
-          <div class="title"> </div>
-          <button mat-icon-button (click)="handleHideList()"><mat-icon>clear</mat-icon></button>
-        </div>
-        <div class="tools-node-items">
-          <div class="node-item" *ngFor="let nodeId of nodesList"> 
-            <mat-card>
-              <div class="item-categories"> <b>Categories: </b>  {{ nodes[nodeId].tool && nodes[nodeId].tool.categories?(nodes[nodeId].tool.categories.join(',')):''  }} </div>
-              <p class="item-name"> <b>Name: </b> {{ nodes[nodeId].tool?.name }} </p>
-              <p class="item-description"> {{ nodes[nodeId].tool?.description }} </p>
-              <div class="actions">
-                <mat-slide-toggle (change)="handleHideNodeItem(nodes[nodeId])"
-                    class="example-margin"
-                    [checked]="nodes[nodeId].hide"
-                    [color]="'accent'">
-                    Hide
-                </mat-slide-toggle>
-              </div>           
-            </mat-card>
-          </div>
-        </div>
-      </div>
+      <canvas id="share-image-canvas"></canvas>
     </div>
 </div>

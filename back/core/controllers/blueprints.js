@@ -27,7 +27,6 @@ class BluePrints {
                 })
             },
             (cb) => {
-                
                 // 1. get blueprint of domain
                 this._bluePrints.getByDomain(req.query.domain).then((res)=>{
                     console.log(" success ", res);
@@ -67,10 +66,18 @@ class BluePrints {
                 } else {
                     
                     // 2. get tools of domain
-                    ToolsServices.getToolsOfDomain(req.query.domain).then((list)=>{
+                    ToolsServices.getToolsOfDomain(req.query.domain).then((result)=>{
+                        const list = result.tech;
+                        console.log(result.spend, "result.spend");
+                        data.blueprint['spend'] = result.spend;
+                        console.log(data.blueprint);
+                        this._bluePrints.updateOne(data.blueprint.id, { spend: result.spend }).then((res)=>{ console.log("update", res) }).catch(err=>console.log(err));
                         /* */
                         ToolsServices.getDomainTool(req.query.domain).then((tool) => {
                             list.push(tool);
+                            data.tools = list;
+                            cb(null, data);
+                        }).catch(err=>{
                             data.tools = list;
                             cb(null, data);
                         })
@@ -84,6 +91,7 @@ class BluePrints {
             (data, cb) => {
                 console.log('marge tools with tools in DB');
                 // 3. marge tools with tools in DB
+                console.log(" - ", data.blueprint)
                 if(data.nodes.length === 0){
                     this._tools.proceedTools(data.tools).then((res) => {
                         data.tools = res;
@@ -97,6 +105,8 @@ class BluePrints {
             },
             (data, cb)=>{
                 //console.log("data.nodes", data.nodes);
+                
+                console.log(" create nodes - ", data.blueprint)
                 if( !data.nodes.length ) {
                     this._toolsNodes.createNodesForTools(data.blueprint.id, data.tools).then((res)=>{
                         console.log("res");
@@ -112,6 +122,8 @@ class BluePrints {
             }
         ],function(err,result){
             // 5. return data
+            
+            console.log(" result - ", result.blueprint)
             if(err) {
                 console.log(err);
                 res.json({

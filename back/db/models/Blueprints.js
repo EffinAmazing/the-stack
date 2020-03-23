@@ -9,6 +9,7 @@ class BluePrintModel extends AbstaractModel{
             userId: ObjectId,
             domain: String,
             uniqCode: String,
+            spend: Number,
             created: { type: Date, default: Date.now },
             updated: { type: Date, default: Date.now}
         })

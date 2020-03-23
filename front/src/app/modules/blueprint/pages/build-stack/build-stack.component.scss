@@ -9,11 +9,48 @@
         align-items: flex-end;
     }
 
+    .total-spand-tools{
+        margin-left: 10px;
+        font-size: 1.1em;
+        font-weight: bold;
+        display: inline-block;
+
+        .price-amount{
+            color: #AA2211;
+        }
+    }
+
+    .share-block{
+        position: relative;
+        margin-left: auto;
+        width: 200px;
+        margin-top: -24px;
+        margin-bottom: 20px;
+        text-align: center;
+
+        .title{
+            position: absolute;
+            top: -24px;
+            font-weight: bold;
+            font-size: 1.1em;
+            display: inline-block;
+            text-align: center;
+            width: 100%;
+            left: 0;
+        }
+
+        .social-icon{
+            width: 22px;
+            height: 22px;
+        }
+    }
+
     .stackActions{
         min-height: 60px;
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
+
 
         &>div { 
             min-width: 150px;
@@ -81,6 +118,10 @@
 }
 
 .hideTools{
+    display: none;
+}
+
+#share-image-canvas{
     display: none;
 }
 
