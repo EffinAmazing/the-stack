@@ -23,6 +23,8 @@ let optionsSSL = {
     cert: fs.readFileSync('cert.pem')
 }
 
+console.log(process.env);
+
 if(process.env.NODE_ENV === 'prod') {
     // Certificate
     const privateKey = fs.readFileSync('/etc/letsencrypt/live/mtsb-api.effinamazing.com/fullchain.pem', 'utf8');
@@ -35,6 +37,8 @@ if(process.env.NODE_ENV === 'prod') {
         ca: ca
     };
 } 
+
+console.log(optionsSSL);
 
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
