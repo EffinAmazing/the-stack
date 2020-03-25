@@ -16,6 +16,8 @@ export interface BluePrintTool {
     toolId: string;
     tool?: Tool;
     hide?: boolean;
+    start: string | Date;
+    end: string | Date;
     position?: { x: number, y: number };
     dependencies?: Array<{
         input: string,

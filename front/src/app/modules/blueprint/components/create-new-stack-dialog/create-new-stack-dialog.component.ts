@@ -15,7 +15,15 @@ export class CreateNewStackDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: any) {}
 
   public handleInput(evt) {
-    this.domain = evt.target.value;
+    let value = evt.target.value;
+    if (value) {
+      value = value.replace('https://', '');
+      value = value.replace('http://', '');
+      const arr = value.split('/');
+      value = arr[0];
+      evt.target.value = value;
+    }
+    this.domain = value;
   }
 
   onNoClick(): void {

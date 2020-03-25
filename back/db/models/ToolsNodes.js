@@ -11,6 +11,11 @@ class ToolsNodesModel extends AbstaractModel {
             blueprintId: ObjectId,
             toolId: ObjectId,
             position: { x: Number, y: Number },
+            start: Date,
+            end: Date,
+            price: Number,
+            owner: String,
+            trainedOn: String,
             hide: Boolean,
             dependencies: [{
                 input: { type: String, enum: [ 'Left', 'Right', 'LeftTop', 'RightTop', 'MiddleTop', 'LeftBottom', 'RightBottom', 'MiddleBottom' ] },
@@ -30,10 +35,13 @@ class ToolsNodesModel extends AbstaractModel {
 
     async createNodesForTools(blueprintId, tools){
         let dataList = await async.map(tools, (item, cb)=>{ 
-            cb(null, {
+            let data = {
                 blueprintId: blueprintId,
                 toolId: item.id
-            });
+            }
+            if(item.start) data['start'] = new Date(item.start);
+            if(item.end) data['end'] = new Date(item.end);
+            cb(null, data);
         });
 
         let docs = await this.modelDB.create(dataList);

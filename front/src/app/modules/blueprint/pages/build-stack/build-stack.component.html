@@ -4,13 +4,7 @@
       
       
       <div class="stackContainer">
-        <div class="share-block" *ngIf="loaded">
-          <span class="title"> Share Image </span>
-          <div class="waiting-process" *ngIf="isWaiting"> <mat-spinner [diameter]="25"></mat-spinner> </div>
-          <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/facebook.svg'" /> </button>
-          <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/linkedin.svg'" /> </button>
-          <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/twitter.svg'" /> </button>
-        </div> 
+        
         <div class="stackActions" *ngIf="loaded" >
           <div>
               <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> All Tools </button>
@@ -20,9 +14,16 @@
             <button mat-raised-button color="primary" (click)="createNewStack()"> Create new stack </button>
           </div>
           <div>
+            
             <button mat-raised-button *ngIf="selectedArrow" (click)="handleDeselectArrow()"> Cancel </button>
             <button mat-raised-button *ngIf="selectedArrow" class="delete-arrow-action" (click)="handleRemoveArrow()"> <mat-icon>clear</mat-icon>  Delete Arrow </button>
-            
+            <div class="share-block" *ngIf="loaded">
+              <span class="title"> Share Image </span>
+              <div class="waiting-process" *ngIf="isWaiting"> <mat-spinner [diameter]="25"></mat-spinner> </div>
+              <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/facebook.svg'" /> </button>
+              <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/linkedin.svg'" /> </button>
+              <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/twitter.svg'" /> </button>
+            </div> 
           </div>
         </div>
         <div class="loading-data-section" *ngIf="!loaded && !isError">
@@ -45,15 +46,18 @@
           (selectArrow)="handleSlectArrow($event)"
           ></app-builder>
 
-        <app-tools-list  [ngClass]="{'hideTools': hideList}" *ngIf="loaded" 
-          [loadedNodes]="changedNodes$" 
-          [loadedCategories]="changedCategories$"
-          (toogleVisibilityNode)="handleHideNodeItem($event)"
-          (closeTools)="handleCloseTools()"
-          ></app-tools-list>
 
         <div class="bottom-actions" *ngIf="loaded" > 
           <button mat-raised-button class="delete-arrow-action" (click)="removeStack()"> Delete stack </button>
+        </div>
+        <mat-divider></mat-divider>
+        <div #categoriesList>
+          <app-tools-list  [ngClass]="{'hideTools': false}" *ngIf="loaded" 
+            [loadedNodes]="changedNodes$" 
+            [loadedCategories]="changedCategories$"
+            (toogleVisibilityNode)="handleHideNodeItem($event)"
+            (closeTools)="handleCloseTools()"
+            ></app-tools-list>
         </div>
       </div>
       <canvas id="share-image-canvas"></canvas>

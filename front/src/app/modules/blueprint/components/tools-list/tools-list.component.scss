@@ -1,12 +1,11 @@
 
 
 .tools-list-categoreies {
-    position: absolute;
     top: 120px;
     left: 0;
     right: 0;
     background-color: #ffffff;
-    height: 600px;
+    
     padding: 20px;
     z-index: 200;
 
@@ -25,7 +24,7 @@
 }
 
 .categories-list{
-    height: 550px;
+    
     overflow: auto;
 }
 

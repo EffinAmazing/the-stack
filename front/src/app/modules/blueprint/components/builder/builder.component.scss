@@ -29,6 +29,10 @@
     cursor: move;
     transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
 
+    &.cdk-drag-dragging{
+        z-index: 99;
+    }
+
     &.domain-tool{
         font-size: 1.3em;
         color: #333333;

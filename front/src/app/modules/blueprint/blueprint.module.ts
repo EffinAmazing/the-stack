@@ -15,10 +15,11 @@ import { ToolsListComponent } from './components/tools-list/tools-list.component
 import { DeleteStackDialogComponent } from './components/delete-stack-dialog/delete-stack-dialog.component';
 import { CreateNewStackDialogComponent } from './components/create-new-stack-dialog/create-new-stack-dialog.component';
 import { PopupsModalsModule } from "../../shared/modules/material/popups-modals/popups-modals.module";
+import { NodeDetailsComponent } from './components/node-details/node-details.component';
 
 
 @NgModule({
-  declarations: [BuildStackComponent, ShareComponent, BuilderComponent, ToolsListComponent, DeleteStackDialogComponent, CreateNewStackDialogComponent],
+  declarations: [BuildStackComponent, ShareComponent, BuilderComponent, ToolsListComponent, DeleteStackDialogComponent, CreateNewStackDialogComponent, NodeDetailsComponent],
   imports: [
     CommonModule,
     BlueprintRoutingModule,

@@ -14,6 +14,9 @@ class ToolsModel extends AbstaractModel{
             link: String,
             logo: String,
             tag: String,
+            price: Number,
+            owner: String,
+            trainedOn: String,
             categories: [String],
             created: { type: Date, default: Date.now },
             updated: { type: Date, default: Date.now}
@@ -29,8 +32,14 @@ class ToolsModel extends AbstaractModel{
                 let dbItem = await this.modelDB.findOne({ name: item.name });
                 return this.mapDocument( dbItem );
             } catch(err) {
+                let start = item.start;
+                let end = item.end;
+                delete item.start;
+                delete item.end;
                 let dbItem = await this.create(item);
                 const mapped = this.mapDocument( dbItem );
+                mapped['start'] = start;
+                mapped['end'] = end;
                 needLoadImage.push(mapped)
                 return mapped;
             }

@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  serverURI: 'https://142.93.199.205'
+  serverURI: 'https://mtsb-api.effinamazing.com'
 };

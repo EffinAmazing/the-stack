@@ -19,12 +19,13 @@
           cdkDrag 
           cdkDragBoundary=".stackWorkflow"
           [cdkDragFreeDragPosition]="hasCoords(node.position)?node.position:{x: 0, y: 0}" 
-          (cdkDragReleased)="relisedMove($event, node)"
+          (cdkDragEnded)="relisedMove($event, node)"
           (cdkDragMoved)="$event.event.stopPropagation();  handleNodeMove($event, node)"
-          (cdkDragStarted)="handleStartDrag(node)"
+          (cdkDragStarted)="handleStartDrag($event, node)"
           (mouseenter)="handleMouseOverNode($event, node)"
-          (mouseleave)="handleMouseOutNode($event, node)" >
-            <img class="node-icon" crossorigin [src]="node.tool.logo?processImageSrc(node.tool.logo):'/assets/images/layers.png'"  />
+          (mouseleave)="handleMouseOutNode($event, node)"
+          (click)="handleClick(node)" >
+            <img class="node-icon" crossorigin [src]="node.tool.logo?processImageSrc(node.tool.logo):getAssetsFolder() + 'assets/images/layers.png'"  />
             {{ node.tool?.name }}
             <div class="pointers">
               <div class="pointer-Left" (click)="handleAddArrowClick($event, 'Left', node)"></div>

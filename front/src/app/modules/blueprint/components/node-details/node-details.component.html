@@ -1,0 +1,16 @@
+<h1 mat-dialog-title> <img class="node-icon" crossorigin [src]="data.node.tool.logo?processImageSrc(data.node.tool.logo):getAssetsFolder() + 'assets/images/layers.png'"  />
+    {{data.node.tool.name}} </h1>
+<div mat-dialog-content>
+    <div class="nodeData" *ngIf="data.node">
+            <mat-divider></mat-divider>
+            <p class="info-paragraph">{{data.node.tool.description}}</p>
+            <mat-divider></mat-divider>
+            <p  class="info-paragraph"> start:  {{data.node.start | date}}</p>
+            <mat-divider></mat-divider>
+            <p  class="info-paragraph"> end:  {{data.node.end | date}}</p>
+    </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">close</button>
+  <button mat-button disabled >Update</button>
+</div>

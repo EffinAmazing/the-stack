@@ -7,6 +7,7 @@
         display: flex;
         justify-content: flex-end;
         align-items: flex-end;
+        margin-bottom: 80px;
     }
 
     .total-spand-tools{
@@ -22,11 +23,8 @@
 
     .share-block{
         position: relative;
-        margin-left: auto;
-        width: 200px;
-        margin-top: -24px;
-        margin-bottom: 20px;
         text-align: center;
+        display: inline-block;
 
         .title{
             position: absolute;
@@ -54,11 +52,12 @@
 
         &>div { 
             min-width: 150px;
-            width: 33%;
+            width: 40%;
         }
 
         &>div:nth-child(2) {
             text-align: center;
+            width: 20%;
         }
 
         &>div:nth-child(3) {

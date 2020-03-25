@@ -24,7 +24,7 @@ export class SocialShareService {
   }
 
   shareInTwitter(img, popup) {
-    const url = 'https://twitter.com/home?status=' + img;
+    const url = 'https://twitter.com/intent/tweet?url=' + img;
 
     popup.location.href = url;
   }

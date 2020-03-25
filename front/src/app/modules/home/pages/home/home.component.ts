@@ -19,4 +19,20 @@ export class HomeComponent implements OnInit {
       this.router.navigateByUrl('/blueprints/build?domain=' + this.domain.value);
     }
   }
+
+  handleInput(data) {
+    let value = data.target.value;
+    if (value) {
+      value = value.replace('https://', '');
+      value = value.replace('http://', '');
+      const arr = value.split('/');
+      value = arr[0];
+      data.target.value = value;
+      this.domain.setValue( value );
+    }
+  }
+
+  handlePaste(data) {
+    // console.log(data.target.value);
+  }
 }

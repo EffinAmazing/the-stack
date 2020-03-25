@@ -7,7 +7,7 @@
                 <div>
                     <mat-form-field appearance="outline" class="input-domain">
                         <mat-label>Domain name:</mat-label>
-                        <input matInput placeholder="" [formControl]="domain" required>
+                        <input matInput placeholder="" [formControl]="domain" required (input)="handleInput($event)" (paste)="handlePaste($event)" (keyup.enter)="submitDomain()">
                         <mat-error *ngIf="domain.invalid"> Please enter a valid domain </mat-error>
                     </mat-form-field>
                 </div>

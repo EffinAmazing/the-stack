@@ -18,7 +18,7 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./build-stack.component.scss']
 })
 export class BuildStackComponent implements OnInit {
-  @ViewChild('stackWorkFlow') stackWorkFlow: ElementRef;
+  @ViewChild('categoriesList') categoriesList: ElementRef;
   blueprint: BluePrint;
   nodes: BluePrintTool[] = [];
   nodesList: string[] = [];
@@ -297,6 +297,7 @@ export class BuildStackComponent implements OnInit {
 
   public handleHideList() {
     this.hideList = !this.hideList;
+    this.categoriesList.nativeElement.scrollIntoView();
   }
 
   public handleHideNodeItem(data: BluePrintTool) {
