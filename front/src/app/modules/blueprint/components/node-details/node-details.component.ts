@@ -15,6 +15,8 @@ const host = environment.serverURI;
 
 export class NodeDetailsComponent  {
   nodeForm: FormGroup;
+  startPicker: any;
+  endPicker: any;
 
   constructor(
     public dialogRef: MatDialogRef<NodeDetailsComponent>,

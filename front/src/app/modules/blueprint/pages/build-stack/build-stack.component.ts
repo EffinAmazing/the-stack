@@ -79,7 +79,7 @@ export class BuildStackComponent implements OnInit {
           /* */
         });
 
-        if (data.nodes.length - hidden > 50) {
+        if (data.nodes.length - hidden > 10) {
           this.proceedNodes(data.nodes.length, hidden);
         } else {
           this.completedProceedNodes();
@@ -98,7 +98,7 @@ export class BuildStackComponent implements OnInit {
       this.nodesList.forEach((nodeId) => {
         const item = this.nodes[nodeId];
         if (!item.hide && all - hidden > 50 ) {
-          console.log(item.tool);
+          // console.log(item.tool);
           if (item.tool.name !== this.domain) {
             item.hide = true;
             hidden++;
@@ -113,7 +113,7 @@ export class BuildStackComponent implements OnInit {
         const item = this.nodes[nodeId];
         //
         if (!item.hide && ( this.verifyOrderToHide(item.tool.categories) || forbiddenTags.includes(item.tool.tag)) &&
-        item.tool.tag !== 'analytics' && all - hidden > 40) {
+        item.tool.tag !== 'analytics' && all - hidden > 10) {
           item.hide = true;
           this.nodesForUpdate.push(item.id);
           hidden++;

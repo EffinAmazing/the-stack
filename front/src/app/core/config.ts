@@ -85,3 +85,11 @@ export const hiddenCategories: Array<string> = [
     'WordPress Plugins',
     'Video Players'
 ];
+
+export const treckActions = [
+    'addNode',
+    'removeNode',
+    'moveNode',
+    'addArrow',
+    'removeArrow'
+]
