@@ -20,6 +20,7 @@ const host = environment.serverURI;
 export class BuilderComponent implements OnInit {
   @ViewChild('stackWorkFlow') stackWorkFlow: ElementRef;
   @Output() positionNodeChanged: EventEmitter<any> = new EventEmitter();
+  @Output() updatedNodeData: EventEmitter<any> = new EventEmitter();
   @Output() arrowAdded: EventEmitter<any> = new EventEmitter();
   @Output() arrowUpdated: EventEmitter<any> = new EventEmitter();
   @Output() hideNode: EventEmitter<any> = new EventEmitter();
@@ -164,17 +165,22 @@ export class BuilderComponent implements OnInit {
   }
 
   public handleClick(node) {
-    if (!this.isMoving) {
-      const dialogRef = this.detailsDialog.open(NodeDetailsComponent, {
-        width: '820px',
-        height: '400px',
-        data: { node }
-      });
 
-      dialogRef.afterClosed().subscribe(result => {
+    const dialogRef = this.detailsDialog.open(NodeDetailsComponent, {
+      width: '820px',
+      data: { node }
+    });
 
-      });
-    }
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        node = Object.assign({}, node, result);
+        this.nodes[node.id] = node;
+        const index = this.showNodes.findIndex((item) => item.id === node.id );
+        this.showNodes[index] = node;
+        this.updatedNodeData.emit({ nodeId: node.id, data: result });
+      }
+    });
+
     this.isMoving = false;
   }
 
@@ -345,8 +351,6 @@ export class BuilderComponent implements OnInit {
   public handleStartDrag(data, node) {
     const lines = this.listOfArrows.filter((item) => item.start.nodeId === node.id || item.end.nodeId === node.id );
     this.activeNode = node;
-
-    console.log(data.source.element.nativeElement.style.transform, data.source._passiveTransform);
     this.startPositionNode = data.source.element.nativeElement.style.transform;
     this.connectedLines = lines;
   }
@@ -424,33 +428,36 @@ export class BuilderComponent implements OnInit {
 
   private redrawArrow(item, container) {
     const startBlock = container.querySelector(`#node-${item.start.nodeId}`);
-    const startCoordiants = this.parseTranslate(startBlock.style.transform);
-    const startPointerItem = startBlock.querySelector('.pointer-' + item.start.pos);
-
-    const posStart = {
-      y: startCoordiants.y + startPointerItem.offsetTop,
-      x: startCoordiants.x + startPointerItem.offsetLeft
-    };
-
-    item.start.x = posStart.x;
-    item.start.y = posStart.y;
-
     const endBlock = container.querySelector(`#node-${item.end.nodeId}`);
-    const endCoordiants = this.parseTranslate(endBlock.style.transform);
-    const endPointerItem = endBlock.querySelector('.pointer-' + item.end.pos);
 
-    const posEnd = {
-      y: endCoordiants.y + endPointerItem.offsetTop,
-      x: endCoordiants.x + endPointerItem.offsetLeft
-    };
+    if (startBlock && endBlock) {
+      const startCoordiants = this.parseTranslate(startBlock.style.transform);
+      const startPointerItem = startBlock.querySelector('.pointer-' + item.start.pos);
 
-    item.end.x = posEnd.x;
-    item.end.y = posEnd.y;
+      const posStart = {
+        y: startCoordiants.y + startPointerItem.offsetTop,
+        x: startCoordiants.x + startPointerItem.offsetLeft
+      };
 
-    this.svgD3.select('path#' + item.lineId)
-          .attr('d', lineGenerator(this.genrateDots(
-            [item.start.x, item.start.y],
-            [item.end.x, item.end.y], item.start.pos, item.end.pos)));
+      item.start.x = posStart.x;
+      item.start.y = posStart.y;
+
+      const endCoordiants = this.parseTranslate(endBlock.style.transform);
+      const endPointerItem = endBlock.querySelector('.pointer-' + item.end.pos);
+
+      const posEnd = {
+        y: endCoordiants.y + endPointerItem.offsetTop,
+        x: endCoordiants.x + endPointerItem.offsetLeft
+      };
+
+      item.end.x = posEnd.x;
+      item.end.y = posEnd.y;
+
+      this.svgD3.select('path#' + item.lineId)
+            .attr('d', lineGenerator(this.genrateDots(
+              [item.start.x, item.start.y],
+              [item.end.x, item.end.y], item.start.pos, item.end.pos)));
+    }
   }
 
   private generatePosition( startX, endX, startY, endY ) {

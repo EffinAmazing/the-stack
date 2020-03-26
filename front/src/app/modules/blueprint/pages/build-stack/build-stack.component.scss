@@ -5,7 +5,7 @@
 
     .bottom-actions{
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
         align-items: flex-end;
         margin-bottom: 80px;
     }
@@ -52,15 +52,10 @@
 
         &>div { 
             min-width: 150px;
-            width: 40%;
+            width: 50%;
         }
 
         &>div:nth-child(2) {
-            text-align: center;
-            width: 20%;
-        }
-
-        &>div:nth-child(3) {
             text-align: right;
         }
     }

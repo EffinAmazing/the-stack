@@ -3,7 +3,7 @@
     
     <div class="categories-list">
         <mat-accordion [multi]="true">
-            <mat-expansion-panel *ngFor="let item of categoriesList" [expanded]="true">
+            <mat-expansion-panel *ngFor="let item of categoriesList" [expanded]="!item.needToBeCollapsed">
                 <mat-expansion-panel-header>
                     <mat-panel-title> {{item.name}} </mat-panel-title>
                 </mat-expansion-panel-header>

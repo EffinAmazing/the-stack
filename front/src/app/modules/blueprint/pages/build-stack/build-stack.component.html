@@ -7,12 +7,10 @@
         
         <div class="stackActions" *ngIf="loaded" >
           <div>
-              <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> All Tools </button>
+              <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> Show or Hide Tools </button>
               <span class="total-spand-tools" *ngIf="blueprint.spend"> Estimated Tool Spend: <span class="price-amount"> ${{ parsePrice(blueprint.spend) }} </span> </span>
           </div>
-          <div>
-            <button mat-raised-button color="primary" (click)="createNewStack()"> Create new stack </button>
-          </div>
+          
           <div>
             
             <button mat-raised-button *ngIf="selectedArrow" (click)="handleDeselectArrow()"> Cancel </button>
@@ -44,11 +42,17 @@
           (hideNode)="handleHideNode($event)"
           (removeArrows)="handleRemoveArrows($event)"
           (selectArrow)="handleSlectArrow($event)"
+          (updatedNodeData)="handleUpdatedNodeData($event)"
           ></app-builder>
 
 
         <div class="bottom-actions" *ngIf="loaded" > 
-          <button mat-raised-button class="delete-arrow-action" (click)="removeStack()"> Delete stack </button>
+          <div>
+            <button mat-raised-button color="primary" (click)="createNewStack()"> Create new stack </button>
+          </div>
+          <div>
+            <button mat-raised-button class="delete-arrow-action" (click)="removeStack()"> Delete stack </button>
+          </div>
         </div>
         <mat-divider></mat-divider>
         <div #categoriesList>

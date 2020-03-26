@@ -33,6 +33,27 @@
         z-index: 99;
     }
 
+    .icon-info-button{
+        padding-left: 0px;
+        padding-right: 0px;
+        min-width: 25px;
+        height: 22px;
+        line-height: 22px;
+        cursor: pointer;
+        position: relative;
+        z-index: 101;
+        background: transparent;
+
+        &:hover{
+            background: transparent;
+        }
+
+        img{
+            width: 20px;
+            height: 20px;
+        }
+    }
+
     &.domain-tool{
         font-size: 1.3em;
         color: #333333;

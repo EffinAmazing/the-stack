@@ -14,12 +14,19 @@ import { BuilderComponent } from './components/builder/builder.component';
 import { ToolsListComponent } from './components/tools-list/tools-list.component';
 import { DeleteStackDialogComponent } from './components/delete-stack-dialog/delete-stack-dialog.component';
 import { CreateNewStackDialogComponent } from './components/create-new-stack-dialog/create-new-stack-dialog.component';
-import { PopupsModalsModule } from "../../shared/modules/material/popups-modals/popups-modals.module";
+import { PopupsModalsModule } from '../../shared/modules/material/popups-modals/popups-modals.module';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
-
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+// import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 @NgModule({
-  declarations: [BuildStackComponent, ShareComponent, BuilderComponent, ToolsListComponent, DeleteStackDialogComponent, CreateNewStackDialogComponent, NodeDetailsComponent],
+  declarations: [
+    BuildStackComponent,
+    ShareComponent,
+    BuilderComponent,
+    ToolsListComponent, DeleteStackDialogComponent, CreateNewStackDialogComponent, NodeDetailsComponent],
   imports: [
     CommonModule,
     BlueprintRoutingModule,
@@ -29,9 +36,14 @@ import { NodeDetailsComponent } from './components/node-details/node-details.com
     ButtonsIndicatorsModule,
     FormsControlsModule,
     LayoutModule,
-    PopupsModalsModule
+    PopupsModalsModule,
+    ReactiveFormsModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    FormsModule
   ],
-  schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
+  schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
+  providers: [ ]
 
 })
 export class BlueprintModule { }

@@ -1,6 +1,6 @@
 import {Component, Inject} from '@angular/core';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import {FormControl, Validators} from '@angular/forms';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import { BluePrintTool } from '../../../../shared/models/tool';
 import { environment } from '../../../../../environments/environment';
 
@@ -14,11 +14,20 @@ const host = environment.serverURI;
 })
 
 export class NodeDetailsComponent  {
+  nodeForm: FormGroup;
 
   constructor(
     public dialogRef: MatDialogRef<NodeDetailsComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { node: BluePrintTool, blueprintId: string }) {
       console.log(data);
+      this.nodeForm = new FormGroup({
+        start: new FormControl(data.node.start),
+        end: new FormControl(data.node.end),
+        owner: new FormControl(data.node.owner ? data.node.owner : ''),
+        cost: new FormControl(data.node.cost ? data.node.cost : ''),
+        trainedOn: new FormControl(data.node.trainedOn ? data.node.trainedOn : '')
+      });
+
     }
 
   public processImageSrc(link) {

@@ -23,10 +23,10 @@
           (cdkDragMoved)="$event.event.stopPropagation();  handleNodeMove($event, node)"
           (cdkDragStarted)="handleStartDrag($event, node)"
           (mouseenter)="handleMouseOverNode($event, node)"
-          (mouseleave)="handleMouseOutNode($event, node)"
-          (click)="handleClick(node)" >
+          (mouseleave)="handleMouseOutNode($event, node)" >
             <img class="node-icon" crossorigin [src]="node.tool.logo?processImageSrc(node.tool.logo):getAssetsFolder() + 'assets/images/layers.png'"  />
             {{ node.tool?.name }}
+            <button *ngIf="node.tool.tag !== 'domain'" mat-button class="icon-info-button"  (click)="handleClick(node)"><img [src]="getAssetsFolder() + 'assets/images/info.png'" /></button>
             <div class="pointers">
               <div class="pointer-Left" (click)="handleAddArrowClick($event, 'Left', node)"></div>
               <div class="pointer-Right" (click)="handleAddArrowClick($event, 'Right', node)"></div>

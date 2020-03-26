@@ -29,8 +29,13 @@ class ToolsModel extends AbstaractModel{
         let needLoadImage = [];
         let toDo = tools.map(async (item)=>{
             try{
+                let start = item.start;
+                let end = item.end;
                 let dbItem = await this.modelDB.findOne({ name: item.name });
-                return this.mapDocument( dbItem );
+                mapped = this.mapDocument( dbItem );
+                mapped['start'] = start;
+                mapped['end'] = end;
+                return mapped;
             } catch(err) {
                 let start = item.start;
                 let end = item.end;

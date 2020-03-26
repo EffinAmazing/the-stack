@@ -13,7 +13,7 @@ class ToolsNodesModel extends AbstaractModel {
             position: { x: Number, y: Number },
             start: Date,
             end: Date,
-            price: Number,
+            cost: Number,
             owner: String,
             trainedOn: String,
             hide: Boolean,

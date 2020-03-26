@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
+import { hiddenCategories } from '../../../../core/config';
 import { environment } from '../../../../../environments/environment';
 import { Observable } from 'rxjs';
 
@@ -16,7 +17,11 @@ export class ToolsListComponent implements OnInit {
   @Output() toogleVisibilityNode: EventEmitter<any> = new EventEmitter();
   @Output() closeTools: EventEmitter<any> = new EventEmitter();
   categories: any;
-  categoriesList: Array<any> = [];
+  categoriesList: Array<{
+    name: string,
+    nodes: string[],
+    needToBeCollapsed: boolean
+  }> = [];
   nodes: any = {};
 
   constructor() { }
@@ -26,24 +31,41 @@ export class ToolsListComponent implements OnInit {
       this.nodes = data.nodes;
     });
 
+
     this.loadedCategories.subscribe((data) => {
       const categories = Object.keys(data);
-
+      const collapsedArray = [];
       for (const iterator of categories) {
         // console.log(data[iterator]);
         const lowerCase = iterator.toLocaleLowerCase();
-        if ( lowerCase.indexOf('analytic') !== -1 ||  lowerCase.indexOf('tracking') || lowerCase.indexOf('marketing')) {
-          this.categoriesList.unshift({
-            name: iterator,
-            nodes: data[iterator]
-          });
-        } else {
-          this.categoriesList.push({
-            name: iterator,
-            nodes: data[iterator]
-          });
+        const needToBeCollapsed = hiddenCategories.includes(iterator);
+        const item = {
+          name: iterator,
+          nodes: data[iterator],
+          needToBeCollapsed
+        }
+        if (lowerCase !== 'none') {
+          if (needToBeCollapsed) {
+            if ( lowerCase.indexOf('analytic') !== -1 ||
+              lowerCase.indexOf('tracking') !== -1 ||
+              lowerCase.indexOf('marketing') !== -1 ) {
+              this.categoriesList.unshift(item);
+            } else {
+              this.categoriesList.push(item);
+            }
+          } else {
+            collapsedArray.push(item);
+          }
         }
       }
+
+      this.categoriesList = [...collapsedArray, ...this.categoriesList ];
+
+      this.categoriesList.unshift({
+        name: 'None',
+        nodes: data['None'],
+        needToBeCollapsed: hiddenCategories.includes('None')
+      });
     });
 
   }

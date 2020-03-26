@@ -8,9 +8,11 @@ import { DeleteStackDialogComponent } from '../../components/delete-stack-dialog
 import { CreateNewStackDialogComponent } from '../../components/create-new-stack-dialog/create-new-stack-dialog.component';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
+import { forbiddenTags, hiddenCategories } from '../../../../core/config';
 import html2canvas from 'html2canvas';
 import * as d3 from 'd3';
 import { environment } from 'src/environments/environment';
+
 
 @Component({
   selector: 'app-build-stack',
@@ -91,27 +93,13 @@ export class BuildStackComponent implements OnInit {
   }
 
   private proceedNodes(all, hidden, force?) {
-    const firbiddenTags = [
-      'widgets',
-      'css',
-      'feed',
-      'ns',
-      'framework',
-      'ssl',
-      'cms',
-      'cdn',
-      'Web Server',
-      'hosting',
-      'javascript',
-      'CDN',
-      'copyright'];
 
     if (force) {
       this.nodesList.forEach((nodeId) => {
         const item = this.nodes[nodeId];
         if (!item.hide && all - hidden > 50 ) {
           console.log(item.tool);
-          if (item.tool.categories[0].search('Analytics') === -1 && item.tool.name !== this.domain) {
+          if (item.tool.name !== this.domain) {
             item.hide = true;
             hidden++;
             this.nodesForUpdate.push(item.id);
@@ -124,7 +112,7 @@ export class BuildStackComponent implements OnInit {
       this.nodesList.forEach((nodeId) => {
         const item = this.nodes[nodeId];
         //
-        if (!item.hide && ( this.verifyOrderToHide(item.tool.categories) || firbiddenTags.includes(item.tool.tag)) &&
+        if (!item.hide && ( this.verifyOrderToHide(item.tool.categories) || forbiddenTags.includes(item.tool.tag)) &&
         item.tool.tag !== 'analytics' && all - hidden > 40) {
           item.hide = true;
           this.nodesForUpdate.push(item.id);
@@ -146,6 +134,18 @@ export class BuildStackComponent implements OnInit {
       return window['assets'];
     } else {
       return '/';
+    }
+  }
+
+
+  public handleUpdatedNodeData(result) {
+    // console.log(result);
+    if (result.data) {
+      this.service.updateNodeTool(result.nodeId, result.data).subscribe((res) => {
+        const tool = this.nodes[result.nodeId].tool;
+        res.tool = this.nodes[result.nodeId].tool;
+        this.nodes[result.nodeId] = res;
+      });
     }
   }
 
@@ -203,16 +203,7 @@ export class BuildStackComponent implements OnInit {
       let hide = false;
       if (categories.length === 0 ) { return true; }
       categories.forEach((cat) => {
-        if (
-          cat.toLowerCase().indexOf('framework') !== -1 ||
-          cat.toLowerCase().indexOf('hosting') !== -1 ||
-          cat.toLowerCase().indexOf('player') !== -1 ||
-          cat.toLowerCase().indexOf('wordpress') !== -1 ||
-          cat.toLowerCase().indexOf('programming') !== -1 ||
-          cat.toLowerCase().indexOf('javascript') !== -1 ||
-          cat.toLowerCase().indexOf('slider') !== -1 ||
-          cat.toLowerCase().indexOf('image') !== -1 ||
-          cat.toLowerCase().indexOf('proxy') !== -1 ) {
+        if ( hiddenCategories.includes(cat) ) {
           hide = true;
         }
       });
@@ -297,7 +288,9 @@ export class BuildStackComponent implements OnInit {
 
   public handleHideList() {
     this.hideList = !this.hideList;
-    this.categoriesList.nativeElement.scrollIntoView();
+    this.categoriesList.nativeElement.scrollIntoView({
+      behavior: 'smooth'
+    });
   }
 
   public handleHideNodeItem(data: BluePrintTool) {

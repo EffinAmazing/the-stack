@@ -2,15 +2,75 @@
     {{data.node.tool.name}} </h1>
 <div mat-dialog-content>
     <div class="nodeData" *ngIf="data.node">
+        <mat-divider></mat-divider>
+        <div class="info-paragraph"> 
+            <div class="title"> Categories: </div>
+            <div class="data"> <span *ngIf="data.node.tool.categories">{{data.node.tool.categories.join(', ') }}</span> </div>
+        </div> 
+        <mat-divider></mat-divider>
+        <div class="info-paragraph">
+            <div class="data"> {{data.node.tool.description}} </div>
+        </div>
+        <mat-divider></mat-divider>
+        <form [formGroup]="nodeForm">
+            <div  class="info-paragraph"> 
+                <div class="title"> start: </div>
+                <div class="data"> 
+                    <mat-form-field>
+                        <mat-label>Choose a date</mat-label>
+                        <input matInput [matDatepicker]="startPicker" formControlName="start">
+                        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>    
+                </div>
+            </div>
             <mat-divider></mat-divider>
-            <p class="info-paragraph">{{data.node.tool.description}}</p>
+            <div  class="info-paragraph"> 
+                <div class="title"> end: </div>
+                <div class="data"> 
+                    <mat-form-field>
+                        <mat-label>Choose a date</mat-label>
+                        <input matInput [matDatepicker]="endPicker" formControlName="end">
+                        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>  
+                </div>
+            </div>
             <mat-divider></mat-divider>
-            <p  class="info-paragraph"> start:  {{data.node.start | date}}</p>
+            <div  class="info-paragraph"> 
+                <div class="title"> owner: </div>
+                <div class="data">
+                    <mat-form-field class="full-width">
+                        <mat-label>Owner</mat-label>
+                        <input matInput placeholder="owner" type="text" formControlName="owner">
+                    </mat-form-field>
+                </div>
+            </div>
             <mat-divider></mat-divider>
-            <p  class="info-paragraph"> end:  {{data.node.end | date}}</p>
+            <div  class="info-paragraph"> 
+                <div class="title"> cost: </div>
+                <div class="data">
+                    <mat-form-field class="full-width">
+                        <mat-label>Cost</mat-label>
+                        <span matPrefix>$ &nbsp;</span>
+                        <input matInput placeholder="1.00" type="number" formControlName="cost">
+                    </mat-form-field>
+                </div>
+            </div>
+            <mat-divider></mat-divider>
+            <div  class="info-paragraph"> 
+                <div class="title"> people who are trained on it: </div>
+                <div class="data">
+                    <mat-form-field class="full-width">
+                        <mat-label>Text</mat-label>
+                        <textarea  matInput placeholder="text" formControlName="trainedOn"></textarea>
+                    </mat-form-field>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 <div mat-dialog-actions>
-  <button mat-button (click)="onNoClick()">close</button>
-  <button mat-button disabled >Update</button>
+  <button mat-raised-button color="accent" (click)="onNoClick()">close</button>
+  <button mat-raised-button color="primary" [mat-dialog-close]="nodeForm.value" >Update</button>
 </div>
