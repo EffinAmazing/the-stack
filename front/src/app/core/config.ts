@@ -90,7 +90,7 @@ export const hiddenCategories: Array<string> = [
     'Audience Targetg',
     'Facebook Exchange',
     'Data Management Platform',
-    'Demand Side Platform',
+    'Demand-side Platform',
     'Ad network',
     'Ad Exchange',
     'Multi-channel',

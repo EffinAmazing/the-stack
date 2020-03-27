@@ -79,15 +79,14 @@
 
         &>div{
             position: absolute;
-            width: 18px;
-            height: 18px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-sizing: border-box;
+            background-color: transparent;
             cursor: pointer;
+
+            &:hover {
+                background-color: rgba(20, 180, 60, 0.5);
+            }
         
-            &:before{
+            /*&:before{
                 content: '+';
                 display: inline-block;
                 color: honeydew;
@@ -103,44 +102,33 @@
 
             &:hover:before{
                 opacity: 1;
-            }
+            }*/
         }
 
         .pointer-Left{
-            margin-top: -9px;
-            top: 50%;
-            left: -9px;
+            padding-left: 10px;
+            top: 0;
+            left: -5px;
+            height: 100%;
         }
         .pointer-Right{
-            margin-top: -9px;
-            top: 50%;
-            right: -9px;
+            padding-left: 10px;
+            top: 0;
+            right: -5px;
+            height: 100%;
         }
-        .pointer-LeftTop{ 
-            top: -9px;
-            left: 9px;
+        .pointer-Top{ 
+            top: -5px;
+            left: 0;
+            width: 100%;
+            padding-top: 10px;
         }
-        .pointer-RightTop{   
-            top: -9px;
-            right: 9px;
-        }
-        .pointer-MiddleTop{
-            top: -9px;
-            left: 50%;
-            margin-left: -9px;
-        }
-        .pointer-LeftBottom{
-            bottom: -9px;
-            left: 9px;
-        }
-        .pointer-RightBottom{  
-            bottom: -9px;
-            right: 9px;
-        }
-        .pointer-MiddleBottom{ 
-            bottom: -9px;
-            left: 50%;
-            margin-left: -9px;
+        
+        .pointer-Bottom{
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            padding-top: 10px;
         }
     }
 

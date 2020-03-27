@@ -1,5 +1,14 @@
 .input-domain{
     min-width: 320px;
+
+    .mat-input-element{
+        border: none;
+    }
+
+    mat-label{
+        padding: 0;
+        margin: 0;
+    }
 }
 .submit-domain{
     text-align: center;

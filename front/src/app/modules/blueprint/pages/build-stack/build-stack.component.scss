@@ -1,7 +1,13 @@
 .stackContainer{
     max-width: 1170px;
     margin: auto;
+    margin-top: 50px;
     position: relative;
+
+    .mat-button-icon-info{
+        width: 20px;
+        height: 20px;
+    }
 
     .bottom-actions{
         display: flex;
@@ -28,7 +34,7 @@
 
         .title{
             position: absolute;
-            top: -24px;
+            top: -14px;
             font-weight: bold;
             font-size: 1.1em;
             display: inline-block;
@@ -52,7 +58,11 @@
 
         &>div { 
             min-width: 150px;
-            width: 50%;
+            width: 40%;
+        }
+
+        &>div:nth-child(1) {
+            width: 60%;
         }
 
         &>div:nth-child(2) {

@@ -1,5 +1,7 @@
 <div>
-    <div id="stackWorkflow" class="stackWorkflow" #stackWorkFlow (mousemove)="handleMouseMove($event)" (click)="handleClickOnWorkspace()">
+    <div id="stackWorkflow" class="stackWorkflow" #stackWorkFlow (mousemove)="handleMouseMove($event)" 
+      (click)="handleClickOnWorkspace()"
+      (mouseup)="handleMouseUp()" (mouselout)="handleMouseUp()">
         <div class="for-svg-bg"></div>
         <svg id="paint"  width="1190" height="640">
           <defs>
@@ -15,27 +17,33 @@
               </marker>
             </defs>
         </svg>
-        <div *ngFor="let node of showNodes"  [ngClass]="{'toolNode': true, 'domain-tool': node.tool.tag === 'domain'}" [id]="'node-' + node.id"
+        <div *ngFor="let node of showNodes" [cdkDragDisabled]="disableTillDrawLine"  [ngClass]="{'toolNode': true, 'domain-tool': node.tool.tag === 'domain'}" [id]="'node-' + node.id"
           cdkDrag 
           cdkDragBoundary=".stackWorkflow"
           [cdkDragFreeDragPosition]="hasCoords(node.position)?node.position:{x: 0, y: 0}" 
           (cdkDragEnded)="relisedMove($event, node)"
           (cdkDragMoved)="$event.event.stopPropagation();  handleNodeMove($event, node)"
-          (cdkDragStarted)="handleStartDrag($event, node)"
-          (mouseenter)="handleMouseOverNode($event, node)"
-          (mouseleave)="handleMouseOutNode($event, node)" >
+          (cdkDragStarted)="handleStartDrag($event, node)" >
             <img class="node-icon" crossorigin [src]="node.tool.logo?processImageSrc(node.tool.logo):getAssetsFolder() + 'assets/images/layers.png'"  />
             {{ node.tool?.name }}
             <button *ngIf="node.tool.tag !== 'domain'" mat-button class="icon-info-button"  (click)="handleClick(node)"><img [src]="getAssetsFolder() + 'assets/images/info.png'" /></button>
             <div class="pointers">
-              <div class="pointer-Left" (click)="handleAddArrowClick($event, 'Left', node)"></div>
-              <div class="pointer-Right" (click)="handleAddArrowClick($event, 'Right', node)"></div>
-              <div class="pointer-LeftTop" (click)="handleAddArrowClick($event, 'LeftTop', node)"></div>
-              <div class="pointer-RightTop" (click)="handleAddArrowClick($event, 'RightTop', node)"></div>
-              <div class="pointer-MiddleTop" (click)="handleAddArrowClick($event, 'MiddleTop', node)"></div>
-              <div class="pointer-LeftBottom" (click)="handleAddArrowClick($event, 'LeftBottom', node)"></div>
-              <div class="pointer-RightBottom" (click)="handleAddArrowClick($event, 'RightBottom', node)"></div>
-              <div class="pointer-MiddleBottom" (click)="handleAddArrowClick($event, 'MiddleBottom', node)"></div>
+              <div class="pointer-Left" 
+                (click)="handleAddArrowClick($event, 'Left', node)"
+                (mouseenter)="handleMouseOverPointer($event, node, 'Left')"
+                (mouseleave)="handleMouseOutPointer()"></div>
+              <div class="pointer-Right" 
+                (click)="handleAddArrowClick($event, 'Right', node)"
+                (mouseenter)="handleMouseOverPointer($event, node, 'Right')"
+                (mouseleave)="handleMouseOutPointer()"></div>
+              <div class="pointer-Top" 
+                (click)="handleAddArrowClick($event, 'Top', node)"
+                (mouseenter)="handleMouseOverPointer($event, node, 'Top')"
+                (mouseleave)="handleMouseOutPointer()"></div>
+              <div class="pointer-Bottom" 
+                (click)="handleAddArrowClick($event, 'Bottom', node)"
+                (mouseenter)="handleMouseOverPointer($event, node, 'Bottom')"
+                (mouseleave)="handleMouseOutPointer()"></div>
             </div>
             <div class="hide-item-from-stack" (click)="hideNodeFormStack(node)"> <mat-icon>clear</mat-icon> </div>
     </div>

@@ -39,7 +39,19 @@
         padding: 5px 20px;
         border: solid 1px #999999;
         margin: 4px 3px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         cursor: default;
+
+        .tool-name{ 
+            width: 30%;
+        }
+
+        .tool-start-date, .tool-end-date, .tool-cost, .tool-owner{
+            width: 15%;
+        }
 
         .node-icon{
             width: 20px;

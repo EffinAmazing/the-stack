@@ -17,7 +17,7 @@
                 <div class="title"> start: </div>
                 <div class="data"> 
                     <mat-form-field>
-                        <mat-label>Choose a date</mat-label>
+                        <mat-label (click)="startPicker.open()">Choose a date</mat-label>
                         <input matInput [matDatepicker]="startPicker" formControlName="start" (click)="startPicker.open()">
                         <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
                         <mat-datepicker #startPicker></mat-datepicker>
@@ -29,7 +29,7 @@
                 <div class="title"> end: </div>
                 <div class="data"> 
                     <mat-form-field>
-                        <mat-label>Choose a date</mat-label>
+                        <mat-label (click)="endPicker.open()">Choose a date</mat-label>
                         <input matInput [matDatepicker]="endPicker" formControlName="end" (click)="endPicker.open()">
                         <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
                         <mat-datepicker #endPicker></mat-datepicker>
@@ -48,7 +48,7 @@
             </div>
             <mat-divider></mat-divider>
             <div  class="info-paragraph"> 
-                <div class="title"> cost: </div>
+                <div class="title">Monthly cost: </div>
                 <div class="data">
                     <mat-form-field class="full-width">
                         <mat-label>Cost</mat-label>
@@ -71,6 +71,6 @@
     </div>
 </div>
 <div mat-dialog-actions>
-  <button mat-raised-button color="accent" (click)="onNoClick()">close</button>
+  <button mat-raised-button color="accent" (click)="onNoClick()">Close</button>
   <button mat-raised-button color="primary" [mat-dialog-close]="nodeForm.value" >Update</button>
 </div>

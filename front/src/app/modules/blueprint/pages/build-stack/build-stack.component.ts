@@ -7,6 +7,7 @@ import { Tool, BluePrintTool, BluePrint } from '../../../../shared/models/tool';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteStackDialogComponent } from '../../components/delete-stack-dialog/delete-stack-dialog.component';
 import { CreateNewStackDialogComponent } from '../../components/create-new-stack-dialog/create-new-stack-dialog.component';
+import { InfoPopupDialogComponent } from '../../components/info-popup-dialog/info-popup-dialog.component';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forbiddenTags, hiddenCategories } from '../../../../core/config';
@@ -46,7 +47,8 @@ export class BuildStackComponent implements OnInit {
       private social: SocialShareService,
       public history: ActionHistoryService,
       private upload: UploadImagesService,
-      public deleteDialog: MatDialog) {
+      public deleteDialog: MatDialog,
+      public infoDialog: MatDialog) {
     this.route.queryParams.subscribe((params: any) => {
       this.domain = params.domain;
     });
@@ -158,6 +160,15 @@ export class BuildStackComponent implements OnInit {
     }
   }
 
+  public handleClickInfo() {
+    const dialogRef = this.deleteDialog.open(InfoPopupDialogComponent, {
+      width: '620px',
+      data: { domain: this.blueprint.domain }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {  });
+  }
+
   public handleShare(media) {
     const width = 500;
     const height = 300;
@@ -227,6 +238,7 @@ export class BuildStackComponent implements OnInit {
 
   public handleRemoveArrow() {
     if (this.selectedArrow) {
+      this.deleteArrowDots();
       this.history.addAction(this.blueprint.id, { name: 'removeArrow', data: this.selectedArrow });
       const lineId = this.selectedArrow.lineId;
       this.handleRemoveArrows([lineId], true);
@@ -283,10 +295,19 @@ export class BuildStackComponent implements OnInit {
 
   public handleDeselectArrow(){
     document.querySelector(`path#${this.selectedArrow.lineId}`).setAttribute('stroke-width', '2');
+    this.deleteArrowDots();
     this.selectedArrow = null;
   }
 
+  public deleteArrowDots() {
+    const dot1 = document.querySelector(`#dot-${this.selectedArrow.start.nodeId}`);
+    if (dot1) { dot1.remove(); }
+    const dot2 = document.querySelector(`#dot-${this.selectedArrow.end.nodeId}`);
+    if (dot2) { dot2.remove(); }
+  }
+
   public handleRemoveArrows(ids, blockReload?: any ) {
+    this.deleteArrowDots();
     this.selectedArrow = null;
     this.service.removeArrows(ids).toPromise().then((result) => {
       if (!blockReload) {
@@ -312,7 +333,7 @@ export class BuildStackComponent implements OnInit {
 
   public handleHideNodeItem(data: { item: BluePrintTool, disableHistory?: boolean }) {
     if (!data.item.hide) {
-      data['hide'] = true;
+      data.item.hide = true;
     } else {
       data.item.hide = false;
     }
@@ -335,14 +356,16 @@ export class BuildStackComponent implements OnInit {
   }
 
   public handleUpdateArrow(data) {
-    this.service.updateArrow(data).toPromise().then((result) => { }).catch(err => console.log(err));
+    if (!data.disableHistory) {  this.history.addAction(this.blueprint.id, { name: 'updateArrow', data: Object.assign({}, data) }); }
+    this.service.updateArrow(data.newData).toPromise().then((result) => { }).catch(err => console.log(err));
   }
 
   public handleHideNode(data) {
-    this.history.addAction(this.blueprint.id, { name: 'hideNode', data });
-    this.service.updateNodeTool(data.id, { hide: true }).subscribe((res) => {
-      res.tool = this.nodes[data.id].tool;
-      this.nodes[data.id] = res;
+    console.log('handleHideNode', data);
+    this.history.addAction(this.blueprint.id, { name: 'hideNode', data: data.item });
+    this.service.updateNodeTool(data.item.id, { hide: true }).subscribe((res) => {
+      res.tool = this.nodes[data.item.id].tool;
+      this.nodes[data.item.id] = res;
     });
   }
 

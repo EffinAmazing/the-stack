@@ -9,9 +9,23 @@
                 </mat-expansion-panel-header>
                 <div class="nodes-holder">
                     <div class="node-items" *ngFor="let nodeId of item.nodes"> 
-                        <img class="node-icon"  [src]="nodes[nodeId].tool.logo?processImageSrc(nodes[nodeId].tool.logo):'/assets/images/layers.png'" />
-                        {{ nodes[nodeId].tool.name }} 
-                        <div class="actions" (click)="toggleNodeFormStack(nodes[nodeId])"> <mat-icon class="visible" *ngIf="!nodes[nodeId].hide" >visibility</mat-icon>  <mat-icon class="hidden" *ngIf="nodes[nodeId].hide">visibility_off</mat-icon> </div>
+                        <div class="tool-name">
+                            <img class="node-icon"  [src]="nodes[nodeId].tool.logo?processImageSrc(nodes[nodeId].tool.logo):'/assets/images/layers.png'" />
+                            {{ nodes[nodeId].tool.name }} 
+                            <div class="actions" (click)="toggleNodeFormStack(nodes[nodeId])"> <mat-icon class="visible" *ngIf="!nodes[nodeId].hide" >visibility</mat-icon>  <mat-icon class="hidden" *ngIf="nodes[nodeId].hide">visibility_off</mat-icon> </div>
+                        </div>
+                        <div class="tool-start-date">
+                            <b>Start:  </b><br/> {{nodes[nodeId].start | date}}
+                        </div>
+                        <div class="tool-end-date">
+                            <b>End:  </b><br/>{{nodes[nodeId].end | date}}
+                        </div>
+                        <div class="tool-cost">
+                            <b>Monthly cost:  </b><br/>{{nodes[nodeId].cost}}
+                        </div>
+                        <div class="tool-owner">
+                            <b>Owner: </b><br/>{{nodes[nodeId].owner}} 
+                        </div>
                     </div>
                 </div>
             </mat-expansion-panel>

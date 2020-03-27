@@ -43,6 +43,9 @@ export class BuilderComponent implements OnInit {
   startPositionNode = '';
   hoveredNode: any;
   isMoving = false;
+  oldArrowData: DrawArrow | null;
+  dotForDrag: HTMLDivElement | null = null;
+  disableTillDrawLine = false;
 
   constructor(private detailsDialog: MatDialog) { }
 
@@ -60,7 +63,6 @@ export class BuilderComponent implements OnInit {
       this.showNodes = [];
 
       if (data.list) {
-        console.log("data.list");
         data.list.forEach((nodeId) => {
           const item = data.nodes[nodeId];
           //
@@ -127,6 +129,26 @@ export class BuilderComponent implements OnInit {
     this.loadedArrows.subscribe((list) => {
       list.forEach((item) => {
         if ( document.querySelector(`path#${item.lineId}`) ) { } else {
+          if (typeof item.start.offset === 'undefined') {
+            item.start.offset = 50;
+            if (item.start.pos !== 'Left' || item.start.pos !== 'Right') {
+              if (item.start.pos.indexOf('Top')) {
+                item.start.pos = 'Top';
+              } else {
+                item.start.pos = 'Bottom';
+              }
+            }
+          }
+          if (typeof item.end.offset === 'undefined') {
+            item.end.offset = 50;
+            if (item.end.pos !== 'Left' || item.end.pos !== 'Right') {
+              if (item.end.pos.indexOf('Top')) {
+                item.end.pos = 'Top';
+              } else {
+                item.end.pos = 'Bottom';
+              }
+            }
+          }
           this.listOfArrows.push(item);
           this.svgD3.append('path')
           .attr('id', item.lineId)
@@ -139,18 +161,7 @@ export class BuilderComponent implements OnInit {
           .attr('fill', 'transparent')
           .attr('marker-end', 'url(#arrow-marker)');
 
-          const lines = document.querySelectorAll('path.line');
-          lines.forEach((line) => {
-            line.addEventListener('click', () => {
-              if (this.selectedArrow) {
-                this.svgD3.select('path#' + this.selectedArrow.lineId).attr('stroke-width', 2);
-              }
-
-              this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === line.id );
-              this.selectArrow.emit(this.selectedArrow);
-              line.setAttribute('stroke-width', '4');
-            });
-          });
+          this.addHandleSelectArrow(item.lineId);
         }
 
         setTimeout(() => { this.redrawArrows(); }, 100);
@@ -176,7 +187,7 @@ export class BuilderComponent implements OnInit {
             item.end.nodeId === result.action.data.nodeId );
             setTimeout(() => {
                 lines.forEach((item) => {
-                  this.redrawArrow(item, container);
+                  this.arrowHelper.updateExistedArrow(item, container);
                 });
               }, 100);
 
@@ -199,15 +210,27 @@ export class BuilderComponent implements OnInit {
               this.removeSingleArrow(result.action.data.lineId);
             } else {
               this.drawArrow(result.action.data);
-              setTimeout(() => this.redrawArrow(result.action.data, container), 100);
+              setTimeout(() => this.arrowHelper.updateExistedArrow(result.action.data, container), 100);
             }
             break;
           case 'removeArrow':
             if (result.undo) {
               this.drawArrow(result.action.data);
-              setTimeout(() => this.redrawArrow(result.action.data, container), 100);
+              setTimeout(() => this.arrowHelper.updateExistedArrow(result.action.data, container), 100);
             } else {
               this.removeSingleArrow(result.action.data.lineId);
+            }
+            break;
+          case 'updateArrow':
+            console.log(result);
+            if (result.undo) {
+              const k = this.listOfArrows.findIndex((item) => item.lineId === result.action.data.oldData.lineId);
+              this.listOfArrows.splice(k, 1, result.action.data.oldData);
+              this.arrowHelper.updateExistedArrow(result.action.data.oldData);
+            } else {
+              const k = this.listOfArrows.findIndex((item) => item.lineId === result.action.data.newData.lineId);
+              this.listOfArrows.splice(k, 1, result.action.data.newData);
+              this.arrowHelper.updateExistedArrow(result.action.data.newData);
             }
             break;
         }
@@ -257,50 +280,13 @@ export class BuilderComponent implements OnInit {
       this.positionNodeChanged.emit({ nodeId: node.id, position: data.source._dragRef._activeTransform  });
 
       const updatedLines = this.connectedLines.map(async (item) => {
-        return this.arrowUpdated.emit(item);
+        return this.arrowUpdated.emit({ newData: item, disableHistory: true });
       });
 
       Promise.all(updatedLines).then(() => { console.log('completed update'); }).catch(err => console.log(err));
 
       this.connectedLines = [];
     // }
-  }
-
-  private drawArrowOnDrag( nodeOne, nodeTwo ) {
-
-    const container = this.stackWorkFlow.nativeElement;
-    const startBlock = container.querySelector(`#node-${nodeOne.id}`);
-    const endBlock = container.querySelector(`#node-${nodeTwo.id}`);
-
-    const start = this.parseTranslate(startBlock.style.transform);
-    const end = this.parseTranslate(endBlock.style.transform);
-
-    const endpos = this.generatePosition( start.x, end.x, start.y, end.y );
-    const startpos = this.generatePosition( end.x, start.x, end.y, start.y );
-
-    const startPointerItem = startBlock.querySelector('.pointer-' + startpos.Xpos + startpos.Ypos);
-
-    const posStart = {
-      y: start.y + startPointerItem.offsetTop,
-      x: start.x + startPointerItem.offsetLeft
-    };
-
-    const endPointerItem = endBlock.querySelector('.pointer-' + endpos.Xpos + endpos.Ypos);
-
-    const posEnd = {
-      y: end.y + endPointerItem.offsetTop,
-      x: end.x + endPointerItem.offsetLeft
-    };
-
-    const Arrow: DrawArrow = {
-      start: { x: posStart.x, y: posStart.y, nodeId: nodeOne.id, pos: startpos.Xpos + startpos.Ypos },
-      end: { x: posEnd.x, y: posEnd.y, nodeId: nodeTwo.id, pos: endpos.Xpos + endpos.Ypos },
-      lineId: 'line-' + nodeOne.id + '-' + nodeTwo.id
-    };
-
-
-    this.drawArrow(Arrow);
-    /*   */
   }
 
   public drawArrow(Arrow: DrawArrow) {
@@ -318,19 +304,66 @@ export class BuilderComponent implements OnInit {
           .attr('marker-end', 'url(#arrow-marker)');
 
     setTimeout(() => {
-      const line = document.querySelector(`path#${Arrow.lineId}`);
-      line.addEventListener('click', () => {
-        if (this.selectedArrow) {
-          this.svgD3.select('path#' + this.selectedArrow.lineId).attr('stroke-width', 2);
-        }
-
-        this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === line.id );
-        this.selectArrow.emit(this.selectedArrow);
-        line.setAttribute('stroke-width', '4');
-      });
+      // const line = document.querySelector(`path#${Arrow.lineId}`);
+      this.addHandleSelectArrow(Arrow.lineId);
     }, 100);
 
     this.arrowAdded.emit(Arrow);
+  }
+
+  public addHandleSelectArrow(ArrowId: string): void {
+    const line = document.querySelector(`path#${ArrowId}`);
+    line.addEventListener('click', () => {
+      const container = this.stackWorkFlow.nativeElement;
+      if (this.selectedArrow) {
+        this.svgD3.select('path#' + this.selectedArrow.lineId).attr('stroke-width', 2);
+        const adot1 = container.querySelector(`#dot-${this.selectedArrow.start.nodeId}`);
+        if (adot1) { adot1.remove(); }
+        const adot2 = container.querySelector(`#dot-${this.selectedArrow.end.nodeId}`);
+        if (adot2) { adot2.remove(); }
+      }
+      //
+      this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === ArrowId );
+      const old = this.oldArrowData = Object.assign({}, this.selectedArrow);
+      // 1. add start dot
+      const refElstart = container.querySelector(
+        `#node-${this.selectedArrow.start.nodeId} .pointers>.pointer-${this.selectedArrow.start.pos}`) as HTMLElement;
+      const poiterStart = this.arrowHelper.getArrowPointerByOffset(
+        refElstart, container, this.selectedArrow.start.pos, this.selectedArrow.start.offset);
+      const dot1 = document.createElement('div');
+      dot1.id = 'dot-' + this.selectedArrow.start.nodeId;
+      dot1.className = 'dot-drag-arrow';
+      dot1.dataset.line = this.selectedArrow.lineId;
+      dot1.dataset.position = 'start';
+      container.append(dot1);
+      dot1.addEventListener('mousedown', () => { this.dotForDrag = dot1; });
+      dot1.addEventListener('mouseup', () => {
+        this.dotForDrag = null;
+        this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
+      });
+      dot1.style.transform = `translate3d(${poiterStart.x}px, ${poiterStart.y}px, 0px)`;
+
+      // 2. add end dot
+      const refElend = container.querySelector(
+        `#node-${this.selectedArrow.end.nodeId} .pointers>.pointer-${this.selectedArrow.end.pos}`) as HTMLElement;
+      const poiterEnd = this.arrowHelper.getArrowPointerByOffset(
+        refElend, container, this.selectedArrow.end.pos, this.selectedArrow.end.offset);
+      const dot2 = document.createElement('div');
+      dot2.id = 'dot-' + this.selectedArrow.end.nodeId;
+      dot2.dataset.line = this.selectedArrow.lineId;
+      dot2.dataset.position = 'end';
+      dot2.className = 'dot-drag-arrow';
+      container.append(dot2);
+      dot2.addEventListener('mousedown', () => { this.dotForDrag = dot2; });
+      dot2.addEventListener('mouseup', () => {
+        this.dotForDrag = null;
+        this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
+      });
+      dot2.style.transform = `translate3d(${poiterEnd.x}px, ${poiterEnd.y}px, 0px)`;
+
+      this.selectArrow.emit(this.selectedArrow);
+      line.setAttribute('stroke-width', '4');
+    });
   }
 
   public getAssetsFolder() {
@@ -339,22 +372,6 @@ export class BuilderComponent implements OnInit {
     } else {
       return '/';
     }
-  }
-
-  private retriveNodePosition(data, node) {
-    data.source.element.nativeElement.style.transform = this.startPositionNode;
-    const coordiants = this.parseTranslate(this.startPositionNode);
-    console.log(data.source);
-    data.source.freeDragPosition = coordiants;
-
-    const container = this.stackWorkFlow.nativeElement;
-    // data.source._dragRef._activeTransform = coordiants;
-    data.source._dragRef._passiveTransform = coordiants;
-
-    const lines = this.listOfArrows.filter((item) => item.start.nodeId === node.id || item.end.nodeId === node.id );
-    lines.forEach((item) => {
-      this.redrawArrow(item, container);
-    });
   }
 
   public hasCoords(position) {
@@ -368,18 +385,21 @@ export class BuilderComponent implements OnInit {
   public handleClickOnWorkspace() {
     if (this.activeArrow) {
       if (!this.activeArrow.relesed) {
-        if (this.activeArrow.end.nodeId && !document.querySelector(`path#${this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId}`)) {
+        if (this.activeArrow.end.nodeId &&
+          !document.querySelector(`path#${this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId}`)) {
           const Arrow = {
             start: {
               x: this.activeArrow.start.x,
               y: this.activeArrow.start.y,
               nodeId: this.activeArrow.start.nodeId,
-              pos: this.activeArrow.start.pos },
+              pos: this.activeArrow.start.pos,
+              offset: this.activeArrow.start.offset},
             end: {
               x: this.activeArrow.end.x,
               y: this.activeArrow.end.y,
               nodeId: this.activeArrow.end.nodeId,
-              pos: this.activeArrow.end.pos
+              pos: this.activeArrow.end.pos,
+              offset: this.activeArrow.end.offset
             },
             lineId: this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId
           };
@@ -387,18 +407,13 @@ export class BuilderComponent implements OnInit {
           this.listOfArrows.push(Arrow);
           this.arrowAdded.emit(Arrow);
 
-          this.svgD3.select('path#' + this.activeArrow.lineId).attr('id', this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId );
+          const lineId = this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId;
+          this.svgD3.select('path#' + this.activeArrow.lineId)
+            .attr('id', lineId );
 
-          const line = document.querySelector(`path#${this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId}`);
-          line.addEventListener('click', () => {
-            if (this.selectedArrow) {
-              this.svgD3.select('path#' + this.selectedArrow.lineId).attr('stroke-width', 2);
-            }
-
-            this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === line.id );
-            this.selectArrow.emit(this.selectedArrow);
-            line.setAttribute('stroke-width', '4');
-          });
+          setTimeout(() => {
+             this.addHandleSelectArrow(lineId);
+          }, 100);
 
           this.activeArrow = null;
         } else {
@@ -408,6 +423,14 @@ export class BuilderComponent implements OnInit {
       } else {
         this.activeArrow.relesed = false;
       }
+    }
+
+  }
+
+  public handleMouseUp() {
+    if (this.selectedArrow && this.dotForDrag) {
+      this.dotForDrag = null;
+      this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: this.oldArrowData, disableHistory: false});
     }
   }
 
@@ -432,52 +455,20 @@ export class BuilderComponent implements OnInit {
     if (this.connectedLines.length) {
       const container = this.stackWorkFlow.nativeElement;
 
-      const block = container.querySelector(`#node-${this.activeNode.id}`);
-
-      const coordiants = this.parseTranslate(block.style.transform);
-
       let pointers = evt.event.target;
       if (!pointers.classList.contains('pointers')) {
         pointers = evt.event.target.parentNode;
       }
-      //
+
+      const dot = container.querySelector('#dot-' + node.id);
+
       this.connectedLines.forEach((item) => {
-        let offsetX = dotRadius;
-        if (item.start.nodeId ===  node.id) {
-          const pointerItem = block.querySelector('.pointer-' + item.start.pos);
-
-          const pos = {
-            y: coordiants.y + pointerItem.offsetTop,
-            x: coordiants.x + pointerItem.offsetLeft
-          };
-
-          item.start.x = pos.x;
-          item.start.y = pos.y;
-
-          this.svgD3.select('path#' + item.lineId)
-            .attr('d', lineGenerator(this.arrowHelper.genrateDots(
-              [item.start.x, item.start.y],
-              [item.end.x, item.end.y], item.start.pos, item.end.pos)));
+        this.arrowHelper.updateExistedArrow(item, container);
+        if (dot && dot.dataset.line === item.lineId) {
+          const pos = dot.dataset.position;
+          dot.style.transform = `translate3d(${item[pos].x}px, ${item[pos].y}px, 0px)`;
         }
-
-        if (item.end.nodeId ===  node.id) {
-          const pointerItem = block.querySelector('.pointer-' + item.end.pos);
-
-          if (item.end.pos === 'Left') { offsetX = dotRadius / 2; }
-          if (item.end.pos === 'Right') { offsetX = dotRadius * 2; }
-          const pos = {
-            y: coordiants.y + pointerItem.offsetTop,
-            x: coordiants.x + pointerItem.offsetLeft
-          };
-
-          item.end.x = pos.x;
-          item.end.y = pos.y;
-
-          this.svgD3.select('path#' + item.lineId)
-            .attr('d', lineGenerator(this.arrowHelper.genrateDots(
-              [item.start.x, item.start.y],
-              [item.end.x, item.end.y], item.start.pos, item.end.pos)));
-        }
+        /* */
       });
     }
   }
@@ -485,102 +476,34 @@ export class BuilderComponent implements OnInit {
   public redrawArrows() {
     const container = this.stackWorkFlow.nativeElement;
     this.listOfArrows.forEach((item) => {
-      this.redrawArrow(item, container);
+      this.arrowHelper.updateExistedArrow(item, container);
     });
   }
 
-  private redrawArrow(item, container) {
-    const startBlock = container.querySelector(`#node-${item.start.nodeId}`);
-    const endBlock = container.querySelector(`#node-${item.end.nodeId}`);
-
-    if (startBlock && endBlock) {
-      const startCoordiants = this.parseTranslate(startBlock.style.transform);
-      const startPointerItem = startBlock.querySelector('.pointer-' + item.start.pos);
-
-      const posStart = {
-        y: startCoordiants.y + startPointerItem.offsetTop,
-        x: startCoordiants.x + startPointerItem.offsetLeft
-      };
-
-      item.start.x = posStart.x;
-      item.start.y = posStart.y;
-
-      const endCoordiants = this.parseTranslate(endBlock.style.transform);
-      const endPointerItem = endBlock.querySelector('.pointer-' + item.end.pos);
-
-      const posEnd = {
-        y: endCoordiants.y + endPointerItem.offsetTop,
-        x: endCoordiants.x + endPointerItem.offsetLeft
-      };
-
-      item.end.x = posEnd.x;
-      item.end.y = posEnd.y;
-
-      this.svgD3.select('path#' + item.lineId)
-            .attr('d', lineGenerator(this.arrowHelper.genrateDots(
-              [item.start.x, item.start.y],
-              [item.end.x, item.end.y], item.start.pos, item.end.pos)));
-    }
-  }
-
-  private generatePosition( startX, endX, startY, endY ) {
-    let Xpos = 'Left';
-    let Ypos = '';
-    const radAngle = Math.atan2(endX - startX, endY - startY);
-    const degAngle = radAngle * 180 / Math.PI + 180;
-    const part = 8;
-    const diapason = 360 / part / 2;
-    if (degAngle < diapason || degAngle > 360 - diapason || degAngle > 180 - diapason && degAngle < 180 + diapason ) { Xpos = 'Middle'; }
-    if (degAngle >= diapason && degAngle <= 180 - diapason) { Xpos = 'Right'; }
-    if (degAngle >= 180 + diapason && degAngle <= 360 - diapason) { Xpos = 'Left'; }
-    if (degAngle < 90 - diapason || degAngle > 270 + diapason ) { Ypos = 'Bottom'; }
-    if (degAngle > 90 + diapason && degAngle < 270 - diapason) { Ypos = 'Top'; }
-
-    return { Xpos, Ypos };
-  }
-
-  public handleMouseOverNode(evt, node) {
-    this.hoveredNode = node;
-    if (this.activeArrow) {
-      // console.log(this.activeArrow);
+  public handleMouseOverPointer(evt, node, pos) {
+    if ( this.activeArrow ) {
+      console.log(evt.x, evt.y);
       const container = this.stackWorkFlow.nativeElement;
-      const rectContainer = container.getBoundingClientRect();
-
-      const X = rectContainer.x;
-      const Y = rectContainer.y;
-      const x1 = evt.x - X - 15;
-      const y1 = evt.y - Y - 15;
-
-      const { Xpos, Ypos } = this.generatePosition(this.activeArrow.start.x, x1, this.activeArrow.start.y, y1);
-      /* */
-
-      const rect = evt.target.querySelector('.pointers .pointer-' + Xpos + Ypos).getBoundingClientRect();
+      const data = this.arrowHelper.getArrowPointer(evt.target, container, pos, { x: evt.x, y: evt.y});
       this.activeArrow.end.nodeId = node.id;
+      this.activeArrow.end.x = data.pointer.x;
+      this.activeArrow.end.y = data.pointer.y;
+      this.activeArrow.end.offset = data.offset;
+      this.activeArrow.end.pos = pos;
       this.activeArrow.end.elRef = evt.target;
-      this.activeArrow.end.pos = Xpos + Ypos;
-      let offsetX = dotRadius;
-      if ( Xpos + Ypos === 'Right') { offsetX = dotRadius * 2; }
-      if ( Xpos + Ypos === 'Left') { offsetX = dotRadius / 2; }
-      const pos = {
-        y: rect.y - Y - containerOffset,
-        x: rect.x - X - containerOffset
-      };
-
-      this.activeArrow.end.x = pos.x;
-      this.activeArrow.end.y = pos.y;
-
-      this.svgD3.select('path#' + this.activeArrow.lineId)
-        .attr('d', lineGenerator(this.arrowHelper.genrateDots(
-          [this.activeArrow.start.x, this.activeArrow.start.y],
-          [this.activeArrow.end.x, this.activeArrow.end.y], this.activeArrow.start.pos, this.activeArrow.end.pos)));
-
+      this.arrowHelper.updateExistedArrow(this.activeArrow);
     }
+    /*if ( this.selectArrow && this.dotForDrag) {
+      const position = this.dotForDrag.dataset.position;
+      if(this.selectArrow) {
+
+      }
+    }*/
   }
 
-  public handleMouseOutNode(evt, node) {
-    // 
-    this.hoveredNode = null;
+  public handleMouseOutPointer() {
     if (this.activeArrow) {
+      console.log('out');
       this.activeArrow.end.nodeId = null;
       this.activeArrow.end.elRef = null;
     }
@@ -590,32 +513,8 @@ export class BuilderComponent implements OnInit {
     if (!this.activeArrow) {
       const target = evt.target;
       const container = this.stackWorkFlow.nativeElement;
-      const rect = target.getBoundingClientRect();
-      const rectContainer = container.getBoundingClientRect();
-
-      const X = rectContainer.x;
-      const Y = rectContainer.y;
-
-      const pos = {
-        y: rect.y - Y - containerOffset,
-        x: rect.x - X - containerOffset
-      };
-
-      this.activeArrow = {
-        start: { nodeId: node.id, x: pos.x, y: pos.y, pos: direction },
-        end: { x: pos.x, y: pos.y },
-        lineId: 'line-' + node.id,
-        relesed: true
-      };
-
-      this.svgD3.append('path')
-        .attr('id', 'line-' + node.id)
-        .attr('class', 'line')
-        .attr('d', lineGenerator([ [pos.x, pos.y], [pos.x + 20, pos.y + 20] ]))
-        .attr('stroke', '#1c57a4')
-        .attr('stroke-width', 2)
-        .attr('fill', 'transparent')
-        .attr('marker-end', 'url(#arrow-marker)');
+      /* */
+      this.activeArrow = this.arrowHelper.culcStartPosition(target, container, node, direction);
     }
   }
 
@@ -637,8 +536,55 @@ export class BuilderComponent implements OnInit {
 
         this.svgD3.select('path#' + this.activeArrow.lineId)
           .attr('d', lineGenerator([ [this.activeArrow.start.x, this.activeArrow.start.y], [pos.x, pos.y] ]));
+      } else {
+        const container = this.stackWorkFlow.nativeElement;
+        const data = this.arrowHelper.getArrowPointer(
+          this.activeArrow.end.elRef, container, this.activeArrow.end.pos, { x: evt.x, y: evt.y});
+        this.activeArrow.end.x = data.pointer.x;
+        this.activeArrow.end.y = data.pointer.y;
+        this.activeArrow.end.offset = data.offset;
+        this.arrowHelper.updateExistedArrow(this.activeArrow);
       }
     }
+
+    if (this.selectedArrow && this.dotForDrag) {
+      const container = this.stackWorkFlow.nativeElement;
+      const position = this.dotForDrag.dataset.position;
+      const nodeId = this.selectedArrow[position].nodeId;
+      const result = this.getPosOfNodeByPoint(nodeId, container, { x: evt.x, y: evt.y});
+      const data = this.arrowHelper.getArrowPointer(
+        result.el, container, result.pos, { x: evt.x, y: evt.y});
+
+      this.selectedArrow[position].x = data.pointer.x;
+      this.selectedArrow[position].y = data.pointer.y;
+      this.selectedArrow[position].pos = result.pos;
+      this.selectedArrow[position].offset = data.offset;
+      this.arrowHelper.updateExistedArrow(this.selectedArrow);
+      this.dotForDrag.style.transform = `translate3d(${data.pointer.x}px, ${data.pointer.y}px, 0px)`;
+    }
+  }
+
+  private getPosOfNodeByPoint(nodeId: string, container: HTMLElement, point: { x: number, y: number }): { el: HTMLElement, pos: string } {
+    const nodeElement = container.querySelector('#node-' + nodeId );
+    const rect = nodeElement.getBoundingClientRect();
+    let pos = '';
+
+    if (point.x < rect.x ||  point.x > rect.x + rect.width ) {
+      if (point.x < rect.x) {
+        pos = 'Left';
+      } else {
+        pos = 'Right';
+      }
+    } else {
+      if (point.y > rect.y + rect.height / 2) {
+        pos = 'Bottom';
+      } else {
+        pos = 'Top';
+      }
+    }
+
+    const El = nodeElement.querySelector(`.pointer-${pos}`) as HTMLElement;
+    return { el: El, pos };
   }
 
   public hideNodeFormStack(node) {
@@ -674,3 +620,107 @@ export class BuilderComponent implements OnInit {
   }
 
 }
+
+  /* private generatePosition( startX, endX, startY, endY ) {
+    let Xpos = 'Left';
+    let Ypos = '';
+    const radAngle = Math.atan2(endX - startX, endY - startY);
+    const degAngle = radAngle * 180 / Math.PI + 180;
+    const part = 8;
+    const diapason = 360 / part / 2;
+    if (degAngle < diapason || degAngle > 360 - diapason || degAngle > 180 - diapason && degAngle < 180 + diapason ) { Xpos = 'Middle'; }
+    if (degAngle >= diapason && degAngle <= 180 - diapason) { Xpos = 'Right'; }
+    if (degAngle >= 180 + diapason && degAngle <= 360 - diapason) { Xpos = 'Left'; }
+    if (degAngle < 90 - diapason || degAngle > 270 + diapason ) { Ypos = 'Bottom'; }
+    if (degAngle > 90 + diapason && degAngle < 270 - diapason) { Ypos = 'Top'; }
+
+    return { Xpos, Ypos };
+  } */
+
+  /* private redrawArrow(item, container) {
+    const startBlock = container.querySelector(`#node-${item.start.nodeId}`);
+    const endBlock = container.querySelector(`#node-${item.end.nodeId}`);
+
+    if (startBlock && endBlock) {
+      const startCoordiants = this.parseTranslate(startBlock.style.transform);
+      const startPointerItem = startBlock.querySelector('.pointer-' + item.start.pos);
+
+      const posStart = {
+        y: startCoordiants.y + startPointerItem.offsetTop,
+        x: startCoordiants.x + startPointerItem.offsetLeft
+      };
+
+      item.start.x = posStart.x;
+      item.start.y = posStart.y;
+
+      const endCoordiants = this.parseTranslate(endBlock.style.transform);
+      const endPointerItem = endBlock.querySelector('.pointer-' + item.end.pos);
+
+      const posEnd = {
+        y: endCoordiants.y + endPointerItem.offsetTop,
+        x: endCoordiants.x + endPointerItem.offsetLeft
+      };
+
+      item.end.x = posEnd.x;
+      item.end.y = posEnd.y;
+
+      this.svgD3.select('path#' + item.lineId)
+            .attr('d', lineGenerator(this.arrowHelper.genrateDots(
+              [item.start.x, item.start.y],
+              [item.end.x, item.end.y], item.start.pos, item.end.pos)));
+    }
+  }
+  */
+
+  /*private retriveNodePosition(data, node) {
+    data.source.element.nativeElement.style.transform = this.startPositionNode;
+    const coordiants = this.parseTranslate(this.startPositionNode);
+    console.log(data.source);
+    data.source.freeDragPosition = coordiants;
+
+    const container = this.stackWorkFlow.nativeElement;
+    // data.source._dragRef._activeTransform = coordiants;
+    data.source._dragRef._passiveTransform = coordiants;
+
+    const lines = this.listOfArrows.filter((item) => item.start.nodeId === node.id || item.end.nodeId === node.id );
+    lines.forEach((item) => {
+      this.redrawArrow(item, container);
+    });
+  }*/
+
+  /*private drawArrowOnDrag( nodeOne, nodeTwo ) {
+
+    const container = this.stackWorkFlow.nativeElement;
+    const startBlock = container.querySelector(`#node-${nodeOne.id}`);
+    const endBlock = container.querySelector(`#node-${nodeTwo.id}`);
+
+    const start = this.parseTranslate(startBlock.style.transform);
+    const end = this.parseTranslate(endBlock.style.transform);
+
+    const endpos = this.generatePosition( start.x, end.x, start.y, end.y );
+    const startpos = this.generatePosition( end.x, start.x, end.y, start.y );
+
+    const startPointerItem = startBlock.querySelector('.pointer-' + startpos.Xpos + startpos.Ypos);
+
+    const posStart = {
+      y: start.y + startPointerItem.offsetTop,
+      x: start.x + startPointerItem.offsetLeft
+    };
+
+    const endPointerItem = endBlock.querySelector('.pointer-' + endpos.Xpos + endpos.Ypos);
+
+    const posEnd = {
+      y: end.y + endPointerItem.offsetTop,
+      x: end.x + endPointerItem.offsetLeft
+    };
+
+    const Arrow: DrawArrow = {
+      start: { x: posStart.x, y: posStart.y, nodeId: nodeOne.id, pos: startpos.Xpos + startpos.Ypos },
+      end: { x: posEnd.x, y: posEnd.y, nodeId: nodeTwo.id, pos: endpos.Xpos + endpos.Ypos },
+      lineId: 'line-' + nodeOne.id + '-' + nodeTwo.id
+    };
+
+
+    this.drawArrow(Arrow);
+
+  } */

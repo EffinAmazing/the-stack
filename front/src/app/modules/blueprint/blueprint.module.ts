@@ -20,13 +20,14 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 // import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { InfoPopupDialogComponent } from './components/info-popup-dialog/info-popup-dialog.component';
 
 @NgModule({
   declarations: [
     BuildStackComponent,
     ShareComponent,
     BuilderComponent,
-    ToolsListComponent, DeleteStackDialogComponent, CreateNewStackDialogComponent, NodeDetailsComponent],
+    ToolsListComponent, DeleteStackDialogComponent, CreateNewStackDialogComponent, NodeDetailsComponent, InfoPopupDialogComponent],
   imports: [
     CommonModule,
     BlueprintRoutingModule,

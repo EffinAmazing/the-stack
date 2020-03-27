@@ -8,26 +8,30 @@
         <div class="stackActions" *ngIf="loaded" >
           <div>
               <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> Show or Hide Tools </button>
-              <span class="total-spand-tools" *ngIf="blueprint.spend"> Estimated Tool Spend: <span class="price-amount"> ${{ parsePrice(blueprint.spend) }} </span> &nbsp; </span>
-              <button mat-stroked-button 
-                [disabled]="history.isActivePrev(blueprint.id)"
-                (click)="handlePrevAction()"> <mat-icon>undo</mat-icon> </button>
-              <button mat-stroked-button 
-                [disabled]="history.isActiveNext(blueprint.id)"
-                (click)="handleNextAction()"> <mat-icon>redo</mat-icon> </button>
+              <span class="total-spand-tools" *ngIf="blueprint.spend"> 
+                Estimated Monthly Stool Spend: <span class="price-amount"> ${{ parsePrice(blueprint.spend) }} </span> 
+                <button mat-icon-button (click)="handleClickInfo()"> <img class="mat-button-icon-info" [src]="getAssetsFolder() + 'assets/images/info.png'" /> </button> &nbsp; 
+              </span> 
+              <div class="share-block" *ngIf="loaded">
+                <span class="title"> Share </span>
+                <div class="waiting-process" *ngIf="isWaiting"> <mat-spinner [diameter]="25"></mat-spinner> </div>
+                <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/facebook.svg'" /> </button>
+                <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/linkedin.svg'" /> </button>
+                <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/twitter.svg'" /> </button>
+              </div> 
           </div>
           
           <div>
             
             <button mat-raised-button *ngIf="selectedArrow" (click)="handleDeselectArrow()"> Cancel </button>
             <button mat-raised-button *ngIf="selectedArrow" class="delete-arrow-action" (click)="handleRemoveArrow()"> <mat-icon>clear</mat-icon>  Delete Arrow </button>
-            <div class="share-block" *ngIf="loaded">
-              <span class="title"> Share Image </span>
-              <div class="waiting-process" *ngIf="isWaiting"> <mat-spinner [diameter]="25"></mat-spinner> </div>
-              <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/facebook.svg'" /> </button>
-              <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/linkedin.svg'" /> </button>
-              <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/twitter.svg'" /> </button>
-            </div> 
+            <button mat-stroked-button 
+                [disabled]="history.isActivePrev(blueprint.id)"
+                (click)="handlePrevAction()"> <mat-icon>undo</mat-icon> </button>
+            <button mat-stroked-button 
+                [disabled]="history.isActiveNext(blueprint.id)"
+                (click)="handleNextAction()"> <mat-icon>redo</mat-icon> </button>
+            
           </div>
         </div>
         <div class="loading-data-section" *ngIf="!loaded && !isError">
