@@ -15,7 +15,6 @@ class BluePrints {
     }
 
     getDomainTools(req, res, next) {
-        console.log(req.query);
 
         async.waterfall([
             (cb)=>{
@@ -29,10 +28,8 @@ class BluePrints {
             (cb) => {
                 // 1. get blueprint of domain
                 this._bluePrints.getByDomain(req.query.domain).then((result)=>{
-                    console.log(" success ", result);
                     cb(null, result);
                 }).catch((err)=>{
-                    console.log(" error ", err)
                     cb(err, null);
                 });
             },
@@ -67,10 +64,9 @@ class BluePrints {
                     // 2. get tools of domain
                     ToolsServices.getToolsOfDomain(req.query.domain).then((result)=>{
                         const list = result.tech;
-                        console.log(result.spend, "result.spend");
                         data.blueprint['spend'] = result.spend;
                         console.log(data.blueprint);
-                        this._bluePrints.updateOne(data.blueprint.id, { spend: result.spend }).then((result)=>{ console.log("update", result) }).catch(err=>console.log(err));
+                        this._bluePrints.updateOne(data.blueprint.id, { spend: result.spend }).then((result)=>{  }).catch(err=>console.log(err));
                         /* */
                         ToolsServices.getDomainTool(req.query.domain).then((tool) => {
                             list.push(tool);
@@ -90,7 +86,6 @@ class BluePrints {
             (data, cb) => {
                 console.log('marge tools with tools in DB');
                 // 3. marge tools with tools in DB
-                console.log(" - ", data.blueprint)
                 if(data.nodes.length === 0){
                     this._tools.proceedTools(data.tools).then((result) => {
                         data.tools = result;
@@ -103,9 +98,6 @@ class BluePrints {
                 }
             },
             (data, cb)=>{
-                //console.log("data.nodes", data.nodes);
-                
-                console.log(" create nodes - ", data.blueprint)
                 if( !data.nodes.length ) {
                     this._toolsNodes.createNodesForTools(data.blueprint.id, data.tools).then((result)=>{
                         console.log("res");
@@ -122,7 +114,6 @@ class BluePrints {
         ],function(err, fulldata){
             // 5. return data
             
-            console.log(" result - ", fulldata)
             if(err) {
                 console.log(err);
                 res.json({
@@ -154,28 +145,21 @@ class BluePrints {
     removeBluePrint(req, res, next){
         const id = req.params.id;
         if(id) {
-            console.log('req.params.id', req.params.id);
             async.waterfall([
                 (cb)=>{
-                    console.log("_arrows");
                     this._arrows.removeAllByBlueprintId(id).then(()=>{
                         cb(null);
                     }).catch((err)=>{ cb(err) })
                 },
                 (cb)=>{
-                    console.log("_toolsNodes");
                     this._toolsNodes.removeAllForBlueprintId(id).then(()=>{
                         cb(null);
                     }).catch((err)=>{ cb(err) })
                 },
                 (cb) => {
-                    console.log("_bluePrints");
-                    console.log(id);
                     this._bluePrints.delete(id, []).then((r)=>{
-                        console.log(r);
                         cb(null, r);
                     }).catch(err => {
-                        console.log(err);
                         cb(err, null)
                     });
                 }

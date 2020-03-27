@@ -71,7 +71,7 @@ export class ToolsListComponent implements OnInit {
   }
 
   public toggleNodeFormStack(node) {
-    this.toogleVisibilityNode.emit(node);
+    this.toogleVisibilityNode.emit({ item: node, disableHistory: true });
   }
 
   public close() {

@@ -5,9 +5,21 @@
 .info-paragraph{
     padding: 10px 0;
     display: flex;
+    font-size: 14px;
+
+    .data {
+        input{
+            padding: 0;
+            border: none;
+        }
+
+        .mat-form-field.full-width {
+            width: 100%;
+        }
+    }
 
     .title{
-        width: 120px;
+        width: 140px;
         font-weight: 600;
     }
 

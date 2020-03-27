@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
 import { SocialShareService } from '../../../../core/services/social-share.service';
 import { UploadImagesService } from '../../../../core/services/upload-images.service';
+import { ActionHistoryService } from '../../../../core/services/action-history.service';
 import { Tool, BluePrintTool, BluePrint } from '../../../../shared/models/tool';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteStackDialogComponent } from '../../components/delete-stack-dialog/delete-stack-dialog.component';
@@ -43,6 +44,7 @@ export class BuildStackComponent implements OnInit {
       private route: ActivatedRoute,
       private router: Router,
       private social: SocialShareService,
+      public history: ActionHistoryService,
       private upload: UploadImagesService,
       public deleteDialog: MatDialog) {
     this.route.queryParams.subscribe((params: any) => {
@@ -79,7 +81,7 @@ export class BuildStackComponent implements OnInit {
           /* */
         });
 
-        if (data.nodes.length - hidden > 10) {
+        if (data.nodes.length - hidden > 10 && hidden === 0) {
           this.proceedNodes(data.nodes.length, hidden);
         } else {
           this.completedProceedNodes();
@@ -98,7 +100,7 @@ export class BuildStackComponent implements OnInit {
       this.nodesList.forEach((nodeId) => {
         const item = this.nodes[nodeId];
         if (!item.hide && all - hidden > 50 ) {
-          // console.log(item.tool);
+
           if (item.tool.name !== this.domain) {
             item.hide = true;
             hidden++;
@@ -137,6 +139,13 @@ export class BuildStackComponent implements OnInit {
     }
   }
 
+  public handleNextAction() {
+    this.history.nextAction(this.blueprint.id);
+  }
+
+  public handlePrevAction() {
+    this.history.prevAction(this.blueprint.id);
+  }
 
   public handleUpdatedNodeData(result) {
     // console.log(result);
@@ -218,7 +227,7 @@ export class BuildStackComponent implements OnInit {
 
   public handleRemoveArrow() {
     if (this.selectedArrow) {
-      console.log(this.selectedArrow);
+      this.history.addAction(this.blueprint.id, { name: 'removeArrow', data: this.selectedArrow });
       const lineId = this.selectedArrow.lineId;
       this.handleRemoveArrows([lineId], true);
       document.querySelector(`path#${lineId}`).remove();
@@ -228,6 +237,14 @@ export class BuildStackComponent implements OnInit {
 
   public updatedNodePosiotion(data) {
     // console.log('aaa', data);
+    if (!data.disableHistory) {
+      const oldPosition = this.nodes[data.nodeId].position;
+      this.history.addAction(this.blueprint.id, { name: 'updatePosition', data: {
+        nodeId: data.nodeId,
+        newPosition: data.position,
+        oldPosition }
+      });
+    }
     this.service.updateNodeTool(data.nodeId, { position: data.position }).subscribe((res) => {
       const tool = this.nodes[data.nodeId].tool;
       res.tool = this.nodes[data.nodeId].tool;
@@ -293,41 +310,39 @@ export class BuildStackComponent implements OnInit {
     });
   }
 
-  public handleHideNodeItem(data: BluePrintTool) {
-    if (!data.hide) {
+  public handleHideNodeItem(data: { item: BluePrintTool, disableHistory?: boolean }) {
+    if (!data.item.hide) {
       data['hide'] = true;
     } else {
-      data.hide = false;
+      data.item.hide = false;
     }
 
-    this.service.updateNodeTool(data.id, { hide: data.hide }).subscribe((res) => {
-      // const nodeIndex = this.nodes.findIndex((item) => item.id = res.id );
-      res.tool = this.nodes[data.id].tool;
-      this.nodes[data.id] = res;
+    if (!data.disableHistory) {  this.history.addAction(this.blueprint.id, { name: 'hideNode', data }); }
+
+    this.service.updateNodeTool(data.item.id, { hide: data.item.hide }).subscribe((res) => {
+      res.tool = this.nodes[data.item.id].tool;
+      this.nodes[data.item.id] = res;
       this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList  });
-      // this.margeShowNodes();
     });
   }
 
   public handleAddArrow(data) {
-    console.log(data);
+    // console.log(data);
+    this.history.addAction(this.blueprint.id, { name: 'addArrow', data });
     this.service.addArrow(this.blueprint.id, data).toPromise().then((result) => {
       console.log(result);
     }).catch(err => console.log(err));
   }
 
   public handleUpdateArrow(data) {
-
     this.service.updateArrow(data).toPromise().then((result) => { }).catch(err => console.log(err));
   }
 
   public handleHideNode(data) {
-    // console.log("handleHideNode", data);
+    this.history.addAction(this.blueprint.id, { name: 'hideNode', data });
     this.service.updateNodeTool(data.id, { hide: true }).subscribe((res) => {
       res.tool = this.nodes[data.id].tool;
       this.nodes[data.id] = res;
-      // console.log('-----------------------updateNodeTool--------------------------------');
-      // this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, hiddenItem: data.id  });
     });
   }
 
@@ -361,15 +376,6 @@ export class BuildStackComponent implements OnInit {
         this.router.navigateByUrl('/stack/build?domain=' + result, { skipLocationChange: false });
         window.location.href = window.location.origin + window.location.pathname + '#/stack/build?domain=' + result;
         window.location.reload();
-      }
-    });
-  }
-
-  private margeShowNodes() {
-    this.showNodes = [];
-    this.nodes.forEach((item) => {
-      if (!item.hide) {
-        this.showNodes.push(item);
       }
     });
   }

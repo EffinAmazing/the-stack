@@ -31,12 +31,14 @@ class ToolsModel extends AbstaractModel{
             try{
                 let start = item.start;
                 let end = item.end;
+                console.log("find", item.name);
                 let dbItem = await this.modelDB.findOne({ name: item.name });
-                mapped = this.mapDocument( dbItem );
+                const mapped = this.mapDocument( dbItem );
                 mapped['start'] = start;
                 mapped['end'] = end;
                 return mapped;
             } catch(err) {
+                console.log('error -----------', err);
                 let start = item.start;
                 let end = item.end;
                 delete item.start;
@@ -70,15 +72,12 @@ class ToolsModel extends AbstaractModel{
     updateInBackground(tools){
         async.eachSeries(tools, (item, cb) => {
             techservice.loadToolLogo(item.name).then(res=>{
-                // this.updateTool(item.id, { logo: res }).then(res=>console.log(" loaded ")).catch(err=>console.log(" failed "));
                 this.toolLogoUpdate(item, res).then(() => {
                     setTimeout(cb, 300);
-                }).catch(err => {
-                    console.log(err);                
+                }).catch(err => {              
                     setTimeout(cb, 300);
                 })
-            }).catch((err)=>{
-               console.log(err);                
+            }).catch((err)=>{             
                setTimeout(cb, 300);
             });
             
@@ -88,10 +87,8 @@ class ToolsModel extends AbstaractModel{
     }
 
     async getToolsByIds(ids){
-        console.log("ids.length", ids)
         let docs = await this.modelDB.find({ _id: { $in: ids } }).exec();
 
-        console.log("docs.length", docs.length);
         let mappedDocs = await async.map(docs, (item, cb)=>{  cb( null, this.mapDocument(item) ); });
         return mappedDocs;
     }

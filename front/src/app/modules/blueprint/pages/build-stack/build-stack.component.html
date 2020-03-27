@@ -8,7 +8,13 @@
         <div class="stackActions" *ngIf="loaded" >
           <div>
               <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> Show or Hide Tools </button>
-              <span class="total-spand-tools" *ngIf="blueprint.spend"> Estimated Tool Spend: <span class="price-amount"> ${{ parsePrice(blueprint.spend) }} </span> </span>
+              <span class="total-spand-tools" *ngIf="blueprint.spend"> Estimated Tool Spend: <span class="price-amount"> ${{ parsePrice(blueprint.spend) }} </span> &nbsp; </span>
+              <button mat-stroked-button 
+                [disabled]="history.isActivePrev(blueprint.id)"
+                (click)="handlePrevAction()"> <mat-icon>undo</mat-icon> </button>
+              <button mat-stroked-button 
+                [disabled]="history.isActiveNext(blueprint.id)"
+                (click)="handleNextAction()"> <mat-icon>redo</mat-icon> </button>
           </div>
           
           <div>
@@ -36,6 +42,7 @@
         <app-builder *ngIf="loaded" 
           [loadedNodes]="changedNodes$" 
           [loadedArrows]="changedArrows$"
+          [historyEmit]="history.getEmmiter(blueprint.id)"
           (positionNodeChanged)="updatedNodePosiotion($event)"
           (arrowAdded)="handleAddArrow($event)"
           (arrowUpdated)="handleUpdateArrow($event)"

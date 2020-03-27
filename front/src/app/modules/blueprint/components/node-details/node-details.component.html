@@ -18,9 +18,9 @@
                 <div class="data"> 
                     <mat-form-field>
                         <mat-label>Choose a date</mat-label>
-                        <input matInput [matDatepicker]="startPicker" formControlName="start">
+                        <input matInput [matDatepicker]="startPicker" formControlName="start" (click)="startPicker.open()">
                         <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #picker></mat-datepicker>
+                        <mat-datepicker #startPicker></mat-datepicker>
                     </mat-form-field>    
                 </div>
             </div>
@@ -30,9 +30,9 @@
                 <div class="data"> 
                     <mat-form-field>
                         <mat-label>Choose a date</mat-label>
-                        <input matInput [matDatepicker]="endPicker" formControlName="end">
+                        <input matInput [matDatepicker]="endPicker" formControlName="end" (click)="endPicker.open()">
                         <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #picker></mat-datepicker>
+                        <mat-datepicker #endPicker></mat-datepicker>
                     </mat-form-field>  
                 </div>
             </div>

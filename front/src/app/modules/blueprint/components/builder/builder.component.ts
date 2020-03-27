@@ -3,6 +3,7 @@ import { Tool, BluePrintTool } from '../../../../shared/models/tool';
 import { DrawArrow } from '../../../../shared/models/draws-item';
 import { MatDialog } from '@angular/material/dialog';
 import { NodeDetailsComponent } from '../node-details/node-details.component';
+import { ArrowsHelper } from '../../../../shared/helper/arrows-draw.helper';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import * as d3 from 'd3';
@@ -28,6 +29,8 @@ export class BuilderComponent implements OnInit {
   @Output() selectArrow: EventEmitter<any> = new EventEmitter();
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
+  @Input() historyEmit: Observable<any>;
+  arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
   nodes: BluePrintTool[] = [];
   // nodes: BluePrintTool[] = [];
@@ -44,7 +47,7 @@ export class BuilderComponent implements OnInit {
   constructor(private detailsDialog: MatDialog) { }
 
   ngOnInit(): void {
-    this.svgD3 = d3.select('svg#paint');
+    this.svgD3 = this.arrowHelper.initSvg('svg#paint');
 
     const offsetX = 200;
     const offsetY = 55;
@@ -97,6 +100,7 @@ export class BuilderComponent implements OnInit {
         this.nodes = data.nodes;
 
         const promises = arrToChange.map(async (props) => {
+          props.disableHistory = true;
           this.positionNodeChanged.emit(props);
           return props;
         });
@@ -127,7 +131,7 @@ export class BuilderComponent implements OnInit {
           this.svgD3.append('path')
           .attr('id', item.lineId)
           .attr('class', 'line')
-          .attr('d', lineGenerator(this.genrateDots(
+          .attr('d', lineGenerator(this.arrowHelper.genrateDots(
             [item.start.x, item.start.y],
             [item.end.x, item.end.y], item.start.pos, item.end.pos)))
           .attr('stroke', '#1c57a4')
@@ -152,6 +156,62 @@ export class BuilderComponent implements OnInit {
         setTimeout(() => { this.redrawArrows(); }, 100);
 
       });
+    });
+
+    this.historyEmit.subscribe((result) => {
+      // console.log(result);
+      if (result) {
+        const container = this.stackWorkFlow.nativeElement;
+        switch (result.action.name) {
+          case 'updatePosition':
+            const i = this.showNodes.findIndex((item) => item.id === result.action.data.nodeId);
+            if (result.undo) {
+              this.nodes[result.action.data.nodeId].position = result.action.data.oldPosition;
+            } else {
+              this.nodes[result.action.data.nodeId].position = result.action.data.newPosition;
+            }
+            this.showNodes.splice(i, 1);
+            this.showNodes.push(this.nodes[result.action.data.nodeId]);
+            const lines = this.listOfArrows.filter((item) => item.start.nodeId === result.action.data.nodeId ||
+            item.end.nodeId === result.action.data.nodeId );
+            setTimeout(() => {
+                lines.forEach((item) => {
+                  this.redrawArrow(item, container);
+                });
+              }, 100);
+
+            this.positionNodeChanged.emit({ nodeId: result.action.data.nodeId,
+              position: this.nodes[result.action.data.nodeId].position, disableHistory: true  });
+            break;
+
+          case 'hideNode':
+            const j = this.showNodes.findIndex((item) => item.id === result.action.data.nodeId);
+            if (result.undo) {
+              if (j === -1) {
+                this.showNodes.push(result.action.data);
+              }
+            } else {
+              this.showNodes.splice(j, 1);
+            }
+            break;
+          case 'addArrow':
+            if (result.undo) {
+              this.removeSingleArrow(result.action.data.lineId);
+            } else {
+              this.drawArrow(result.action.data);
+              setTimeout(() => this.redrawArrow(result.action.data, container), 100);
+            }
+            break;
+          case 'removeArrow':
+            if (result.undo) {
+              this.drawArrow(result.action.data);
+              setTimeout(() => this.redrawArrow(result.action.data, container), 100);
+            } else {
+              this.removeSingleArrow(result.action.data.lineId);
+            }
+            break;
+        }
+      }
     });
 
   }
@@ -186,8 +246,7 @@ export class BuilderComponent implements OnInit {
 
   public relisedMove(data, node: BluePrintTool) {
     //
-    // this.retriveNodePosition(data, node);
-    if (this.hoveredNode && this.hoveredNode.id !== node.id) {
+    /*if (this.hoveredNode && this.hoveredNode.id !== node.id) {
       this.retriveNodePosition(data, node);
       if (!document.querySelector(`path#line-${this.hoveredNode.id + '-' + node.id}`) &&
         !document.querySelector(`path#line-${node.id + '-' + this.hoveredNode.id}`)) {
@@ -204,7 +263,7 @@ export class BuilderComponent implements OnInit {
       Promise.all(updatedLines).then(() => { console.log('completed update'); }).catch(err => console.log(err));
 
       this.connectedLines = [];
-    }
+    // }
   }
 
   private drawArrowOnDrag( nodeOne, nodeTwo ) {
@@ -240,12 +299,17 @@ export class BuilderComponent implements OnInit {
     };
 
 
+    this.drawArrow(Arrow);
+    /*   */
+  }
+
+  public drawArrow(Arrow: DrawArrow) {
     this.listOfArrows.push(Arrow);
 
     this.svgD3.append('path')
           .attr('id', Arrow.lineId)
           .attr('class', 'line')
-          .attr('d', lineGenerator(this.genrateDots(
+          .attr('d', lineGenerator(this.arrowHelper.genrateDots(
             [Arrow.start.x, Arrow.start.y],
             [Arrow.end.x, Arrow.end.y], Arrow.start.pos, Arrow.end.pos)))
           .attr('stroke', '#1c57a4')
@@ -267,7 +331,6 @@ export class BuilderComponent implements OnInit {
     }, 100);
 
     this.arrowAdded.emit(Arrow);
-    /*   */
   }
 
   public getAssetsFolder() {
@@ -392,7 +455,7 @@ export class BuilderComponent implements OnInit {
           item.start.y = pos.y;
 
           this.svgD3.select('path#' + item.lineId)
-            .attr('d', lineGenerator(this.genrateDots(
+            .attr('d', lineGenerator(this.arrowHelper.genrateDots(
               [item.start.x, item.start.y],
               [item.end.x, item.end.y], item.start.pos, item.end.pos)));
         }
@@ -411,7 +474,7 @@ export class BuilderComponent implements OnInit {
           item.end.y = pos.y;
 
           this.svgD3.select('path#' + item.lineId)
-            .attr('d', lineGenerator(this.genrateDots(
+            .attr('d', lineGenerator(this.arrowHelper.genrateDots(
               [item.start.x, item.start.y],
               [item.end.x, item.end.y], item.start.pos, item.end.pos)));
         }
@@ -454,7 +517,7 @@ export class BuilderComponent implements OnInit {
       item.end.y = posEnd.y;
 
       this.svgD3.select('path#' + item.lineId)
-            .attr('d', lineGenerator(this.genrateDots(
+            .attr('d', lineGenerator(this.arrowHelper.genrateDots(
               [item.start.x, item.start.y],
               [item.end.x, item.end.y], item.start.pos, item.end.pos)));
     }
@@ -507,67 +570,11 @@ export class BuilderComponent implements OnInit {
       this.activeArrow.end.y = pos.y;
 
       this.svgD3.select('path#' + this.activeArrow.lineId)
-        .attr('d', lineGenerator(this.genrateDots(
+        .attr('d', lineGenerator(this.arrowHelper.genrateDots(
           [this.activeArrow.start.x, this.activeArrow.start.y],
           [this.activeArrow.end.x, this.activeArrow.end.y], this.activeArrow.start.pos, this.activeArrow.end.pos)));
 
     }
-  }
-
-  private genrateDots(start, end, StartPos?, EndPos?) {
-    const arr = [];
-    const diffX = end[0] - start[0];
-    const diffY = end[1] - start[1];
-
-    if (StartPos && EndPos) {
-      // start
-      const startX = start[0] + dotRadius; const startY = start[1] + dotRadius;
-      let endX = end[0] + dotRadius; let endY = end[1] + dotRadius;
-
-      arr.push([startX, startY]);
-
-      if (StartPos.indexOf('Top') !== -1 || StartPos.indexOf('Bottom') !== -1) {
-        arr.push([ startX + diffX * 0.15, start[1] + diffY * 0.35 ]);
-      }
-
-      if (StartPos === 'Left' || StartPos === 'Right') {
-        arr.push([ start[0] + diffX * 0.35  + dotRadius, start[1] + diffY * 0.15 + dotRadius] );
-      }
-
-      if (EndPos === 'Left' || EndPos === 'Right') {
-        arr.push([ start[0] + diffX * 0.65 + dotRadius * 0.5, start[1] + diffY * 0.85 + dotRadius * 0.5]);
-      }
-
-      if (EndPos === 'Left') {
-        endX = end[0] + dotRadius * 0.5;
-      } else if (EndPos === 'Right' ) {
-        endX = end[0] + dotRadius * 1.5;
-      } else {
-        endX = end[0] + dotRadius;
-      }
-
-      if (EndPos.indexOf('Top') !== -1 || EndPos.indexOf('Bottom') !== -1) {
-        arr.push([ startX + diffX * 0.85, start[1] + diffY * 0.65]);
-      }
-
-      if (EndPos.indexOf('Top') !== -1) {
-        // arr.push([ end[0] + diffX * 0.95, end[1] + diffY * 0.75]);
-        endY = end[1] + dotRadius * 0.5;
-      } else if (EndPos.indexOf('Bottom') !== -1) {
-        endY = end[1] + dotRadius * 1.5;
-      } else {
-        endY = end[1] + dotRadius;
-      }
-
-      arr.push([endX, endY]);
-    } else {
-      arr.push(start);
-      arr.push([ start[0] + diffX * 0.35, start[1] + diffY * 0.15]);
-      arr.push(end);
-    }
-
-
-    return arr;
   }
 
   public handleMouseOutNode(evt, node) {
@@ -646,12 +653,24 @@ export class BuilderComponent implements OnInit {
     if (arrowsToRemove.length) {
       arrowsToRemove.forEach(element => {
         ids.push(element.lineId);
+        const i = this.listOfArrows.findIndex(item => item.lineId ===  element.lineId );
+        this.listOfArrows.splice(i, 1);
         this.svgD3.select('path#' + element.lineId).remove();
       });
 
       setTimeout(() => { this.removeArrows.emit(ids); }, 0);
     }
-    this.hideNode.emit(node);
+    this.hideNode.emit({ item: node, disableHistory: false });
+  }
+
+  public removeSingleArrow(lineId: string) {
+    const index = this.listOfArrows.findIndex((item) => item.lineId === lineId );
+
+    if (index !== -1) {
+      this.svgD3.select('path#' + this.listOfArrows[index].lineId).remove();
+      this.removeArrows.emit([this.listOfArrows[index].lineId]);
+      this.listOfArrows.splice(index, 1);
+    }
   }
 
 }

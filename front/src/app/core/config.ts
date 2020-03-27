@@ -83,7 +83,22 @@ export const hiddenCategories: Array<string> = [
     'Linux Web Server',
     'Windows Web Server',
     'WordPress Plugins',
-    'Video Players'
+    'Video Players',
+    'Standard',
+    'Fonts',
+    'Digital Video Ads',
+    'Audience Targetg',
+    'Facebook Exchange',
+    'Data Management Platform',
+    'Demand Side Platform',
+    'Ad network',
+    'Ad Exchange',
+    'Multi-channel',
+    'Payment Currency',
+    'Open source',
+    'Plug in / Module',
+    'Transaction email',
+    'Ad server'
 ];
 
 export const treckActions = [
