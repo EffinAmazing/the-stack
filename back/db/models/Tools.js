@@ -116,7 +116,7 @@ class ToolsModel extends AbstaractModel{
             offset = parseInt(offset);
             if (!offset) offset = 0;
         }
-        const listDocs = await this.modelDB.find({ name: { $regex: new RegExp("(" + name.toLowerCase() + ")", "i") } }).limit(limit).skip(offset).exec();
+        const listDocs = await this.modelDB.find({ name: { $regex: new RegExp(name.toLowerCase(), "i") } }).exec();
         const tools = await async.map(listDocs, (item, cb) => { cb(null, this.mapDocument(item)) });
         return tools;
     }

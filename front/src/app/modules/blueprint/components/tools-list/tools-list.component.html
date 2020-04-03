@@ -2,7 +2,7 @@
     <h2> Tools </h2>
     <div class="total-stack"> Total stack cost: <span class="red"> ${{totalCost}}</span> </div>
     <div class="categories-list">
-        <mat-accordion [multi]="true">
+        <mat-accordion [multi]="true" *ngIf="categoriesList.length">
             <mat-expansion-panel *ngFor="let item of categoriesList" [expanded]="!item.needToBeCollapsed">
                 <mat-expansion-panel-header>
                     <mat-panel-title> {{item.name}} </mat-panel-title>
