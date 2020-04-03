@@ -8,6 +8,7 @@ import { BlueprintModule } from './modules/blueprint/blueprint.module';
 import { HomeModule } from './modules/home/home.module';
 import { NoCacheHeadersInterceptor } from './core/interceptors/no-cache-headers.interceptor';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
+import { ProfileModule } from './modules/profile/profile.module';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
     AppRoutingModule,
     BrowserAnimationsModule,
     BlueprintModule,
-    HomeModule
+    HomeModule,
+    ProfileModule
   ],
   providers: [
     {

@@ -1,16 +1,16 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { BuildStackComponent } from "./pages/build-stack/build-stack.component";
-import { ShareComponent } from "./pages/share/share.component";
+import { BuildStackComponent } from './pages/build-stack/build-stack.component';
+import { ShareComponent } from './pages/share/share.component';
 
 
 const routes: Routes = [
   {
-    path: "build",
+    path: 'build',
     component: BuildStackComponent
   },
   {
-    path: "share",
+    path: 'share',
     component: ShareComponent
   }
 ];

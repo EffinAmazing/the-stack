@@ -149,6 +149,7 @@ export class BuilderComponent implements OnInit {
               }
             }
           }
+
           this.listOfArrows.push(item);
           this.svgD3.append('path')
           .attr('id', item.lineId)
@@ -328,41 +329,49 @@ export class BuilderComponent implements OnInit {
       // 1. add start dot
       const refElstart = container.querySelector(
         `#node-${this.selectedArrow.start.nodeId} .pointers>.pointer-${this.selectedArrow.start.pos}`) as HTMLElement;
-      const poiterStart = this.arrowHelper.getArrowPointerByOffset(
-        refElstart, container, this.selectedArrow.start.pos, this.selectedArrow.start.offset);
-      const dot1 = document.createElement('div');
-      dot1.id = 'dot-' + this.selectedArrow.start.nodeId;
-      dot1.className = 'dot-drag-arrow';
-      dot1.dataset.line = this.selectedArrow.lineId;
-      dot1.dataset.position = 'start';
-      container.append(dot1);
-      dot1.addEventListener('mousedown', () => { this.dotForDrag = dot1; });
-      dot1.addEventListener('mouseup', () => {
-        this.dotForDrag = null;
-        this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
-      });
-      dot1.style.transform = `translate3d(${poiterStart.x}px, ${poiterStart.y}px, 0px)`;
+      if (refElstart ) {
+        const poiterStart = this.arrowHelper.getArrowPointerByOffset(
+          refElstart, container, this.selectedArrow.start.pos, this.selectedArrow.start.offset);
+        const dot1 = document.createElement('div');
+        dot1.id = 'dot-' + this.selectedArrow.start.nodeId;
+        dot1.className = 'dot-drag-arrow';
+        dot1.dataset.line = this.selectedArrow.lineId;
+        dot1.dataset.position = 'start';
+        container.append(dot1);
+        dot1.addEventListener('mousedown', () => { this.dotForDrag = dot1; });
+        dot1.addEventListener('mouseup', () => {
+          this.dotForDrag = null;
+          this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
+        });
+        dot1.style.transform = `translate3d(${poiterStart.x}px, ${poiterStart.y}px, 0px)`;
+      } else {
+        console.log(`#node-${this.selectedArrow.start.nodeId} .pointers>.pointer-${this.selectedArrow.start.pos}`);
+      }
 
       // 2. add end dot
       const refElend = container.querySelector(
         `#node-${this.selectedArrow.end.nodeId} .pointers>.pointer-${this.selectedArrow.end.pos}`) as HTMLElement;
-      const poiterEnd = this.arrowHelper.getArrowPointerByOffset(
-        refElend, container, this.selectedArrow.end.pos, this.selectedArrow.end.offset);
-      const dot2 = document.createElement('div');
-      dot2.id = 'dot-' + this.selectedArrow.end.nodeId;
-      dot2.dataset.line = this.selectedArrow.lineId;
-      dot2.dataset.position = 'end';
-      dot2.className = 'dot-drag-arrow';
-      container.append(dot2);
-      dot2.addEventListener('mousedown', () => { this.dotForDrag = dot2; });
-      dot2.addEventListener('mouseup', () => {
-        this.dotForDrag = null;
-        this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
-      });
-      dot2.style.transform = `translate3d(${poiterEnd.x}px, ${poiterEnd.y}px, 0px)`;
+      if (refElend) {
+        const poiterEnd = this.arrowHelper.getArrowPointerByOffset(
+          refElend, container, this.selectedArrow.end.pos, this.selectedArrow.end.offset);
+        const dot2 = document.createElement('div');
+        dot2.id = 'dot-' + this.selectedArrow.end.nodeId;
+        dot2.dataset.line = this.selectedArrow.lineId;
+        dot2.dataset.position = 'end';
+        dot2.className = 'dot-drag-arrow';
+        container.append(dot2);
+        dot2.addEventListener('mousedown', () => { this.dotForDrag = dot2; });
+        dot2.addEventListener('mouseup', () => {
+          this.dotForDrag = null;
+          this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
+        });
+        dot2.style.transform = `translate3d(${poiterEnd.x}px, ${poiterEnd.y}px, 0px)`;
 
-      this.selectArrow.emit(this.selectedArrow);
-      line.setAttribute('stroke-width', '4');
+        this.selectArrow.emit(this.selectedArrow);
+        line.setAttribute('stroke-width', '4');
+      } else {
+        console.log(`#node-${this.selectedArrow.end.nodeId} .pointers>.pointer-${this.selectedArrow.end.pos}`);
+      }
     });
   }
 
@@ -475,9 +484,19 @@ export class BuilderComponent implements OnInit {
 
   public redrawArrows() {
     const container = this.stackWorkFlow.nativeElement;
+    const ids = [];
     this.listOfArrows.forEach((item) => {
-      this.arrowHelper.updateExistedArrow(item, container);
+      const startNode = this.nodes[item.start.nodeId];
+      const endNode = this.nodes[item.end.nodeId];
+      if (!startNode.hide && !endNode.hide) {
+        this.arrowHelper.updateExistedArrow(item, container);
+      } else {
+        ids.push(item.lineId);
+      }
     });
+    if (ids.length > 0) {
+      this.removeArrows.emit(ids);
+    }
   }
 
   public handleMouseOverPointer(evt, node, pos) {

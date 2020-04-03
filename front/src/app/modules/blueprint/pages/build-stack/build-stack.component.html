@@ -8,19 +8,19 @@
         <div class="stackActions" *ngIf="loaded" >
           <div>
               <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> Show or Hide Tools </button>
-              <span class="total-spand-tools" *ngIf="blueprint.spend"> 
-                Estimated Monthly Stool Spend: <span class="price-amount"> ${{ parsePrice(blueprint.spend) }} </span> 
-                <button mat-icon-button (click)="handleClickInfo()"> <img class="mat-button-icon-info" [src]="getAssetsFolder() + 'assets/images/info.png'" /> </button> &nbsp; 
-              </span> 
-              <div class="share-block" *ngIf="loaded">
-                <span class="title"> Share </span>
-                <div class="waiting-process" *ngIf="isWaiting"> <mat-spinner [diameter]="25"></mat-spinner> </div>
-                <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/facebook.svg'" /> </button>
-                <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/linkedin.svg'" /> </button>
-                <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/twitter.svg'" /> </button>
-              </div> 
+              
+              <button mat-raised-button (click)="handleAddNewTool()"> <mat-icon>add</mat-icon> Add Tool </button>
           </div>
-          
+          <div>
+            <div class="share-block" *ngIf="loaded">
+              <span class="title"> Share </span>
+              <div class="waiting-process" *ngIf="isWaiting"> <mat-spinner [diameter]="25"></mat-spinner> </div>
+              <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/facebook.svg'" /> </button>
+              <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/linkedin.svg'" /> </button>
+              <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/twitter.svg'" /> </button>
+              <!-- <button mat-icon-button class="share-image-button" (click)="handleShare('email')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/email.svg'" /> </button> -->
+            </div> 
+          </div>
           <div>
             
             <button mat-raised-button *ngIf="selectedArrow" (click)="handleDeselectArrow()"> Cancel </button>
@@ -62,6 +62,12 @@
             <button mat-raised-button color="primary" (click)="createNewStack()"> Create new stack </button>
           </div>
           <div>
+            <span class="total-spand-tools" *ngIf="blueprint.spend"> 
+              Estimated Monthly Tool Spend: <span class="price-amount"> ${{ parsePrice(blueprint.spend) }} </span> 
+              <button mat-icon-button (click)="handleClickInfo()"> <img class="mat-button-icon-info" [src]="getAssetsFolder() + 'assets/images/info.png'" /> </button> &nbsp; 
+            </span> 
+          </div>
+          <div>
             <button mat-raised-button class="delete-arrow-action" (click)="removeStack()"> Delete stack </button>
           </div>
         </div>
@@ -72,6 +78,7 @@
             [loadedCategories]="changedCategories$"
             (toogleVisibilityNode)="handleHideNodeItem($event)"
             (closeTools)="handleCloseTools()"
+            (updatedNodeData)="handleUpdatedNodeData($event)"
             ></app-tools-list>
         </div>
       </div>

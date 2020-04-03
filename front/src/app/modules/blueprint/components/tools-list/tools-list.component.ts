@@ -1,6 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
-import { hiddenCategories } from '../../../../core/config';
+import { MatDialog } from '@angular/material/dialog';
+import { NodeDetailsComponent } from '../node-details/node-details.component';
+import { hiddenCategories, WhitelistCategories } from '../../../../core/config';
 import { environment } from '../../../../../environments/environment';
 import { Observable } from 'rxjs';
 
@@ -16,58 +18,185 @@ export class ToolsListComponent implements OnInit {
   @Input() loadedCategories: Observable<any>;
   @Output() toogleVisibilityNode: EventEmitter<any> = new EventEmitter();
   @Output() closeTools: EventEmitter<any> = new EventEmitter();
+  @Output() updatedNodeData: EventEmitter<{ nodeId: string, data: BluePrintTool }> = new EventEmitter();
   categories: any;
+  totalCost: number;
   categoriesList: Array<{
     name: string,
     nodes: string[],
+    cost?: number,
     needToBeCollapsed: boolean
   }> = [];
   nodes: any = {};
+  editStates: { [key: string]: { start: boolean, end: boolean, cost: boolean, owner: boolean } } = {};
+  currentNodeEdit: BluePrintTool | null = null;
+  copyBeforeStart: BluePrintTool | null = null;
 
-  constructor() { }
+  constructor(private detailsDialog: MatDialog) { }
 
   ngOnInit(): void {
+    this.totalCost = 0;
     this.loadedNodes.subscribe((data) => {
       this.nodes = data.nodes;
+      for (const key in data.nodes) {
+        if (data.nodes.hasOwnProperty(key)) {
+          this.editStates[data.nodes[key].id] = { start: false, end: false, cost: false, owner: false };
+        }
+      }
+
     });
 
+    const checkIsAdded: {[key: string]: boolean} = { };
+    console.log(this.categoriesList);
 
     this.loadedCategories.subscribe((data) => {
       const categories = Object.keys(data);
       const collapsedArray = [];
+      const whitelist = [];
+      let none: any;
       for (const iterator of categories) {
-        // console.log(data[iterator]);
         const lowerCase = iterator.toLocaleLowerCase();
         const needToBeCollapsed = hiddenCategories.includes(iterator);
         const item = {
           name: iterator,
           nodes: data[iterator],
+          cost: 0,
           needToBeCollapsed
-        }
+        };
+
+        let catCost = 0;
+        data[iterator].forEach(nodeId => {
+          if (!checkIsAdded[nodeId]) {
+            this.totalCost += this.nodes[nodeId].cost ? this.nodes[nodeId].cost : 0;
+            checkIsAdded[nodeId] = true;
+          }
+          catCost += this.nodes[nodeId].cost ? this.nodes[nodeId].cost : 0;
+        });
+        item.cost = catCost;
+
         if (lowerCase !== 'none') {
-          if (needToBeCollapsed) {
-            if ( lowerCase.indexOf('analytic') !== -1 ||
-              lowerCase.indexOf('tracking') !== -1 ||
-              lowerCase.indexOf('marketing') !== -1 ) {
-              this.categoriesList.unshift(item);
+          if (!needToBeCollapsed) {
+            if ( WhitelistCategories.includes(iterator) ) {
+              whitelist.push(item);
             } else {
               this.categoriesList.push(item);
             }
           } else {
             collapsedArray.push(item);
           }
+        } else {
+          none = item;
         }
       }
 
-      this.categoriesList = [...collapsedArray, ...this.categoriesList ];
+      whitelist.sort((a, b) => {
+        const indexA = WhitelistCategories.indexOf(a.name);
+        const indexB = WhitelistCategories.indexOf(b.name);
 
-      this.categoriesList.unshift({
-        name: 'None',
-        nodes: data['None'],
-        needToBeCollapsed: hiddenCategories.includes('None')
+        if (indexA < indexB) {return -1; }
+        if (indexA > indexB) {return 1; }
+        return 0;
       });
+      if (none) {
+        this.categoriesList.push(none);
+      }
+
+      this.categoriesList = [...whitelist, ...this.categoriesList, ...collapsedArray];
     });
 
+  }
+
+  public handleClickToEdit(nodeId: string, field: string) {
+    if (this.currentNodeEdit) {
+      if (this.currentNodeEdit.id !== nodeId) {
+        this.editStates[this.currentNodeEdit.id] = { start: false, end: false, cost: false, owner: false };
+        this.currentNodeEdit = this.nodes[nodeId];
+      }
+    } else {
+      this.currentNodeEdit = this.nodes[nodeId];
+    }
+
+    if (!this.copyBeforeStart) {
+      this.copyBeforeStart = Object.assign({}, this.nodes[nodeId]);
+    } else if (this.copyBeforeStart.id !== nodeId) {
+      this.copyBeforeStart = Object.assign({}, this.nodes[nodeId]);
+    }
+
+    this.editStates[nodeId][field] = true;
+  }
+
+  public confirmUpdates(nodeId: string, field: string) {
+    if (this.editStates[nodeId]) {
+      this.editStates[nodeId][field] = false;
+      this.copyBeforeStart[field] = Object.assign({}, this.nodes[nodeId]);
+
+      if (field === 'cost') {
+        this.nodes[nodeId].tool.categories.forEach((cat) => {
+          this.reculcCategoryCost(cat);
+        });
+
+        this.reculcAllCost();
+      }
+
+      this.updatedNodeData.emit({ nodeId, data: this.nodes[nodeId] });
+    }
+  }
+
+  public cancelUpdates(nodeId: string, field: string) {
+    if (this.editStates[nodeId]) {
+      this.editStates[nodeId][field] = false;
+      this.nodes[nodeId] = this.copyBeforeStart;
+    }
+  }
+
+  public handleClickInfo(node) {
+
+    const dialogRef = this.detailsDialog.open(NodeDetailsComponent, {
+      width: '820px',
+      data: { node }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        node = Object.assign({}, node, result);
+        this.nodes[node.id] = node;
+        node.tool.categories.forEach((cat) => {
+          this.reculcCategoryCost(cat);
+        });
+
+        this.reculcAllCost();
+        /* */
+        this.updatedNodeData.emit({ nodeId: node.id, data: result });
+      }
+    });
+  }
+
+  private reculcCategoryCost(name) {
+    const indexCat = this.categoriesList.findIndex((catItem) => catItem.name === name);
+    let cost = 0;
+    this.categoriesList[indexCat].nodes.forEach((item) => {
+      cost += this.nodes[item].cost ? this.nodes[item].cost : 0;
+    });
+
+    this.categoriesList[indexCat].cost = cost;
+  }
+
+  private reculcAllCost() {
+    this.totalCost = 0;
+
+    for (const key in this.nodes) {
+      if (this.nodes.hasOwnProperty(key)) {
+        this.totalCost += this.nodes[key].cost ? this.nodes[key].cost : 0;
+      }
+    }
+  }
+
+  public getAssetsFolder() {
+    if (typeof window['assets'] !== 'undefined') {
+      return window['assets'];
+    } else {
+      return '/';
+    }
   }
 
   public toggleNodeFormStack(node) {

@@ -10,6 +10,7 @@ const path = require('path');
 const os = require("os");
 const fs = require('fs');
 const formData = require("express-form-data");
+const initPassport = require('./services/passport').initPassport;
 
 const app = express();
 
@@ -58,7 +59,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public'), { dotfiles: 'allow' }));
-
+initPassport();
 app.use("/", router);
 
 app.use(function(err, req, res, next){

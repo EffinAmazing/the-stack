@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { BluePrintResp, BluePrintTool } from "../../shared/models/tool";
+import { BluePrintResp, BluePrintTool } from '../../shared/models/tool';
 import { ResponseMappers } from '../../shared/mappers/response-mapper.helper';
 import {  environment } from '../../../environments/environment';
 
@@ -44,5 +44,13 @@ export class BlueprintsService {
 
   removeBluePrint(id): Observable<any> {
     return this.mapper.mapResponse(this.http.delete(`${this.serverURI}blueprints/${id}`));
+  }
+
+  getToolsList(name): Observable<any> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}tools/search?name=${name}&limit=20&offset=0`));
+  }
+
+  addNewNodeItems(dataList): Observable<any>{
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolsnodes/list`, {data: dataList}));
   }
 }

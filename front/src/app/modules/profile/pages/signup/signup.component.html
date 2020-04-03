@@ -1,0 +1,15 @@
+<div class="main">
+    <section class="mt-full-screen mt-flex">
+        <div class="mt-container">
+            <div class="signup-from-container">
+                <mat-card *ngIf="!isLoading">
+                    <div class="notice error-notice" *ngIf="isError"> {{errorMessage}} </div>
+                    <app-signup-form (submitForm)="handleSubmit($event)"></app-signup-form>
+                </mat-card>
+                <div class="loading-data-section" *ngIf="isLoading">
+                    <mat-spinner></mat-spinner>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

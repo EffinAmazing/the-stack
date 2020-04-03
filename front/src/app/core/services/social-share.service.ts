@@ -34,4 +34,24 @@ export class SocialShareService {
 
     popup.location.href = url;
   }
+
+  shareInEmail(image: string, popup, domain) {
+    const url = `mailto:email@type?subject=Marketing Tools Stack for ${domain}&body=screen <${image}>`;
+
+    popup.document.body.innerHTML = `<a id="link_forsharing" href="${url}">
+      <img src="cid:share_image" style="visibility: hidden" /><img id="share_image" src="${image}" /></a>`;
+    setTimeout(() => {
+      popup.document.querySelector('#link_forsharing').click();
+    }, 200);
+
+    setTimeout(() => {
+      // console.log(popup.location.protocol === 'about:');
+      if (popup.location.protocol === 'about:') {
+        popup.close();
+      } else {
+        console.log(popup);
+        popup.resizeTo(800, 600);
+      }
+    }, 900);
+  }
 }

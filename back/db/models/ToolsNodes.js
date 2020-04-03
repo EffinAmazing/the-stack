@@ -66,6 +66,34 @@ class ToolsNodesModel extends AbstaractModel {
         let result = await this.modelDB.deleteMany({ blueprintId: blueprintId }).exec();
         return result;
     }
+
+    async addOne(data){
+        let doc = await this.modelDB.create(data);
+        const mapped = this.mapDocument(doc);
+        return mapped;
+    }
+
+    async addListNodes(datList){
+        let docs = await this.modelDB.create(datList);
+        let mappedDocs = await async.map(docs, (item, cb)=>{ cb( null, this.mapDocument(item) ); });
+        return mappedDocs;
+    }
+
+    async getNodesIdForTools(tools) {
+        // 1 get ids of tools
+        let mappedTool = await async.map(tools, (item, cb) => { 
+            this.modelDB.findOne({ toolId: item.id }, (err, doc) => {
+                if (err || !doc) {
+                    cb(null, item )
+                } else {
+                    item['nodeId'] = doc._id
+                    cb(null, item)
+                }
+            }) 
+        });
+
+        return tools
+    }
 }
 
 module.exports = ToolsNodesModel;

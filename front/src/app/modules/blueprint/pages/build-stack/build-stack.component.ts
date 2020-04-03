@@ -8,6 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DeleteStackDialogComponent } from '../../components/delete-stack-dialog/delete-stack-dialog.component';
 import { CreateNewStackDialogComponent } from '../../components/create-new-stack-dialog/create-new-stack-dialog.component';
 import { InfoPopupDialogComponent } from '../../components/info-popup-dialog/info-popup-dialog.component';
+import { AddNewToolDialogComponent } from '../../components/add-new-tool-dialog/add-new-tool-dialog.component';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forbiddenTags, hiddenCategories } from '../../../../core/config';
@@ -48,6 +49,7 @@ export class BuildStackComponent implements OnInit {
       public history: ActionHistoryService,
       private upload: UploadImagesService,
       public deleteDialog: MatDialog,
+      public toolsDialog: MatDialog,
       public infoDialog: MatDialog) {
     this.route.queryParams.subscribe((params: any) => {
       this.domain = params.domain;
@@ -199,6 +201,9 @@ export class BuildStackComponent implements OnInit {
               case 'linkedin':
                 this.social.shareInLinkedIn(environment.serverURI + link, this.blueprint.domain + ' tools stack', popup);
                 break;
+              case 'email':
+                this.social.shareInEmail(environment.serverURI + link, popup, this.blueprint.domain);
+                break;
               default:
                 break;
             }
@@ -300,10 +305,51 @@ export class BuildStackComponent implements OnInit {
   }
 
   public deleteArrowDots() {
-    const dot1 = document.querySelector(`#dot-${this.selectedArrow.start.nodeId}`);
-    if (dot1) { dot1.remove(); }
-    const dot2 = document.querySelector(`#dot-${this.selectedArrow.end.nodeId}`);
-    if (dot2) { dot2.remove(); }
+    if (this.selectedArrow) {
+      const dot1 = document.querySelector(`#dot-${this.selectedArrow.start.nodeId}`);
+      if (dot1) { dot1.remove(); }
+      const dot2 = document.querySelector(`#dot-${this.selectedArrow.end.nodeId}`);
+      if (dot2) { dot2.remove(); }
+    }
+  }
+
+  public handleAddNewTool() {
+    const dialogRef = this.deleteDialog.open(AddNewToolDialogComponent, {
+      width: '620px',
+      data: {  }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      const listToCreate = [];
+      if (result) {
+        for (const key in result) {
+          if (result.hasOwnProperty(key)) {
+            listToCreate.push({
+                blueprintId: this.blueprint.id,
+                toolId: result[key].id,
+                hide: false,
+                dependencies: []
+            });
+          }
+        }
+
+        if (listToCreate.length > 0) {
+          this.service.addNewNodeItems(listToCreate).toPromise().then(nodes => {
+            const nodesIds: string[] = [];
+            nodes.map((node) => {
+              node.tool = result[node.toolId];
+              nodesIds.push(node.id);
+              this.nodes[node.id] = node;
+              return node;
+            });
+            this.nodesList = [...this.nodesList, ...nodesIds];
+            this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList  });
+          }).catch(err => {
+            console.log(err);
+          });
+        }
+      }
+    });
   }
 
   public handleRemoveArrows(ids, blockReload?: any ) {

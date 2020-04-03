@@ -31,6 +31,7 @@
         position: relative;
         text-align: center;
         display: inline-block;
+        padding-left: 10px;
 
         .title{
             position: absolute;
@@ -61,11 +62,12 @@
             width: 40%;
         }
 
-        &>div:nth-child(1) {
-            width: 60%;
+        &>div:nth-child(2) {
+            width: 20%;
+            text-align: center;
         }
 
-        &>div:nth-child(2) {
+        &>div:nth-child(3) {
             text-align: right;
         }
     }
@@ -131,7 +133,7 @@
 
 .waiting-process{
     position: absolute;
-    left: -25px;
+    left: -10px;
     top: 5px;
 }
 

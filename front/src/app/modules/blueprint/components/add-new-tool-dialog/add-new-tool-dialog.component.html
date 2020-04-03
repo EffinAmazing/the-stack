@@ -1,0 +1,25 @@
+<h1 mat-dialog-title>  </h1>
+<div mat-dialog-content>
+  <div class="search-from">
+    <mat-form-field class="search-full-width">
+        <mat-label>Tool name</mat-label>
+        <input type="text" matInput placeholder="Input more 3 symbol for start search" [(ngModel)]="toolSearchName" (input)="handleInputText($event)">
+        <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+  <div class="list-of-tools"> 
+    <mat-list>
+        <mat-list-item *ngFor="let toolItem of tools" [ngClass]="{'selected': isToolSlected(toolItem.id), 'is-already-in-stack': !!toolItem.nodeId}"  (click)="handleSelectTool(toolItem)">
+            <mat-icon mat-list-icon><img class="logo-tool"
+                [src]="toolItem.logo?processImageSrc(toolItem.logo):getAssetsFolder() + 'assets/images/layers.png'"></mat-icon>
+            <div mat-line>{{toolItem.name}}</div>
+            <div mat-line>{{toolItem.categories?.join(', ')}}</div>
+        </mat-list-item>
+    </mat-list>
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()" >Cancel</button> 
+  <button mat-raised-button color="primary" [mat-dialog-close]="selected" [disabled]="!isSelectedAnyTool()"> Add Tool </button>
+</div>
+

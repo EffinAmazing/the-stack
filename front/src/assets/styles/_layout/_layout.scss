@@ -39,3 +39,18 @@ html, body{
     user-select: none;
     cursor: pointer;
 }
+
+.notice{
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 20px;
+    font-weight: 800;
+
+    &.error-notice{
+        color: #ff1111;
+    }
+}
+
+.mat-flat-button.mat-primary, .mat-raised-button.mat-primary, .mat-fab.mat-primary, .mat-mini-fab.mat-primary{
+    background-color: #ff4100;
+}

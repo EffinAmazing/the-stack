@@ -161,14 +161,22 @@ export class ArrowsHelper {
     public updateExistedArrow(arrow: DrawArrow, container?: HTMLElement): void {
         if (container) {
             const refElstart = container.querySelector(`#node-${arrow.start.nodeId} .pointers>.pointer-${arrow.start.pos}`) as HTMLElement;
-            const startPointer = this.getArrowPointerByOffset(refElstart, container, arrow.start.pos, arrow.start.offset);
-            arrow.start.x = startPointer.x;
-            arrow.start.y = startPointer.y;
+            if (refElstart) {
+                const startPointer = this.getArrowPointerByOffset(refElstart, container, arrow.start.pos, arrow.start.offset);
+                arrow.start.x = startPointer.x;
+                arrow.start.y = startPointer.y;
+            } else {
+                console.log(`#node-${arrow.start.nodeId} .pointers>.pointer-${arrow.start.pos}`);
+            }
 
             const refElend = container.querySelector(`#node-${arrow.end.nodeId} .pointers>.pointer-${arrow.end.pos}`) as HTMLElement;
-            const endPointer = this.getArrowPointerByOffset(refElend, container, arrow.end.pos, arrow.end.offset);
-            arrow.end.x = endPointer.x;
-            arrow.end.y = endPointer.y;
+            if (refElend) {
+                const endPointer = this.getArrowPointerByOffset(refElend, container, arrow.end.pos, arrow.end.offset);
+                arrow.end.x = endPointer.x;
+                arrow.end.y = endPointer.y;
+            } else {
+                console.log(`#node-${arrow.end.nodeId} .pointers>.pointer-${arrow.end.pos}`);
+            }
         }
         const dots = this.genrateDots([arrow.start.x, arrow.start.y], [arrow.end.x, arrow.end.y], arrow.start.pos, arrow.end.pos );
         this.SVG.select(`path#${arrow.lineId}`)

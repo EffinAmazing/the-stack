@@ -98,7 +98,15 @@ export const hiddenCategories: Array<string> = [
     'Open source',
     'Plug in / Module',
     'Transaction email',
-    'Ad server'
+    'Ad server',
+    'Application Performance',
+    'Site Search',
+    'Social Sharing',
+    'Business Email Hosting',
+    'Fraud Prevention',
+    'Transactional Email',
+    'Login',
+    'Visitor Count Tracking'
 ];
 
 export const treckActions = [
@@ -107,4 +115,14 @@ export const treckActions = [
     'moveNode',
     'addArrow',
     'removeArrow'
-]
+];
+
+export const WhitelistCategories = [
+    'Marketing Automation',
+    'CRM',
+    'Audience Measurement',
+    'Conversion Optimization',
+    'A/B Testing',
+    'Personalization',
+    'Visitor Count Tracking'
+];

@@ -27,27 +27,38 @@ class ToolsModel extends AbstaractModel{
 
     async proceedTools(tools){
         let needLoadImage = [];
+        let createItem = async (item)=> {
+            let start = item.start;
+            let end = item.end;
+            delete item.start;
+            delete item.end;
+            let dbItem = await this.create(item);
+            const mapped = this.mapDocument( dbItem );
+            mapped['start'] = start;
+            mapped['end'] = end;
+            needLoadImage.push(mapped);
+
+            return mapped;
+        }
+    
         let toDo = tools.map(async (item)=>{
             try{
                 let start = item.start;
                 let end = item.end;
                 console.log("find", item.name);
                 let dbItem = await this.modelDB.findOne({ name: item.name });
-                const mapped = this.mapDocument( dbItem );
-                mapped['start'] = start;
-                mapped['end'] = end;
-                return mapped;
+                if(!dbItem){
+                    const mapped = await createItem(item);
+                    return mapped;
+                } else {
+                    const mapped = this.mapDocument( dbItem );
+                    mapped['start'] = start;
+                    mapped['end'] = end;
+                    return mapped;
+                }
             } catch(err) {
                 console.log('error -----------', err);
-                let start = item.start;
-                let end = item.end;
-                delete item.start;
-                delete item.end;
-                let dbItem = await this.create(item);
-                const mapped = this.mapDocument( dbItem );
-                mapped['start'] = start;
-                mapped['end'] = end;
-                needLoadImage.push(mapped)
+                const mapped = await createItem(item);
                 return mapped;
             }
         })
@@ -93,6 +104,22 @@ class ToolsModel extends AbstaractModel{
         return mappedDocs;
     }
 
+
+    async getByName(name, offset, limit){
+        if (!limit) limit = 15;
+        if (!offset) offset = 0 
+        if (typeof limit !== 'number') {
+            limit = parseInt(limit);
+            if (!limit) limit = 15;
+        }
+        if (typeof offset !== 'number') {
+            offset = parseInt(offset);
+            if (!offset) offset = 0;
+        }
+        const listDocs = await this.modelDB.find({ name: { $regex: new RegExp("(" + name.toLowerCase() + ")", "i") } }).limit(limit).skip(offset).exec();
+        const tools = await async.map(listDocs, (item, cb) => { cb(null, this.mapDocument(item)) });
+        return tools;
+    }
 }
 
 module.exports = ToolsModel;

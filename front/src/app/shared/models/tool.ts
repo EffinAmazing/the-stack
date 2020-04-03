@@ -6,6 +6,7 @@ export interface Tool {
     description: string;
     link: string;
     tag: string;
+    nodeId?: string;
     created?: string;
     updated?: string;
 }

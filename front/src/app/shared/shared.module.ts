@@ -4,11 +4,12 @@ import { FormsControlsModule } from './modules/material/forms-controls/forms-con
 import { LayoutModule } from './modules/material/layout/layout.module';
 import { ButtonsIndicatorsModule } from './modules/material/buttons-indicators/buttons-indicators.module';
 import { CommonBehaviorsModule } from './modules/material/common-behaviors/common-behaviors.module';
+import { SigninFromComponent } from './components/signin-from/signin-from.component';
 
 
 
 @NgModule({
-  declarations: [],
+  declarations: [SigninFromComponent],
   imports: [
     CommonModule,
     FormsControlsModule,
