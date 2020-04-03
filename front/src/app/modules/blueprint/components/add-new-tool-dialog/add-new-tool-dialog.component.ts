@@ -1,4 +1,4 @@
-import {Component, Inject} from '@angular/core';
+import {Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { Tool } from '../../../../shared/models/tool';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
@@ -23,7 +23,7 @@ export class AddNewToolDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<AddNewToolDialogComponent>,
     private service: BlueprintsService,
-    @Inject(MAT_DIALOG_DATA) public data: any) {
+    @Inject(MAT_DIALOG_DATA) public data: { blueprintId: string }) {
 
     }
 
@@ -50,7 +50,7 @@ export class AddNewToolDialogComponent {
       } else {
         this.runedTimout = false;
         console.log(this.toolSearchName);
-        this.service.getToolsList(this.toolSearchName).toPromise().then((result) => {
+        this.service.getToolsList(this.toolSearchName, this.data.blueprintId).toPromise().then((result) => {
           this.tools = result;
         }).catch(err => {
           console.log(err);

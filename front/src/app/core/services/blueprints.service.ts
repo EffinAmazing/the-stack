@@ -46,8 +46,8 @@ export class BlueprintsService {
     return this.mapper.mapResponse(this.http.delete(`${this.serverURI}blueprints/${id}`));
   }
 
-  getToolsList(name): Observable<any> {
-    return this.mapper.mapResponse(this.http.get(`${this.serverURI}tools/search?name=${name}&limit=20&offset=0`));
+  getToolsList(name, blueprintId): Observable<any> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}tools/search?name=${name}&blueprint=${blueprintId}&offset=0`));
   }
 
   addNewNodeItems(dataList): Observable<any>{

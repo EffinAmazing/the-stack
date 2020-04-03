@@ -316,7 +316,7 @@ export class BuildStackComponent implements OnInit {
   public handleAddNewTool() {
     const dialogRef = this.deleteDialog.open(AddNewToolDialogComponent, {
       width: '620px',
-      data: {  }
+      data: { blueprintId: this.blueprint.id }
     });
 
     dialogRef.afterClosed().subscribe(result => {

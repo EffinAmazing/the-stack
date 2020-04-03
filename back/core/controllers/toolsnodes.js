@@ -99,9 +99,10 @@ class ToolsNodes {
 
     getListOfTools( req, res, next  ){
         const name = req.query.name;
+        const blueprintId = req.query.blueprint;
         let limit = req.query.limit;
         let offset = req.query.offset;
-        if (name) {
+        if (name && blueprintId) {
             async.waterfall([
                 // 1. find tools with simular name
                 (callback)=>{
@@ -114,7 +115,7 @@ class ToolsNodes {
                 },
                 // 2. check if this tool is already in stack
                 (tools, callback) => {
-                    this.model.getNodesIdForTools(tools).then(result => {
+                    this.model.getNodesIdForTools(tools, blueprintId).then(result => {
                         callback(null, result);
                     }).catch(err => {
                         callback(err);

@@ -79,10 +79,10 @@ class ToolsNodesModel extends AbstaractModel {
         return mappedDocs;
     }
 
-    async getNodesIdForTools(tools) {
+    async getNodesIdForTools(tools, blueprintId) {
         // 1 get ids of tools
         let mappedTool = await async.map(tools, (item, cb) => { 
-            this.modelDB.findOne({ toolId: item.id }, (err, doc) => {
+            this.modelDB.findOne({ toolId: item.id, blueprintId:  blueprintId}, (err, doc) => {
                 if (err || !doc) {
                     cb(null, item )
                 } else {
