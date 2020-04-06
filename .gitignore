@@ -7,3 +7,6 @@
 /back/public/domain-logos/*
 /back/public/tools-logos/*
 /back/public/uploads/*
+/back/*.pem
+/back/*.csr
+/back/public/.well-known/*

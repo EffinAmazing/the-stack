@@ -32,6 +32,7 @@ export class BuildStackComponent implements OnInit {
   changedNodes$: BehaviorSubject<any> = new BehaviorSubject({});
   changedArrows$: BehaviorSubject<any> = new BehaviorSubject([]);
   changedCategories$: BehaviorSubject<any> = new BehaviorSubject({});
+  changeNodeData$: BehaviorSubject<BluePrintTool | null> = new BehaviorSubject(null);
   nodesForUpdate: any = [];
   selectedArrow: any;
   hideList = true;
@@ -158,6 +159,7 @@ export class BuildStackComponent implements OnInit {
         const tool = this.nodes[result.nodeId].tool;
         res.tool = this.nodes[result.nodeId].tool;
         this.nodes[result.nodeId] = res;
+        this.changeNodeData$.next(this.nodes[result.nodeId]);
       });
     }
   }
@@ -407,7 +409,7 @@ export class BuildStackComponent implements OnInit {
   }
 
   public handleHideNode(data) {
-    console.log('handleHideNode', data);
+    // console.log('handleHideNode', data);
     this.history.addAction(this.blueprint.id, { name: 'hideNode', data: data.item });
     this.service.updateNodeTool(data.item.id, { hide: true }).subscribe((res) => {
       res.tool = this.nodes[data.item.id].tool;

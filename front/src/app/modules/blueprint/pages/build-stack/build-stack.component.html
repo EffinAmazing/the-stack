@@ -76,6 +76,7 @@
           <app-tools-list  [ngClass]="{'hideTools': false}" *ngIf="loaded" 
             [loadedNodes]="changedNodes$" 
             [loadedCategories]="changedCategories$"
+            [updatedOutNodeData]="changeNodeData$"
             (toogleVisibilityNode)="handleHideNodeItem($event)"
             (closeTools)="handleCloseTools()"
             (updatedNodeData)="handleUpdatedNodeData($event)"

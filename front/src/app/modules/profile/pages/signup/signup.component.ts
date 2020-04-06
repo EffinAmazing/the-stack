@@ -26,7 +26,7 @@ export class SignupComponent implements OnInit {
     this.service.createUser(data).toPromise().then(res => {
       console.log(res);
       this.isLoading = false;
-      // this.router.navigateByUrl('/home');
+      // 
     }).catch((err) => {
       this.isLoading = false;
       this.isError = true;

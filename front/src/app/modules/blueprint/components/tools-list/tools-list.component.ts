@@ -16,6 +16,7 @@ const host = environment.serverURI;
 export class ToolsListComponent implements OnInit {
   @Input() loadedNodes: Observable<any>;
   @Input() loadedCategories: Observable<any>;
+  @Input() updatedOutNodeData: Observable<BluePrintTool | null>;
   @Output() toogleVisibilityNode: EventEmitter<any> = new EventEmitter();
   @Output() closeTools: EventEmitter<any> = new EventEmitter();
   @Output() updatedNodeData: EventEmitter<{ nodeId: string, data: BluePrintTool }> = new EventEmitter();
@@ -102,6 +103,14 @@ export class ToolsListComponent implements OnInit {
       }
 
       this.categoriesList = [...whitelist, ...this.categoriesList, ...collapsedArray];
+    });
+
+    this.updatedOutNodeData.subscribe((node) => {
+      if (node) {
+        node.tool.categories.forEach((cat) => {
+          this.reculcCategoryCost(cat);
+        });
+      }
     });
 
   }

@@ -31,8 +31,4 @@ export class HomeComponent implements OnInit {
       this.domain.setValue( value );
     }
   }
-
-  handlePaste(data) {
-    // console.log(data.target.value);
-  }
 }
