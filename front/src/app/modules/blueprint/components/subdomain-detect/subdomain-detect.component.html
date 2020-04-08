@@ -1,0 +1,9 @@
+<div class="detect-subdomain">
+    <div class="has-subdomain" *ngIf="hasSubdomain">
+        {{domain}} has a subdomain {{subdomain}}. Please try submit domain without subdomain<br/>
+        try without subdomain <button mat-stroked-button color="primary" (click)="redirectToDomain(withoutSubdomain)"> {{withoutSubdomain}} </button>
+    </div>
+    <div class="not-subdomain" *ngIf="!hasSubdomain" >
+        Please check if your domain name is correct 
+    </div>
+</div>

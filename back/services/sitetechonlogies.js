@@ -11,6 +11,7 @@ async function getTestDataFromFile(domain){
 
     if (process.env.NODE_ENV !== "prod") {
         url = `http://localhost:9000/cashed/effinamazing.com.json`;
+        // url = `http://localhost:9000/cashed/forum.xda-developers.com-error.json`;
     }
     // let pathURI = path.resolve("../test-data/", 'effinamazing.com.json');
     let response = await axios({

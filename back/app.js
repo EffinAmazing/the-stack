@@ -24,8 +24,6 @@ let optionsSSL = {
     cert: fs.readFileSync('cert.pem')
 }
 
-console.log(process.env);
-
 if(process.env.NODE_ENV === 'prod') {
     // Certificate
     const privateKey = fs.readFileSync('/etc/letsencrypt/live/mtsb-api.effinamazing.com/privkey.pem', 'utf8');
@@ -39,12 +37,12 @@ if(process.env.NODE_ENV === 'prod') {
     };
 } 
 
-console.log(optionsSSL);
+// console.log(optionsSSL);
 
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
-mongoose.connect(config.MONGOURI + config.DB_NAME , {useNewUrlParser: true});
+mongoose.connect(config.MONGOURI + config.DB_NAME , {useNewUrlParser: true,  useUnifiedTopology: true });
 
 app.use(cors());
 // parse data with connect-multiparty. 
