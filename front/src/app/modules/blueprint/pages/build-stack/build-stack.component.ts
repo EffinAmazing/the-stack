@@ -119,8 +119,16 @@ export class BuildStackComponent implements OnInit {
       this.nodesList.forEach((nodeId) => {
         const item = this.nodes[nodeId];
         //
-        if (!item.hide && ( this.verifyOrderToHide(item.tool.categories) || forbiddenTags.includes(item.tool.tag)) &&
-        item.tool.tag !== 'analytics' && all - hidden > 10) {
+        let oldTool = false;
+        if (item.end) {
+          const endDate = new Date(item.end);
+          const diff = Date.now() - endDate.getTime();
+          if (diff > 7776000000) {
+            oldTool = true;
+          }
+        }
+        if (!item.hide && ( this.verifyOrderToHide(item.tool.categories) || forbiddenTags.includes(item.tool.tag) || oldTool ) &&
+        ( item.tool.tag !== 'analytics' || oldTool) && all - hidden > 10) {
           item.hide = true;
           this.nodesForUpdate.push(item.id);
           hidden++;
