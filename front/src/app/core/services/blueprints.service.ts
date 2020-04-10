@@ -26,6 +26,10 @@ export class BlueprintsService {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolshide/`, { ids } ));
   }
 
+  unhideNodes(ids: string[]): Observable<any>{
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolsunhide/`, { ids } ));
+  }
+
   addArrow(blueprintId, data): Observable<any> {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}arrows/`, { data, blueprintId }));
   }

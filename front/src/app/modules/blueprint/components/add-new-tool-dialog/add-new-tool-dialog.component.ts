@@ -59,12 +59,10 @@ export class AddNewToolDialogComponent {
     }
 
     public handleSelectTool(tool: Tool) {
-      if (!tool.nodeId) {
-        if (this.selected[tool.id]) {
-          delete this.selected[tool.id];
-        } else {
-          this.selected[tool.id] = tool;
-        }
+      if (this.selected[tool.id]) {
+        delete this.selected[tool.id];
+      } else {
+        this.selected[tool.id] = tool;
       }
     }
 
@@ -88,7 +86,7 @@ export class AddNewToolDialogComponent {
       }
     }
 
-    public isSelectedAnyTool(): boolean{
+    public isSelectedAnyTool(): boolean {
       let isSelcted = false;
       for (const key in this.selected) {
         if (this.selected.hasOwnProperty(key)) {

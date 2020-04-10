@@ -30,6 +30,7 @@ export class BuilderComponent implements OnInit {
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
   @Input() historyEmit: Observable<any>;
+  @Input() addedNewNode: Observable<any>;
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
   nodes: BluePrintTool[] = [];
@@ -238,6 +239,30 @@ export class BuilderComponent implements OnInit {
       }
     });
 
+    this.addedNewNode.subscribe(res => {
+      const start = 10;
+      if (res) {
+        res.forEach((item, index) => {
+          const existNode = this.showNodes.find(node => node.id === item.id);
+          if (!existNode) {
+            item.hide = false;
+            if (typeof item.position.x !== 'number') {
+              item.position.y = 0;
+              const yIndex = Math.floor(index / maxItems);
+              let xIndex = (index - yIndex * maxItems);
+              if (xIndex === Math.floor(maxItems / 2) && yIndex === 0) {
+                xIndex++;
+              }
+              item.position.y = (start - yIndex) * offsetY + Math.floor(offsetY * 0.5);
+              item.position.x = xIndex * offsetX;
+            }
+
+            this.showNodes.push(item);
+          }
+        });
+        /* */
+      }
+    });
   }
 
   public processImageSrc(link) {

@@ -53,6 +53,28 @@ class ToolsNodes {
         }
     }
 
+    unhideList(req, res, next ){
+        let ids = req.body.ids;
+
+        if (ids) {
+            this.model.unhideList(ids).then((result) => {
+                res.json({
+                    result: result
+                })
+            }).catch((err)=>{
+                res.json({ 
+                    result: "Error",
+                    message: err.message
+                })
+            })
+        } else {
+            res.status(400).json({ 
+                result: "Error",
+                message: "incorrect data"
+            })
+        }
+    }
+
     add(req, res, next) {
         let data = req.body.data;
 

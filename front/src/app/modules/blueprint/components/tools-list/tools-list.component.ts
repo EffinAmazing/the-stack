@@ -17,6 +17,7 @@ export class ToolsListComponent implements OnInit {
   @Input() loadedNodes: Observable<any>;
   @Input() loadedCategories: Observable<any>;
   @Input() updatedOutNodeData: Observable<BluePrintTool | null>;
+  @Input() addedNewNode: Observable<BluePrintTool[] | null>;
   @Output() toogleVisibilityNode: EventEmitter<any> = new EventEmitter();
   @Output() closeTools: EventEmitter<any> = new EventEmitter();
   @Output() updatedNodeData: EventEmitter<{ nodeId: string, data: BluePrintTool }> = new EventEmitter();
@@ -45,6 +46,34 @@ export class ToolsListComponent implements OnInit {
         }
       }
 
+    });
+
+    this.addedNewNode.subscribe((nodes) => {
+      if (nodes) {
+        nodes.forEach(item => {
+          if (this.nodes[item.id]) {
+            this.nodes.hide = false;
+          } else {
+            this.nodes[item.id] = item;
+            if (item.tool.categories && item.tool.categories.length) {
+              item.tool.categories.forEach((cat) => {
+                const index = this.categoriesList.findIndex(ctItem => ctItem.name === cat);
+                if (index !== -1) {
+                  this.categoriesList[index].nodes.push(item.id);
+                } else {
+                  this.categoriesList.push({
+                    name: cat,
+                    nodes: [item.id],
+                    cost: 0,
+                    needToBeCollapsed: false
+                  });
+                }
+              });
+            }
+            this.editStates[item.id] = { start: false, end: false, cost: false, owner: false };
+          }
+        });
+      }
     });
 
     const checkIsAdded: {[key: string]: boolean} = { };

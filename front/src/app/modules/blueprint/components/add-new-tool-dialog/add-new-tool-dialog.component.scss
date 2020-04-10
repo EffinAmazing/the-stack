@@ -20,13 +20,12 @@
     .mat-list-item {
         cursor: pointer;
 
-        &.selected{
-            background-color: rgba(90, 140, 220, 0.5);
+        &.is-already-in-stack{
+            background-color: rgba(50, 220, 190, 0.5);
         }
 
-        &.is-already-in-stack{
-            background-color: rgba(190, 190, 190, 0.5);
-            cursor: default;
+        &.selected{
+            background-color: rgba(90, 140, 220, 0.5);
         }
     }
 }

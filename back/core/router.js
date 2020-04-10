@@ -33,6 +33,7 @@ router.put("/toolsnodes/:id", toolsNodes.update.bind(toolsNodes));
 router.post("/toolsnodes/", toolsNodes.add.bind(toolsNodes));
 router.post("/toolsnodes/list", toolsNodes.addList.bind(toolsNodes));
 router.post("/toolshide/", toolsNodes.hidelist.bind(toolsNodes));
+router.post("/toolsunhide/", toolsNodes.unhideList.bind(toolsNodes));
 router.get('/tools/search', toolsNodes.getListOfTools.bind(toolsNodes));
 
 router.post("/arrows/", arrows.add.bind(arrows));

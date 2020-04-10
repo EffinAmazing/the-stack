@@ -6,8 +6,9 @@
             <mat-expansion-panel *ngFor="let item of categoriesList" [expanded]="!item.needToBeCollapsed">
                 <mat-expansion-panel-header>
                     <mat-panel-title> {{item.name}} </mat-panel-title>
+                    <div class="category-total-spand">  Category cost: <span class="red">${{item.cost?item.cost:0}}</span> </div>
                 </mat-expansion-panel-header>
-                <div class="category-total-spand">  Category cost: <span class="red">${{item.cost?item.cost:0}}</span> </div>
+                
                 <div class="nodes-holder">
                     <div class="node-items" *ngFor="let nodeId of item.nodes"> 
                         <div class="tool-name">

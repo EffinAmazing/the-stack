@@ -33,6 +33,7 @@ export class BuildStackComponent implements OnInit {
   changedArrows$: BehaviorSubject<any> = new BehaviorSubject([]);
   changedCategories$: BehaviorSubject<any> = new BehaviorSubject({});
   changeNodeData$: BehaviorSubject<BluePrintTool | null> = new BehaviorSubject(null);
+  addedNewNode$: BehaviorSubject<BluePrintTool[] | null> = new BehaviorSubject(null);
   nodesForUpdate: any = [];
   selectedArrow: any;
   hideList = true;
@@ -226,9 +227,13 @@ export class BuildStackComponent implements OnInit {
   }
 
   public parsePrice(price: number): string {
-    const tPrice = Math.floor(price / 1000);
+    if (price >= 1000) {
+      const tPrice = Math.floor(price / 1000);
 
-    return (tPrice ? (tPrice + ', ') : ' ') + (price - tPrice * 1000);
+      return (tPrice ? (tPrice + ', ') : ' ') + (price - tPrice * 1000);
+    } else {
+      return price.toString();
+    }
   }
 
   private verifyOrderToHide(categories) {
@@ -331,19 +336,32 @@ export class BuildStackComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       const listToCreate = [];
+      const listToUnhide = [];
       if (result) {
         for (const key in result) {
           if (result.hasOwnProperty(key)) {
-            listToCreate.push({
-                blueprintId: this.blueprint.id,
-                toolId: result[key].id,
-                hide: false,
-                dependencies: []
-            });
+            if (!result[key].nodeId) {
+              listToCreate.push({
+                  blueprintId: this.blueprint.id,
+                  toolId: result[key].id,
+                  hide: false,
+                  dependencies: []
+              });
+            } else {
+              listToUnhide.push(result[key].nodeId);
+            }
           }
         }
 
-        if (listToCreate.length > 0) {
+        this.proceedAddNewNodes(listToCreate, listToUnhide, result).then(nodes => {
+          if (nodes.length) {
+            this.addedNewNode$.next(nodes);
+          }
+        }).catch(err => console.log(err));
+
+
+
+        /*if (listToCreate.length > 0) {
           this.service.addNewNodeItems(listToCreate).toPromise().then(nodes => {
             const nodesIds: string[] = [];
             nodes.map((node) => {
@@ -353,13 +371,55 @@ export class BuildStackComponent implements OnInit {
               return node;
             });
             this.nodesList = [...this.nodesList, ...nodesIds];
-            this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList  });
+            this.addedNewNode$.next(nodes);
+            // this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList  });
           }).catch(err => {
             console.log(err);
           });
         }
+
+        if (listToUnhide.length > 0) {
+          this.service.unhideNodes(listToUnhide).toPromise()
+            .then(res => {
+              const nodes = listToUnhide.map((nodeId) => {
+                this.nodes[nodeId].hide = false;
+                return this.nodes[nodeId];
+              });
+
+              this.addedNewNode$.next(nodes);
+            })
+            .catch(err => console.log(err));
+        }*/
       }
     });
+  }
+
+  async proceedAddNewNodes(listToCreate, listToUnhide, tools) {
+    let nodes = [];
+    let unhideNodes = [];
+    if (listToCreate.length) {
+      nodes = await this.service.addNewNodeItems(listToCreate).toPromise();
+      console.log(nodes);
+      const nodesIds: string[] = [];
+      nodes.map((node) => {
+        node.tool = tools[node.toolId];
+        nodesIds.push(node.id);
+        this.nodes[node.id] = node;
+        return node;
+      });
+      this.nodesList = [...this.nodesList, ...nodesIds];
+    }
+
+    if (listToUnhide.length) {
+      const res = await this.service.unhideNodes(listToUnhide).toPromise();
+      unhideNodes = listToUnhide.map((nodeId) => {
+        this.nodes[nodeId].hide = false;
+        return this.nodes[nodeId];
+      });
+      console.log(unhideNodes, res);
+    }
+
+    return [...nodes, ...unhideNodes];
   }
 
   public handleRemoveArrows(ids, blockReload?: any ) {
