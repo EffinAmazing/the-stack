@@ -17,6 +17,7 @@ import * as d3 from 'd3';
 import { environment } from 'src/environments/environment';
 
 
+
 @Component({
   selector: 'app-build-stack',
   templateUrl: './build-stack.component.html',
@@ -55,6 +56,7 @@ export class BuildStackComponent implements OnInit {
       public infoDialog: MatDialog) {
     this.route.queryParams.subscribe((params: any) => {
       this.domain = params.domain;
+      window['dataLayer'] = window['dataLayer'] || [];
     });
   }
 
@@ -164,6 +166,11 @@ export class BuildStackComponent implements OnInit {
   public handleUpdatedNodeData(result) {
     // console.log(result);
     if (result.data) {
+      window['dataLayer'].push({
+        event: 'node.updateInfo',
+        node:  this.nodes[result.nodeId],
+        tool: this.nodes[result.nodeId].tool
+      });
       this.service.updateNodeTool(result.nodeId, result.data).subscribe((res) => {
         const tool = this.nodes[result.nodeId].tool;
         res.tool = this.nodes[result.nodeId].tool;
@@ -261,6 +268,13 @@ export class BuildStackComponent implements OnInit {
       this.deleteArrowDots();
       this.history.addAction(this.blueprint.id, { name: 'removeArrow', data: this.selectedArrow });
       const lineId = this.selectedArrow.lineId;
+
+      window['dataLayer'].push({
+        event: 'arrow.remove',
+        startNode:  this.nodes[this.selectedArrow.start.nodeId],
+        endNode: this.nodes[this.selectedArrow.end.nodeId]
+      });
+
       this.handleRemoveArrows([lineId], true);
       document.querySelector(`path#${lineId}`).remove();
       this.selectedArrow = null;
@@ -269,14 +283,22 @@ export class BuildStackComponent implements OnInit {
 
   public updatedNodePosiotion(data) {
     // console.log('aaa', data);
+    const oldPosition = this.nodes[data.nodeId].position;
     if (!data.disableHistory) {
-      const oldPosition = this.nodes[data.nodeId].position;
+
       this.history.addAction(this.blueprint.id, { name: 'updatePosition', data: {
         nodeId: data.nodeId,
         newPosition: data.position,
         oldPosition }
       });
     }
+    window['dataLayer'].push({
+      event: 'node.updatePosition',
+      node:  this.nodes[data.nodeId],
+      newPosition: data.position,
+      oldPosition
+    });
+
     this.service.updateNodeTool(data.nodeId, { position: data.position }).subscribe((res) => {
       const tool = this.nodes[data.nodeId].tool;
       res.tool = this.nodes[data.nodeId].tool;
@@ -289,7 +311,7 @@ export class BuildStackComponent implements OnInit {
   }
 
   private completedProceedNodes() {
-    console.log(this.nodesForUpdate);
+
     this.loaded = true;
     if (this.nodesForUpdate.length) {
       this.service.hideNodes(this.nodesForUpdate).subscribe((data) => {
@@ -399,12 +421,19 @@ export class BuildStackComponent implements OnInit {
     let unhideNodes = [];
     if (listToCreate.length) {
       nodes = await this.service.addNewNodeItems(listToCreate).toPromise();
-      console.log(nodes);
+      // console.log(nodes);
       const nodesIds: string[] = [];
       nodes.map((node) => {
         node.tool = tools[node.toolId];
         nodesIds.push(node.id);
         this.nodes[node.id] = node;
+
+        window['dataLayer'].push({
+          event: 'node.addedNew',
+          node,
+          tool: tools[node.toolId]
+        });
+
         return node;
       });
       this.nodesList = [...this.nodesList, ...nodesIds];
@@ -414,6 +443,11 @@ export class BuildStackComponent implements OnInit {
       const res = await this.service.unhideNodes(listToUnhide).toPromise();
       unhideNodes = listToUnhide.map((nodeId) => {
         this.nodes[nodeId].hide = false;
+        window['dataLayer'].push({
+          event: 'node.unhide',
+          node: this.nodes[nodeId],
+          tool: this.nodes[nodeId].tool
+        });
         return this.nodes[nodeId];
       });
       console.log(unhideNodes, res);
@@ -450,8 +484,16 @@ export class BuildStackComponent implements OnInit {
   public handleHideNodeItem(data: { item: BluePrintTool, disableHistory?: boolean }) {
     if (!data.item.hide) {
       data.item.hide = true;
+      window['dataLayer'].push({
+        event: 'node.hide',
+        node: data.item
+      });
     } else {
       data.item.hide = false;
+      window['dataLayer'].push({
+        event: 'node.unhide',
+        node: data.item
+      });
     }
 
     if (!data.disableHistory) {  this.history.addAction(this.blueprint.id, { name: 'hideNode', data }); }
@@ -466,8 +508,13 @@ export class BuildStackComponent implements OnInit {
   public handleAddArrow(data) {
     // console.log(data);
     this.history.addAction(this.blueprint.id, { name: 'addArrow', data });
+    window['dataLayer'].push({
+      event: 'arrow.add',
+      startNode: this.nodes[data.start.nodeId],
+      endNode: this.nodes[data.end.nodeId]
+    });
     this.service.addArrow(this.blueprint.id, data).toPromise().then((result) => {
-      console.log(result);
+      // console.log(result);
     }).catch(err => console.log(err));
   }
 
@@ -478,6 +525,10 @@ export class BuildStackComponent implements OnInit {
 
   public handleHideNode(data) {
     // console.log('handleHideNode', data);
+    window['dataLayer'].push({
+      event: 'node.hide',
+      node: data.item
+    });
     this.history.addAction(this.blueprint.id, { name: 'hideNode', data: data.item });
     this.service.updateNodeTool(data.item.id, { hide: true }).subscribe((res) => {
       res.tool = this.nodes[data.item.id].tool;
@@ -492,10 +543,13 @@ export class BuildStackComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
-      console.log(result);
+
       if ( result ) {
         console.log(this.service);
+        window['dataLayer'].push({
+          event: 'stack.remove',
+          stack: this.blueprint
+        });
         this.service.removeBluePrint(this.blueprint.id).toPromise().then(() => {
           this.router.navigateByUrl('/home');
         }).catch(err => alert(err));
