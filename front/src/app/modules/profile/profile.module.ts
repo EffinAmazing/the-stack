@@ -9,10 +9,13 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import { SignupComponent } from './pages/signup/signup.component';
 import { SignupFormComponent } from './components/signup-form/signup-form.component';
+import { SigninComponent } from './pages/signin/signin.component';
+import { SigninFormComponent } from './components/signin-form/signin-form.component';
+import { AccountComponent } from './pages/account/account.component';
 
 
 @NgModule({
-  declarations: [SignupComponent, SignupFormComponent],
+  declarations: [SignupComponent, SignupFormComponent, SigninComponent, SigninFormComponent, AccountComponent],
   imports: [
     CommonModule,
     ProfileRoutingModule,

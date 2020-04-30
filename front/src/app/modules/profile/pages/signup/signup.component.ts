@@ -26,7 +26,11 @@ export class SignupComponent implements OnInit {
     this.service.createUser(data).toPromise().then(res => {
       console.log(res);
       this.isLoading = false;
-      // 
+      
+      this.router.onSameUrlNavigation = 'reload';
+      this.router.navigateByUrl('/profile/signin', { skipLocationChange: false });
+      // window.location.href = window.location.origin + window.location.pathname + '#/profile/signin';
+      // window.location.reload();
     }).catch((err) => {
       this.isLoading = false;
       this.isError = true;

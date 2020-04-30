@@ -9,6 +9,7 @@ import { HomeModule } from './modules/home/home.module';
 import { NoCacheHeadersInterceptor } from './core/interceptors/no-cache-headers.interceptor';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { ProfileModule } from './modules/profile/profile.module';
+import { AuthInterceptor } from "./core/interceptors/auth.interceptor";
 
 @NgModule({
   declarations: [
@@ -26,6 +27,11 @@ import { ProfileModule } from './modules/profile/profile.module';
     {
       provide: HTTP_INTERCEPTORS,
       useClass: NoCacheHeadersInterceptor,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
       multi: true
     },
     {

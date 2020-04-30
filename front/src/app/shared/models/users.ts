@@ -6,3 +6,8 @@ export interface SignUPFormData {
     lastName: string;
     password: string;
 }
+
+export interface SignInFromData {
+    email: string;
+    password: string;
+}

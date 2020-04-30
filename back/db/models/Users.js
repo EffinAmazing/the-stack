@@ -58,9 +58,11 @@ class UserModel extends AbstaractModel{
         this.schema.methods.comparePassword = function (candidatePassword, next) { // add to user model function comparing passwords
             let promise = new Promise((resolve, reject) => {
                 bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
+                    console.log( 'isMatch', isMatch );
                     if (err)  {
                         reject(err);
                     } else {
+                        console.log('resolve');
                         resolve(isMatch)
                     }
                 })
@@ -77,9 +79,11 @@ class UserModel extends AbstaractModel{
 
     async checkCredantial(username, password){
         let user = await this.modelDB.findOne({$or:[{email: username}, { username: username}]});
+        console.log(user);
         if (user) {
             let isMatch = await user.comparePassword(password);
-            return isMatch;
+            console.log('checkCredantial -> isMatch', isMatch);
+            return user;
         } else {
             return false;
         }
@@ -87,8 +91,9 @@ class UserModel extends AbstaractModel{
 
     async create(data){
         data.validationCode = uniqid.time().substr(-4);
-        let user = await this.modelDB.findOne({$or:[{email: username}, { username: username}]});
+        let user = await this.modelDB.findOne({$or:[{email: data.email}, { username: data.email}]}).where();
         if (!user) {
+            data['username'] = data['email'];
             user = super.create(data, []);
             return user;
         } else {

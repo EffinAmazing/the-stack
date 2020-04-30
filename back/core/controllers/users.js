@@ -11,6 +11,7 @@ class Users {
 
     signin(req, res, next) {
         passport.authenticate('local', {session: false}, (err, user, info) => {
+            console.log('err, user, info', err, user, info);
             if (err || !user) {
                 res.json({
                     result: 'Error',
@@ -29,7 +30,7 @@ class Users {
                     delete user.password;
                     res.json({
                         result: {
-                            data: user,
+                            user: user,
                             token: token
                         }
                     })
@@ -48,14 +49,13 @@ class Users {
                     result: user
                 })
             }).catch(err=>{
-                // console.log(err);
+                console.log(err);
                 res.status(500).json({
                     result: 'Error',
                     message: 'Someting went wrong'
                 })
             });
         } else {
-            // console.log(err);
             res.status(200).json({
                 result: 'Error',
                 message: 'Bad request'

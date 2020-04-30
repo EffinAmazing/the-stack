@@ -155,5 +155,8 @@
       }
     }
   },
-  "defaultProject": "merch-blueprint-front"
+  "defaultProject": "merch-blueprint-front",
+  "cli": {
+    "analytics": false
+  }
 }

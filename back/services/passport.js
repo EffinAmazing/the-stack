@@ -11,11 +11,13 @@ exports.initPassport = function(){
     passport.use(new Strategy(  
       function(username, password, done) {
         // database dummy - find user and verify password
+        
   
         console.log("initPassport Strategy", username, password);
         let dbModel = new UserModel();
            dbModel.checkCredantial(username, password)
                .then((user)=>{
+                 console.log( 'done', user);
                  done(null,user);
                })
                .catch((err)=>{
