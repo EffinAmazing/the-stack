@@ -3,6 +3,7 @@
         <div class="mt-container">
             <div class="signup-from-container">
                 <mat-card *ngIf="!isLoading">
+                    <span *ngIf="isError" class="error-message"> {{errorMessage}} </span>
                     <app-signin-form (submitForm)="handleSubmitForm($event)"></app-signin-form>
                 </mat-card>
                 <div class="loading-data-section" *ngIf="isLoading">

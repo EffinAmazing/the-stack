@@ -40,10 +40,14 @@
             <div  class="info-paragraph"> 
                 <div class="title"> owner: </div>
                 <div class="data">
-                    <mat-form-field class="full-width">
-                        <mat-label>Owner</mat-label>
-                        <input matInput placeholder="owner" type="text" formControlName="owner">
+                    <input type="hidden" formControlName="owner" />
+                    <div class="list-owners"><span *ngFor="let item of getOwners()" class="item-owners" > {{item}}  &nbsp; 
+                        <mat-icon class="icon-item-owners" (click)="removeOwner(item)">cancel</mat-icon></span></div>
+                    <mat-form-field >
+                        <mat-label>Owners</mat-label>
+                        <input matInput placeholder="owner" type="email" [(ngModel)]="ownerTemp" [ngModelOptions]="{standalone: true}">
                     </mat-form-field>
+                    <button mat-raised-button class="add-button-owner" (click)="handleAddOwner()"> <mat-icon>add</mat-icon> Add</button>
                 </div>
             </div>
             <mat-divider></mat-divider>
@@ -61,10 +65,14 @@
             <div  class="info-paragraph"> 
                 <div class="title"> people who are trained on it: </div>
                 <div class="data">
-                    <mat-form-field class="full-width">
-                        <mat-label>Text</mat-label>
-                        <textarea  matInput placeholder="text" formControlName="trainedOn"></textarea>
+                    <input type="hidden" formControlName="trainedOn"  />
+                    <div class="list-owners"><span *ngFor="let item of getTrainedOn()" class="item-owners" > {{item}}  &nbsp; 
+                        <mat-icon class="icon-item-owners" (click)="removeTrainedOn(item)">cancel</mat-icon></span></div>
+                    <mat-form-field >
+                        <mat-label>Trained On</mat-label>
+                        <input matInput placeholder="Trained On" type="email" [(ngModel)]="trainOnTemp" [ngModelOptions]="{standalone: true}">
                     </mat-form-field>
+                    <button mat-raised-button class="add-button-owner" (click)="handleAddTrainedOn()"> <mat-icon>add</mat-icon> Add</button>
                 </div>
             </div>
         </form>

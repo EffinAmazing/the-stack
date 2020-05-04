@@ -15,6 +15,8 @@ const host = environment.serverURI;
 
 export class NodeDetailsComponent  {
   nodeForm: FormGroup;
+  ownerTemp: string = '';
+  trainOnTemp: string = '';
 
   constructor(
     public dialogRef: MatDialogRef<NodeDetailsComponent>,
@@ -38,6 +40,101 @@ export class NodeDetailsComponent  {
     }
   }
 
+  public getOwners(): string[]{
+    const owners = this.nodeForm.get('owner').value;
+
+    if (owners === '') {
+      return [];
+    } else {
+      return owners.split(',');
+    }
+  }
+
+  public getTrainedOn(): string[] {
+    const trainedOn = this.nodeForm.get('trainedOn').value;
+    
+    if (trainedOn === '') {
+      return [];
+    } else {
+      return trainedOn.split(',');
+    }
+  }
+
+  public addOwner(email: string): void {
+    let owners = this.nodeForm.get('owner').value;
+
+    let list = owners.split(',');
+
+    if (owners === '') {
+      list = [];
+    }
+
+    const duplicat = list.find(item => item === email);
+    if (!duplicat) { 
+      list.push(email);
+    }
+
+    owners = list.join(',');
+    this.nodeForm.get('owner').setValue(owners)
+  }
+
+  public addTrainedOn(email: string): void{
+    let trainedOn = this.nodeForm.get('trainedOn').value;
+
+    let list = trainedOn.split(',');
+
+    if (trainedOn === '') {
+      list = [];
+    }
+
+    const duplicat = list.find(item => item === email);
+    if (!duplicat) { 
+      list.push(email);
+    }
+
+    trainedOn = list.join(',');
+    this.nodeForm.get('trainedOn').setValue(trainedOn)
+  }
+
+  public removeOwner(email: sring): void {
+    let owners = this.nodeForm.get('owner').value;
+    const list:string[] = owners.split(',');
+    const index = list.findIndex((item) => item === email);
+    if (index !== -1) {
+      list.splice(index, 1);
+      owners =  list.join(',');
+      this.nodeForm.get('owner').setValue(owners)
+    }
+  }
+
+  public removeTrainedOn(email: string) {
+    let trainedOn = this.nodeForm.get('trainedOn').value;
+    const list:string[] = trainedOn.split(',');
+    const index = list.findIndex((item) => item === email);
+    if (index !== -1) {
+      list.splice(index, 1);
+      trainedOn =  list.join(',');
+      this.nodeForm.get('owner').setValue(trainedOn)
+    }
+  }
+
+  public handleAddOwner(){
+    // console.log(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i.test( this.ownerTemp ), this.ownerTemp);
+
+    if ( /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i.test( this.ownerTemp ) ) {
+      this.addOwner(this.ownerTemp);
+      this.ownerTemp = '';
+    }
+     
+  }
+
+  public handleAddTrainedOn () {
+    if ( /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i.test( this.trainOnTemp ) ) {
+      this.addTrainedOn(this.trainOnTemp);
+      this.trainOnTemp = '';
+    }
+  }
+  
   public getAssetsFolder() {
     if (typeof window['assets'] !== 'undefined') {
       return window['assets'];

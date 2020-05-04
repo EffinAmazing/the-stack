@@ -22,16 +22,25 @@ export class SigninComponent implements OnInit {
   }
 
   handleSubmitForm(data) {
+    this.isLoading = true;
     this.service.login(data.email, data.password).toPromise().then( res => {
       console.log(res);
-      /*this.service.setSession(res);
-      this.router.onSameUrlNavigation = 'reload';
-      this.router.navigateByUrl('/profile', { skipLocationChange: false });
-      window.location.href = window.location.origin + window.location.pathname + '#/profile';
+      this.isLoading = false;
+      if (res === 'Error') {
+        this.isError = true;
+      } else {
+        this.service.setSession(res);
+        this.router.onSameUrlNavigation = 'reload';
+        this.router.navigateByUrl('/profile', { skipLocationChange: false });
+      }
+      /*window.location.href = window.location.origin + window.location.pathname + '#/profile';
       window.location.reload();
       */
     }).catch(err => {
       console.log(err);
+      this.isError = true;
+      this.isLoading = false;
+
     });
   }
 
