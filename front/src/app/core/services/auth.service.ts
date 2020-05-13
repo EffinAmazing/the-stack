@@ -24,13 +24,13 @@ export class AuthService {
   }
 
   getCurrentUser() {
-    let str = localStorage.getItem("session_user");
+    const str = localStorage.getItem("session_user");
     return JSON.parse( decodeURI(str) );
   }
 
   setSession(authResult) {
-    let userStr = encodeURI( JSON.stringify(authResult.user) );
+    const userStr = encodeURI( JSON.stringify(authResult.user) );
     localStorage.setItem('session_user', userStr);
     localStorage.setItem('auth_token', authResult.token);
-  }    
+  }
 }

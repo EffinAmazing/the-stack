@@ -1,7 +1,87 @@
 <div class="main">
+    <app-header [user]="user"></app-header>
     <div class="mt-container"> 
-        <div>
-        
+        <div class="my-stack-container">
+          <h2> My Stacks </h2>
+          <div *ngIf="loadingBluePrints">
+            <mat-progress-bar
+                class="loading-page-data"
+                color="primary"
+                [mode]="modeName"
+                [value]="50"
+                [bufferValue]="75">
+            </mat-progress-bar>
+          </div>
+          <div *ngIf="!loadingBluePrints && !listBluePrints.length">
+            <div class="notice notice-message"> You haven't had created stacks yet. use form below, for creating one </div>
+            <div class="form-domain">
+
+              <h2> Input Domain </h2>
+              <div class="form-full-width-field">
+                  <mat-form-field appearance="outline" class="input-domain">
+                      <mat-label>Domain name:</mat-label>
+                      <input matInput placeholder="" [formControl]="domain" required (input)="handleInput($event)" (keyup.enter)="submitDomain()">
+                      <mat-error *ngIf="domain.invalid"> Please enter a valid domain </mat-error>
+                  </mat-form-field>
+              </div>
+              <div class="submit-domain">
+                  <button mat-raised-button color="primary" (click)="submitDomain()">Submit</button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!loadingBluePrints" class="list-of-blueprints"> 
+            
+            <mat-card *ngFor="let stack of listBluePrints" class="item-of-blueprint"> 
+              <div class="item-content">
+                <div class="icon-of-domain">
+                  <img class="icon" [src]="getDomainLogo(stack.domain)" />
+                </div>
+                <div class="stack-info"> 
+                  <div class="domain-title"> {{ stack.domain }} </div>
+                  <div> 
+                    <b>created:</b>  &nbsp; <span> {{stack.created | date}} </span>  &nbsp;  &nbsp; &nbsp;
+                    <a  mat-raised-button color="primary" [routerLink]="'/stack/build/' + stack.id"> View </a> &nbsp; 
+                    <button mat-raised-button disabled> Delete </button>
+                  </div>
+                </div>
+              </div>
+            </mat-card>
+          </div>
+        </div>
+        <div class="great-spacer"></div>
+        <mat-divider></mat-divider>
+        <div class="great-spacer"></div>
+        <div class="invited-stack-list"> 
+          <h2> Shared Stacks </h2>
+          <div *ngIf="loadingSharedStacks">
+            <mat-progress-bar
+                class="loading-page-data"
+                color="primary"
+                [mode]="modeName"
+                [value]="50"
+                [bufferValue]="75">
+            </mat-progress-bar>
+          </div>
+          <div *ngIf="!loadingSharedStacks && !sharedBluePrints.length">
+            <div class="notice notice-message"> You haven't had shared stacks </div>
+          </div>
+          <div *ngIf="!loadingSharedStacks && sharedBluePrints.length">
+            <mat-card *ngFor="let stack of sharedBluePrints" class="item-of-blueprint"> 
+              <div class="item-content">
+                <div class="icon-of-domain">
+                  <img class="icon" [src]="getDomainLogo(stack.domain)" />
+                </div>
+                <div class="stack-info"> 
+                  <div class="domain-title"> {{ stack.domain }} </div>
+                  <div> 
+                    <b>created:</b>  &nbsp; <span> {{stack.created | date}} </span>  &nbsp;  &nbsp; &nbsp;
+                    <a  mat-raised-button color="primary" [routerLink]="'/stack/build/' + stack.id"> View </a> &nbsp; 
+                  </div>
+                </div>
+              </div>
+            </mat-card>
+          </div>
+
         </div>
     </div>
 </div>

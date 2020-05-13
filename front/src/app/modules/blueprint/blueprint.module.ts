@@ -23,13 +23,14 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { InfoPopupDialogComponent } from './components/info-popup-dialog/info-popup-dialog.component';
 import { AddNewToolDialogComponent } from './components/add-new-tool-dialog/add-new-tool-dialog.component';
 import { SubdomainDetectComponent } from './components/subdomain-detect/subdomain-detect.component';
+import { InviteDialogComponent } from './components/invite-dialog/invite-dialog.component';
 
 @NgModule({
   declarations: [
     BuildStackComponent,
     ShareComponent,
     BuilderComponent,
-    ToolsListComponent, DeleteStackDialogComponent, CreateNewStackDialogComponent, NodeDetailsComponent, InfoPopupDialogComponent, AddNewToolDialogComponent, SubdomainDetectComponent],
+    ToolsListComponent, DeleteStackDialogComponent, CreateNewStackDialogComponent, NodeDetailsComponent, InfoPopupDialogComponent, AddNewToolDialogComponent, SubdomainDetectComponent, InviteDialogComponent],
   imports: [
     CommonModule,
     BlueprintRoutingModule,

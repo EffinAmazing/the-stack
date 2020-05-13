@@ -18,7 +18,23 @@ export class BlueprintsService {
     return this.mapper.mapResponse(this.http.get<BluePrintResp>(`${this.serverURI}blueprints/tools?domain=${domain}`));
   }
 
-  updateNodeTool(nodeID: string, data ): Observable<BluePrintTool>{
+  getBlueprint(id: string): Observable<BluePrintResp> {
+    return this.mapper.mapResponse(this.http.get<BluePrintResp>(`${this.serverURI}blueprints/tools/${id}`));
+  }
+
+  postDomainTools(domain: string): Observable<BluePrintResp>  {
+    return this.mapper.mapResponse(this.http.post<BluePrintResp>(`${this.serverURI}blueprints/tools`, { domain }));
+  }
+
+  inviteUsers(data): Observable<any> {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}blueprints/invite`, data));
+  }
+
+  getBluePrintsForUser(userId) {
+    return this.mapper.mapResponse(this.http.get<BluePrintTool[]>(`${this.serverURI}blueprints/list?userId=${userId}`));
+  }
+
+  updateNodeTool(nodeID: string, data ): Observable<BluePrintTool> {
     return this.mapper.mapResponse(this.http.put<BluePrintTool>(`${this.serverURI}toolsnodes/${nodeID}`, { data }));
   }
 
@@ -26,7 +42,7 @@ export class BlueprintsService {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolshide/`, { ids } ));
   }
 
-  unhideNodes(ids: string[]): Observable<any>{
+  unhideNodes(ids: string[]): Observable<any> {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolsunhide/`, { ids } ));
   }
 
@@ -54,7 +70,11 @@ export class BlueprintsService {
     return this.mapper.mapResponse(this.http.get(`${this.serverURI}tools/search?name=${name}&blueprint=${blueprintId}&offset=0`));
   }
 
-  addNewNodeItems(dataList): Observable<any>{
+  addNewNodeItems(dataList): Observable<any> {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolsnodes/list`, {data: dataList}));
+  }
+
+  getSharedBluePrints(): Observable<any> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}blueprints/shared`));
   }
 }

@@ -12,6 +12,7 @@ import { SignupFormComponent } from './components/signup-form/signup-form.compon
 import { SigninComponent } from './pages/signin/signin.component';
 import { SigninFormComponent } from './components/signin-form/signin-form.component';
 import { AccountComponent } from './pages/account/account.component';
+import { SharedModule } from '../../shared/shared.module';
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import { AccountComponent } from './pages/account/account.component';
     FormsControlsModule,
     LayoutModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    SharedModule
   ]
 })
 export class ProfileModule { }

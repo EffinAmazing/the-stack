@@ -40,7 +40,7 @@ export class NodeDetailsComponent  {
     }
   }
 
-  public getOwners(): string[]{
+  public getOwners(): string[] {
     const owners = this.nodeForm.get('owner').value;
 
     if (owners === '') {
@@ -96,7 +96,7 @@ export class NodeDetailsComponent  {
     this.nodeForm.get('trainedOn').setValue(trainedOn)
   }
 
-  public removeOwner(email: sring): void {
+  public removeOwner(email: string): void {
     let owners = this.nodeForm.get('owner').value;
     const list:string[] = owners.split(',');
     const index = list.findIndex((item) => item === email);

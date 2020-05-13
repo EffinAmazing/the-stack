@@ -9,9 +9,11 @@ import { DeleteStackDialogComponent } from '../../components/delete-stack-dialog
 import { CreateNewStackDialogComponent } from '../../components/create-new-stack-dialog/create-new-stack-dialog.component';
 import { InfoPopupDialogComponent } from '../../components/info-popup-dialog/info-popup-dialog.component';
 import { AddNewToolDialogComponent } from '../../components/add-new-tool-dialog/add-new-tool-dialog.component';
+import { InviteDialogComponent } from '../../components/invite-dialog/invite-dialog.component';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forbiddenTags, hiddenCategories } from '../../../../core/config';
+import { AuthService } from '../../../../core/services/auth.service';
 import html2canvas from 'html2canvas';
 import * as d3 from 'd3';
 import { environment } from 'src/environments/environment';
@@ -25,6 +27,7 @@ import { environment } from 'src/environments/environment';
 })
 export class BuildStackComponent implements OnInit {
   @ViewChild('categoriesList') categoriesList: ElementRef;
+  id: string | null = null;
   blueprint: BluePrint;
   nodes: BluePrintTool[] = [];
   nodesList: string[] = [];
@@ -43,62 +46,76 @@ export class BuildStackComponent implements OnInit {
   isError = false;
   isWaiting = false;
   errMessage = 'Something went wrong plaese check domain and try again';
+  authUser: any;
 
   constructor(
       private service: BlueprintsService,
       private route: ActivatedRoute,
       private router: Router,
       private social: SocialShareService,
+      private auth: AuthService,
       public history: ActionHistoryService,
       private upload: UploadImagesService,
       public deleteDialog: MatDialog,
       public toolsDialog: MatDialog,
-      public infoDialog: MatDialog) {
+      public infoDialog: MatDialog,
+      public inviteDialog: MatDialog) {
+    this.id = route.snapshot.params['id'];
+    console.log(this.id);
     this.route.queryParams.subscribe((params: any) => {
       this.domain = params.domain;
+      // console.log(params);
       window['dataLayer'] = window['dataLayer'] || [];
+      this.authUser = this.auth.getCurrentUser();
     });
   }
 
   ngOnInit(): void {
     if (this.domain) {
       this.service.getDomainTools(this.domain).subscribe((data) => {
-        if (typeof data === 'string') {
-          return this.isError = true;
-        }
-        console.log(data);
-        let hidden = 0;
-        this.blueprint = data.blueprint;
-        data.nodes.forEach((item) => {
-          const tool = data.tools.find((atool) =>  atool.id === item.toolId );
-          item.tool = tool;
-          this.nodes[item.id] = item;
-          this.nodesList.push(item.id);
-          if (item.hide ) { hidden++; }
-          if (item.tool.categories && item.tool.categories.length > 0) {
-            item.tool.categories.forEach((cat) => {
-              if (this.categories[cat]) {
-                this.categories[cat].push(item.id);
-              } else {
-                this.categories[cat] = [ item.id ];
-              }
-            });
-          } else {
-            this.categories['None'].push(item.id);
-          }
-          /* */
-        });
-
-        if (data.nodes.length - hidden > 10 && hidden === 0) {
-          this.proceedNodes(data.nodes.length, hidden);
-        } else {
-          this.completedProceedNodes();
-        }
+        this.proceedBluePrintData(data);
         // console.log(this.nodes, this.nodes.length);
       }, err => this.isError = true );
-
+    } else if (this.id) {
+      this.service.getBlueprint(this.id).subscribe((data) => {
+        this.proceedBluePrintData(data);
+      }, err => this.isError = true );
     } else {
       this.isError = true;
+    }
+  }
+
+  private proceedBluePrintData(data) {
+    if (typeof data === 'string') {
+      return this.isError = true;
+    }
+    console.log(data);
+    let hidden = 0;
+    this.blueprint = data.blueprint;
+    data.nodes.forEach((item) => {
+      const tool = data.tools.find((atool) =>  atool.id === item.toolId );
+      item.tool = tool;
+      this.nodes[item.id] = item;
+      this.nodesList.push(item.id);
+      if (item.hide ) { hidden++; }
+      if (item.tool.categories && item.tool.categories.length > 0) {
+        item.tool.categories.forEach((cat) => {
+          if (this.categories[cat]) {
+            this.categories[cat].push(item.id);
+          } else {
+            this.categories[cat] = [ item.id ];
+          }
+        });
+      } else {
+        this.categories['None'].push(item.id);
+      }
+      /* */
+    });
+
+    if (data.nodes.length - hidden > 10 && hidden === 0) {
+      this.proceedNodes(data.nodes.length, hidden);
+    } else {
+      this.completedProceedNodes();
     }
   }
 
@@ -348,6 +365,26 @@ export class BuildStackComponent implements OnInit {
       const dot2 = document.querySelector(`#dot-${this.selectedArrow.end.nodeId}`);
       if (dot2) { dot2.remove(); }
     }
+  }
+
+  public handleClickInviteUser() {
+    const dialogRef = this.inviteDialog.open(InviteDialogComponent, {
+      width: '520px',
+      data: { blueprintId: this.blueprint.id }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(result);
+      if (result) {
+        this.service.inviteUsers(result).toPromise()
+        .then(res => {
+          console.log(res);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+      }
+    });
   }
 
   public handleAddNewTool() {

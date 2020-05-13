@@ -17,6 +17,14 @@ export class UsersService {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}users/signup`, { data }));
   }
 
+  getUserByCode(code): Observable<any> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}users/bycode?code=${code}`));
+  }
+
+  completeUserSignup(id, code, data): Observable<any> {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}users/complete/${id}`, { code, data }));
+  }
+
   signInUser() {
 
   }

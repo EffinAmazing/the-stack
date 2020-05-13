@@ -1,0 +1,12 @@
+<mat-toolbar color="primary">
+    <mat-toolbar-row>
+      <span> App </span>
+      <span class="spacer"></span>
+      <div class="profile-data"> 
+        <a class="header-link" [routerLink]="'/profile'">
+            {{ user.firstName }} {{ user.lastName }}
+            <mat-icon class="user-account-icon">account_circle</mat-icon>
+        </a>
+      </div>
+    </mat-toolbar-row>
+</mat-toolbar>

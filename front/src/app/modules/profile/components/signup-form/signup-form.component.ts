@@ -1,6 +1,7 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import { SignUPFormData } from '../../../../shared/models/users';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-signup-form',
@@ -9,7 +10,10 @@ import { SignUPFormData } from '../../../../shared/models/users';
 })
 export class SignupFormComponent implements OnInit {
   @Output() submitForm: EventEmitter<SignUPFormData> = new EventEmitter();
+  @Input() user: Observable<any>;
+  @Input() verification: any;
   signUp: FormGroup;
+  id: string | null = '';
 
   constructor() {
     this.signUp = new FormGroup({
@@ -22,7 +26,13 @@ export class SignupFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
+    this.user.subscribe((result) => {
+      if (result) {
+        this.id = result._id;
+        this.signUp.controls.email.setValue(result.email);
+      }
+    });
+    // console.log('ngOnInit', this.user);
   }
 
   public handleSubmitForm() {

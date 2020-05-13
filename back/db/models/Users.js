@@ -1,8 +1,11 @@
-var mongoose = require('mongoose');
-var AbstaractModel = require('./_abstract');
-var bcrypt = require('bcrypt');
-var uniqid = require('uniqid');
+const mongoose = require('mongoose');
+const AbstaractModel = require('./_abstract');
+const bcrypt = require('bcrypt');
+const uniqid = require('uniqid');
+const BluePrintAccess = require('./BlueprintAccess');
 const ObjectId = mongoose.Schema.Types.ObjectId;
+const async = require('async');
+
 
 const SALT_FACTOR = 12;
 
@@ -16,7 +19,6 @@ class UserModel extends AbstaractModel{
             firstName: String,
             lastName: String,
             email: { type: String , unique: true, required: true },
-            password: { type: String , required: true },
             avatar: String,
             role: { type: Number, default: 1 }, // 0 - Administrator
             verified: { type: Boolean, default: true},
@@ -26,11 +28,14 @@ class UserModel extends AbstaractModel{
         });
 
         this.schema.pre(['save', 'updateOne', 'update'], function (next) { // handling adding and updating data to db
-            const user = this;
+            let user = this;
+            if (this._update) {
+                user = this._update;
+            }
+            // console.log(' ****************** this.schema ******************* ', user, this._update, user.password);
+            // if (!user.isModified('password')) { next(); } // check if it senda filed password to saving
       
-            if (!user.isModified('password')) { next(); } // check if it senda filed password to saving
-      
-            this.updated = Date.now();
+            // this.updated = Date.now();
             if(!user.password) next();
             if (this.isModified && !user.isModified('password')) {
                 next(); 
@@ -98,6 +103,65 @@ class UserModel extends AbstaractModel{
             return user;
         } else {
             throw new Error(" User with this email is already registerred ");
+        }
+    }
+
+    async getByCode(code) {
+        let user = await this.modelDB.findOne({ verified: false,  validationCode: code });
+        return user;
+    }
+
+    async complete(id, code, data) {
+       data['verified'] = true;
+       let ok = await this.modelDB.updateOne({ _id: id, verified: false,  validationCode: code }, data).exec();
+       return ok;
+    }
+
+    async verifyListBluePrintConnection( emails, blueprintId, providerId ) {
+        const access = new BluePrintAccess();
+        let result = await async.map(emails, (email, cb) => {
+            this.verifyOneUser(email,  blueprintId, providerId, access).then((data)=>{
+                cb(null, data);
+            }).catch(err => {
+                cb(err, null);
+            })
+        });
+
+        return result;
+    }
+
+    async verifyOneUser(email, blueprintId, providerId, access){
+        const user = await this.modelDB.findOne({ email: email });
+        
+        if (user) { 
+            const res = await access.hasUserAccess(user._id, blueprintId);
+            if (!res) {
+                await access.create({ blueprintId: blueprintId,
+                    providerUser: providerId,
+                    receiverUser: user._id,
+                    level: 'Full' });
+                return { email: email, user: user, needSendInvite: false, status: 'success' };
+            } else return { email: email, user: user, needSendInvite: false, status: 'success' };
+        } else {
+            try{
+                let userDoc = new this.modelDB({
+                    email: email,
+                    username: email,
+                    role: 1,
+                    verified: false,
+                    validationCode: uniqid.time()
+                });
+                let user = await userDoc.save();
+                
+                await access.create({ blueprintId: blueprintId,
+                    providerUser: providerId,
+                    receiverUser: user._id,
+                    level: 'Full' });
+                return { email: email, user: user, needSendInvite: true, status: 'success' };
+            } catch (err) {
+                console.log(err);
+                return { email: email, user: null, needSendInvite: false, status: 'fail' };
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ const ToolsNodes = require('./controllers/toolsnodes');
 const Arrows = require('./controllers/arrows');
 const Upload = require('./controllers/uploads');
 const Users = require('./controllers/users');
+const passport = require('passport');
 const router = express.Router();
 
 const blueprints = new BlueprintsController();
@@ -25,9 +26,14 @@ router.get("/", function(req, res, next){
     })
 })
 router.get("/blueprints/tools", blueprints.getDomainTools.bind(blueprints));
+router.post("/blueprints/tools", passport.authenticate('jwt', { session: false }), blueprints.getDomainTools.bind(blueprints));
 router.post("/blueprints/", blueprints.updateBlueprint);
 router.put("/blueprints/:id", blueprints.updateBlueprint);
+router.get("/blueprints/tools/:id", passport.authenticate('jwt', { session: false }), blueprints.getBluePrint.bind(blueprints));
 router.delete('/blueprints/:id', blueprints.removeBluePrint.bind(blueprints));
+router.get('/blueprints/list', passport.authenticate('jwt', { session: false }), blueprints.getBluePrintsForUser.bind(blueprints));
+router.post('/blueprints/invite', passport.authenticate('jwt', { session: false }), blueprints.inviteUsers.bind(blueprints));
+router.get('/blueprints/shared', passport.authenticate('jwt', { session: false }), blueprints.getSharedBluePrints.bind(blueprints));
 
 router.put("/toolsnodes/:id", toolsNodes.update.bind(toolsNodes));
 router.post("/toolsnodes/", toolsNodes.add.bind(toolsNodes));
@@ -45,6 +51,8 @@ router.post('/uploads/:id', upload.uploadImage.bind(upload));
 
 router.post('/users/signup', users.signup.bind(users));
 router.post('/users/signin', users.signin.bind(users));
+router.get('/users/bycode', users.getUserByCode.bind(users));
+router.post('/users/complete/:id', users.completeRegistration.bind(users));
 
 
 module.exports = router;

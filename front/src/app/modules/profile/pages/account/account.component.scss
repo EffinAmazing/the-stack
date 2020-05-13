@@ -1,0 +1,34 @@
+.input-domain{
+    min-width: 320px;
+
+    .mat-input-element{
+        border: none;
+    }
+
+    mat-label{
+        padding: 0;
+        margin: 0;
+    }
+}
+
+.stack-info .domain-title{
+    font-size: 2em;
+    line-height: 2.5em;
+}
+
+.item-content {
+    display: flex;
+}
+.great-spacer{
+    padding: 20px 0;
+}
+.item-content .icon-of-domain{
+    padding-right: 50px;
+}
+
+.form-full-width-field{
+    text-align: center;
+}
+.submit-domain{
+    text-align: center;
+}

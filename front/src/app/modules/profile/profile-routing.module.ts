@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { SignupComponent } from './pages/signup/signup.component';
 import { SigninComponent } from './pages/signin/signin.component';
-import { AccountComponent } from "./pages/account/account.component";
+import { AccountComponent } from './pages/account/account.component';
+import { AuthGuardGuard as AuthGuard } from '../../core/guards/auth-guard.guard';
 
 const routes: Routes = [
   {
@@ -14,9 +15,14 @@ const routes: Routes = [
     component: SigninComponent
   },
   {
+    path: 'verify/:code',
+    component: SignupComponent
+  },
+  {
     path: '',
     component: AccountComponent,
-    pathMatch: 'full'
+    pathMatch: 'full',
+    canActivate: [AuthGuard]
   }
 ];
 

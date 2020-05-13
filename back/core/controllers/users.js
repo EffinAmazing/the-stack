@@ -56,10 +56,62 @@ class Users {
                 })
             });
         } else {
-            res.status(200).json({
+            res.status(400).json({
                 result: 'Error',
                 message: 'Bad request'
             })
+        }
+    }
+
+    getUserByCode(req, res, next) {
+        let code = req.query.code;
+
+        if ( code ) {
+            this.model.getByCode(code)
+            .then((result) => {
+                res.json({
+                    result: result
+                });
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    result: 'Error',
+                    message: 'Someting went wrong'
+                })
+            })
+        } else {
+            res.status(400).json({
+                result: 'Error',
+                message: 'Bad request'
+            }); 
+        }
+    }
+
+    completeRegistration(req, res, next) {
+        let data = req.body.data;
+        let code = req.body.code;
+        let id = req.params.id
+
+        if (data) {
+            this.model.complete(id, code, data)
+            .then(result => {
+                res.json({
+                    result: result
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    result: 'Error',
+                    message: 'Server error'
+                }); 
+            });
+        } else {
+            res.status(400).json({
+                result: 'Error',
+                message: 'Bad request'
+            }); 
         }
     }
 
