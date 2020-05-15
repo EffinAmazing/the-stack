@@ -40,6 +40,24 @@ html, body{
     cursor: pointer;
 }
 
+.mat-toolbar.mat-primary{
+    background: #25282d;
+}
+.mat-toolbar-row, .mat-toolbar-single-row{
+    justify-content: space-between;
+}
+.mat-icon.user-account-icon{
+    width: 36px;
+    height: 36px;
+    font-size: 34px;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+.loading-page-data{
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
 .notice{
     text-align: center;
     padding: 10px;
