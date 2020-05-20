@@ -25,7 +25,24 @@ export class UsersService {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}users/complete/${id}`, { code, data }));
   }
 
-  signInUser() {
+  getUsersList(offset): Observable<any> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}users?offset=${offset}`));
+  }
 
+  updateUsers(id, data): Observable<any> {
+    return this.mapper.mapResponse(this.http.put(`${this.serverURI}users/${id}`, { data }));
+  }
+
+  deleteUser(id): Observable<any> {
+    return this.mapper.mapResponse(this.http.delete(`${this.serverURI}users/${id}`));
+  }
+
+  getInvitedUsers(blueprintId): Observable<any> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}blueprints/${blueprintId}/invited`));
+  }
+
+  resendInvite(id): Observable<any> {
+    const url = window.location.href.replace(window.location.hash, '');
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}users/${id}/reinvite`, { path: url }));
   }
 }

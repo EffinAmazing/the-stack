@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { SignupComponent } from './pages/signup/signup.component';
 import { SigninComponent } from './pages/signin/signin.component';
 import { AccountComponent } from './pages/account/account.component';
+import { UsersManagmentComponent } from './pages/users-managment/users-managment.component';
 import { AuthGuardGuard as AuthGuard } from '../../core/guards/auth-guard.guard';
 
 const routes: Routes = [
@@ -17,6 +18,11 @@ const routes: Routes = [
   {
     path: 'verify/:code',
     component: SignupComponent
+  },
+  {
+    path: 'users',
+    component: UsersManagmentComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: '',

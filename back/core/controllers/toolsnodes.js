@@ -1,19 +1,53 @@
 
 const ToolsNodesModel = require('../../db/models/ToolsNodes');
 const ToolsModels = require('../../db/models/Tools');
+const UserModel = require('../../db/models/Users');
+const BluePrintModel = require('../../db/models/Blueprints');
 const async = require('async');
 
 class ToolsNodes {
     constructor(){
         this.model = new ToolsNodesModel();
         this.tools = new ToolsModels();
+        this.users = new UserModel();
+        this.blueprints = new BluePrintModel();
     }
 
     update(req, res, next){
         let data = req.body.data;
+        let blueprintId = req.body.blueprintId;
+        const referer = req.headers.referer;
         let id = req.params.id;
+        const blueprints = this.blueprints;
+        const user = req.user;
         if( data && id ){
             this.model.updateOne(id, data).then((result)=>{
+                let owners = [];
+                let trainedOns = [];
+                if ( (data.owner || data.trainedOn) && user ) {
+                    if (data.owner) {   
+                        owners = data.owner.split(",");
+                    }
+                    if (data.trainedOn) {
+                        trainedOns = data.trainedOn.split(",");
+                    }
+                    let emails = owners.concat(trainedOns);
+                    this.users.verifyListBluePrintConnection(emails, blueprintId, user._id)
+                        .then((list)=>{
+                            console.log(result);
+                            async.filter(list, (item, callback) => {
+                                callback(null, item.needSendInvite)
+                            }, function(err, filtered) {
+                                blueprints.sendInviteUserToBluePrint(filtered, referer)
+                                .then(result=>{  console.log(result); })
+                                .catch(err=> { console.log(err); });
+                            });
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        })
+                }
+                //
                 res.json({
                     result: result
                 })

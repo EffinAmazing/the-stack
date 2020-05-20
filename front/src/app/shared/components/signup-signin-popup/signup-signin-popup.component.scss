@@ -1,0 +1,46 @@
+.form-field-contianer.full-width{
+    width: 100%;
+}
+.form-field-contianer.half-width{
+    width: 50%;
+}
+
+.form-field-contianer.nofull-width{
+    width: 75%;
+}
+.form-field-contianer{
+    padding-left: 10px;
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+.form-fields-box{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.form-field-contianer .mat-form-field{
+    width: 100%;
+}
+.form-actions{
+    text-align: center;
+}
+.popup-title{
+    text-align: center;
+}
+.form-message{
+    padding-left: 15px;
+    padding-right: 15px;
+    font-size: 18px;
+    line-height: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+.separete-message{
+    text-align: center;
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.submit-button{
+    min-width: 100px;
+}

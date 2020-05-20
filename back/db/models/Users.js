@@ -3,6 +3,7 @@ const AbstaractModel = require('./_abstract');
 const bcrypt = require('bcrypt');
 const uniqid = require('uniqid');
 const BluePrintAccess = require('./BlueprintAccess');
+const emailService = require('../../services/email');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const async = require('async');
 
@@ -163,6 +164,40 @@ class UserModel extends AbstaractModel{
                 return { email: email, user: null, needSendInvite: false, status: 'fail' };
             }
         }
+    }
+
+    async getList(limit, offset) {
+        let total = await this.modelDB.countDocuments({}).exec();
+        let list = await this.modelDB.find({}).limit(limit).skip(offset).exec();
+
+        let mapped = await async.map(list, (item, cb) => { cb(null, this.mapDocument(item)); });
+        return {
+            list: mapped,
+            total: total,
+            offset: offset,
+            limit: limit
+        }
+    }
+
+    async updateOne(id, data) {
+        await this.modelDB.update({ _id: id }, data).exec();
+        let doc = await this.modelDB.findOne({ _id: id }).exec();
+
+        return this.mapDocument( doc );
+    }
+
+    async getListByIDs(ids){
+        let list = await this.modelDB.find({ _id: { $in: ids } }).exec();
+
+        let mapped = await async.map(list, (item, cb) => {  cb(null, this.mapDocument(item)) });
+        return mapped;
+    }
+
+    async reSendInvite(id, url) {
+        let user = await this.modelDB.findById({ _id: id }).exec();
+        await emailService.sendInviteForUser(user.email, user, url);
+
+        return true;
     }
 }
 

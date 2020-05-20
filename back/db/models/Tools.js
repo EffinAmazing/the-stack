@@ -97,6 +97,7 @@ class ToolsModel extends AbstaractModel{
         })
     }
 
+
     async getToolsByIds(ids){
         let docs = await this.modelDB.find({ _id: { $in: ids } }).exec();
 

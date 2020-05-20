@@ -21,10 +21,11 @@ class BluePrintModel extends AbstaractModel{
 
     async getByDomain(domain, userId = null){
         try {
-          let params = { domain: domain };
+          let params = { domain: domain, userId: { $exists: false } };
           if (userId) {
             params['userId'] = userId
           }
+
           let blueprint = await this.modelDB.findOne(params).exec();
           // console.log(blueprint);
           return this.mapDocument( blueprint );
@@ -39,6 +40,13 @@ class BluePrintModel extends AbstaractModel{
             let blueprint = await this.create(data); 
             return this.mapDocument( blueprint );
         }
+    }
+
+    async signBluePrintToUser(blueprintId, userId){
+        let res = await this.modelDB.updateOne({ _id: blueprintId }, { userId: userId }).exec();
+
+        let doc = await this.modelDB.findById(blueprintId).exec();
+        return this.mapDocument(doc);
     }
 
     async one(id){
@@ -61,8 +69,16 @@ class BluePrintModel extends AbstaractModel{
     }
 
     async sendInviteUserToBluePrint( list, path ) {
-        await async.each(list, (item)=>{
-            emailService.sendInviteForUser(item.email, item.user, path);
+        await async.each(list, (item, cb)=>{
+            emailService.sendInviteForUser(item.email, item.user, path)
+            .then(res => {
+                
+                cb(null);
+            })
+            .catch(err => {
+                console.log(err);
+                cb(null);
+            });
         })
 
         return true;

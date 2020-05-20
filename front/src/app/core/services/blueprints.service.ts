@@ -34,8 +34,8 @@ export class BlueprintsService {
     return this.mapper.mapResponse(this.http.get<BluePrintTool[]>(`${this.serverURI}blueprints/list?userId=${userId}`));
   }
 
-  updateNodeTool(nodeID: string, data ): Observable<BluePrintTool> {
-    return this.mapper.mapResponse(this.http.put<BluePrintTool>(`${this.serverURI}toolsnodes/${nodeID}`, { data }));
+  updateNodeTool(nodeID: string, data, blueprintId): Observable<BluePrintTool> {
+    return this.mapper.mapResponse(this.http.put<BluePrintTool>(`${this.serverURI}toolsnodes/${nodeID}`, { data, blueprintId }));
   }
 
   hideNodes(ids: string[]): Observable<any> {
@@ -76,5 +76,9 @@ export class BlueprintsService {
 
   getSharedBluePrints(): Observable<any> {
     return this.mapper.mapResponse(this.http.get(`${this.serverURI}blueprints/shared`));
+  }
+
+  signUserToBluePrint(id): Observable<any> {
+    return this.mapper.mapResponse(this.http.put(`${this.serverURI}blueprints/${id}/signin`, {}));
   }
 }

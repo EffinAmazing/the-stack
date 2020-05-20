@@ -1,0 +1,104 @@
+<h1 mat-dialog-title class="popup-title">{{formActive?'Sign Up':'Sign In'}}</h1>
+<div mat-dialog-content>
+    <p class="form-message"> At first, to invite users or update node data you will need to signup or sign in </p>
+    <div class="notice error-notice" *ngIf="!isLoading && isError"> {{errorMessage}} </div>
+    <div *ngIf="!isLoading">
+        <div *ngIf="formActive === 'signup'; then signUpForm else signInForm"></div>
+        <ng-template #signUpForm >
+            <div class="form-sign-up">
+                <form class="signup-form" [formGroup]="signUpFormGroup" >
+                    <div class="form-fields-box">
+                        <div class="form-field-contianer full-width">
+                            <mat-form-field >
+                                <mat-label>Email</mat-label>
+                                <input matInput type="email" formControlName="email" />
+                            </mat-form-field>
+                        </div>
+                        
+                        <div class="form-field-contianer half-width">
+                            <mat-form-field >
+                                <mat-label>First Name</mat-label>
+                                <input matInput formControlName="firstName" />
+                            </mat-form-field>
+                        </div>
+                
+                        
+                        <div class="form-field-contianer half-width">
+                            <mat-form-field >
+                                <mat-label>Last Name</mat-label>
+                                <input matInput  formControlName="lastName" />
+                            </mat-form-field>
+                        </div>
+                
+                        
+                        <div class="form-field-contianer half-width">
+                            <mat-form-field >
+                                <mat-label>Password</mat-label>
+                                <input matInput type="password"  formControlName="password" />
+                            </mat-form-field>
+                        </div>
+                
+                        
+                        <div class="form-field-contianer half-width">
+                            <mat-form-field >
+                                <mat-label>Repeat Password</mat-label>
+                                <input matInput type="password" formControlName="repeatPassword" />
+                            </mat-form-field>
+                        </div>
+                    </div>
+            
+                    <div class="form-actions">
+                        <p>&nbsp;</p>
+                        <button mat-raised-button color="primary" class="submit-button" type="button" (click)="handleSubmitSignUp()">Submit</button>
+                    </div>
+
+                    <p class="separete-message"> Or </p>
+
+                    <div class="form-actions">
+                        <button mat-raised-button class="button" type="button" (click)="toggleForms()">Sign In</button>
+
+                    </div>
+                </form>
+            </div>
+        </ng-template>
+        <ng-template #signInForm >
+            <div class="form-sign-in"> 
+                <form class="signup-form" [formGroup]="signInFormGroup">
+                    <div class="form-fields-box">
+                        <div class="form-field-contianer nofull-width">
+                            <mat-form-field >
+                                <mat-label>Email</mat-label>
+                                <input matInput type="email" formControlName="email" />
+                            </mat-form-field>
+                        </div>
+                                
+                        <div class="form-field-contianer nofull-width">
+                            <mat-form-field >
+                                <mat-label>Password</mat-label>
+                                <input matInput type="password"  formControlName="password" />
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button mat-raised-button color="primary"  class="submit-button" type="button"  (click)="handleSubmitSiginIn()">Submit</button>
+                    </div>
+
+                    <p class="separete-message"> Or </p>
+
+                    <div class="form-actions">
+                        <button mat-raised-button class="button" type="button" (click)="toggleForms()">Sign Up</button>
+                    </div>
+                    
+                </form>
+            </div>
+        </ng-template>
+    </div>
+    <div *ngIf="isLoading">
+        <div class="loading-data-section" >
+            <mat-spinner></mat-spinner>
+        </div>
+    </div>
+</div>
+<div mat-dialog-actions>
+</div>
+

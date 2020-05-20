@@ -5,23 +5,27 @@ import { FormsControlsModule } from './modules/material/forms-controls/forms-con
 import { LayoutModule } from './modules/material/layout/layout.module';
 import { ButtonsIndicatorsModule } from './modules/material/buttons-indicators/buttons-indicators.module';
 import { CommonBehaviorsModule } from './modules/material/common-behaviors/common-behaviors.module';
-import { SigninFromComponent } from './components/signin-from/signin-from.component';
 import { HeaderComponent } from './components/header/header.component';
+import { SignupSigninPopupComponent } from './components/signup-signin-popup/signup-signin-popup.component';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 
 
 @NgModule({
-  declarations: [SigninFromComponent, HeaderComponent, HeaderComponent],
+  declarations: [ HeaderComponent, SignupSigninPopupComponent ],
   imports: [
     CommonModule,
     FormsControlsModule,
     LayoutModule,
     ButtonsIndicatorsModule,
     CommonBehaviorsModule,
-    RouterModule
+    RouterModule,
+    ReactiveFormsModule,
+    FormsModule
   ],
   exports: [
-    HeaderComponent
+    HeaderComponent,
+    SignupSigninPopupComponent
   ]
 })
 export class SharedModule { }

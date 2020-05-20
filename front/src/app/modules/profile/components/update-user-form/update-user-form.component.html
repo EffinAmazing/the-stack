@@ -1,0 +1,41 @@
+<h1 mat-dialog-title>Edit User</h1>
+<div mat-dialog-content>
+    <form [formGroup]="userForm">
+        <div class="container-form">
+            <div class="form-field">
+                <mat-form-field >
+                    <mat-label>Email</mat-label>
+                    <input matInput placeholder="Email" type="email" formControlName="email">
+                </mat-form-field>
+            </div>
+            <div class="form-field">
+                <mat-form-field >
+                    <mat-label>First Name</mat-label>
+                    <input matInput placeholder="First Name" type="text" formControlName="firstName">
+                </mat-form-field>
+            </div>
+            <div class="form-field">
+                <mat-form-field >
+                    <mat-label>Last Name</mat-label>
+                    <input matInput placeholder="Last Name" type="text" formControlName="lastName">
+                </mat-form-field>
+            </div>
+            <div class="form-field">
+                <mat-form-field>
+                    <mat-label>Role</mat-label>
+                    <mat-select formControlName="role">
+                        <mat-option [value]="0">{{'Administrator'}}</mat-option>
+                        <mat-option [value]="1">{{'Editor'}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div class="form-field">
+                <mat-checkbox class="example-margin" formControlName="verified"> Verified </mat-checkbox>
+            </div>
+        </div>
+    </form>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onCancelClick()"> Cancel </button>
+    <button mat-button (click)="onUpdateClick()"> Update </button>
+</div>

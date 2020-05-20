@@ -115,6 +115,117 @@ class Users {
         }
     }
 
+    getList(req, res, next) {
+        let limit = 10;
+        let offset = 0;
+        if (req.query.limit) {
+            limit = parseInt( req.query.limit );
+        }
+        if (req.query.offset) {
+            offset = parseInt( req.query.offset );
+        }
+
+        this.model.getList(limit, offset)
+        .then(data => {
+            res.json({
+                result: data
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                result: 'Error',
+                message: 'Server error'
+            }); 
+        });
+    }
+
+    update(req, res, next) {
+        let id = req.params.id;
+        let data = req.body.data;
+        const user = req.user;
+
+        if (user) {
+            this.model.updateOne(id, data)
+            .then(doc => {
+                res.json({
+                    result: doc
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    result: 'Error',
+                    message: 'Server error'
+                }); 
+            });
+        } else {
+            res.status(401).json({
+                result: 'Error',
+                message: 'You need to be registered'
+            }); 
+        }
+    }
+
+    delete(req, res, next) {
+        let id = req.params.id;
+        const user = req.user;
+
+        if (user) { 
+            if (user.role !== 0) {
+                return res.status(403).json({
+                    result: 'Error',
+                    message: 'Forbidden'
+                });
+            }
+
+            this.model.delete(id, [], [])
+            .then(done => {
+                res.json({
+                    result: "Ok"
+                })
+            })
+            .catch(err =>{
+                console.log(err);
+                res.status(500).json({
+                    result: 'Error',
+                    message: 'Server error'
+                })
+            })
+        } else {
+            res.status(401).json({
+                result: 'Error',
+                message: 'You need to be registered'
+            });   
+        }
+
+    }
+
+    resendInvite(req, res, next) {
+        const id = req.params.id;
+        const url = req.body.path;
+
+        if (id) {
+            this.model.reSendInvite(id, url).then(data => {
+                res.json({
+                    result: data
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    result: 'Error',
+                    message: 'Server error'
+                })
+            })
+        } else {
+            res.status(400).json({
+                result: "Error",
+                message: 'bad request'
+            })
+        }
+    }
+
 }
 
 module.exports = Users;

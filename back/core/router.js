@@ -5,6 +5,7 @@ const Arrows = require('./controllers/arrows');
 const Upload = require('./controllers/uploads');
 const Users = require('./controllers/users');
 const passport = require('passport');
+const servicePassport = require('../services/passport');
 const router = express.Router();
 
 const blueprints = new BlueprintsController();
@@ -34,8 +35,10 @@ router.delete('/blueprints/:id', blueprints.removeBluePrint.bind(blueprints));
 router.get('/blueprints/list', passport.authenticate('jwt', { session: false }), blueprints.getBluePrintsForUser.bind(blueprints));
 router.post('/blueprints/invite', passport.authenticate('jwt', { session: false }), blueprints.inviteUsers.bind(blueprints));
 router.get('/blueprints/shared', passport.authenticate('jwt', { session: false }), blueprints.getSharedBluePrints.bind(blueprints));
+router.put('/blueprints/:id/signin', passport.authenticate('jwt', { session: false }), blueprints.signUserToBluePrint.bind(blueprints));
+router.get('/blueprints/:id/invited', passport.authenticate('jwt', { session: false }), blueprints.getInvitededUsers.bind(blueprints));
 
-router.put("/toolsnodes/:id", toolsNodes.update.bind(toolsNodes));
+router.put("/toolsnodes/:id", servicePassport.optionalAthentication , toolsNodes.update.bind(toolsNodes));
 router.post("/toolsnodes/", toolsNodes.add.bind(toolsNodes));
 router.post("/toolsnodes/list", toolsNodes.addList.bind(toolsNodes));
 router.post("/toolshide/", toolsNodes.hidelist.bind(toolsNodes));
@@ -53,6 +56,10 @@ router.post('/users/signup', users.signup.bind(users));
 router.post('/users/signin', users.signin.bind(users));
 router.get('/users/bycode', users.getUserByCode.bind(users));
 router.post('/users/complete/:id', users.completeRegistration.bind(users));
+router.get('/users', passport.authenticate('jwt', { session: false }), users.getList.bind(users));
+router.put('/users/:id', passport.authenticate('jwt', { session: false }), users.update.bind(users));
+router.delete('/users/:id', passport.authenticate('jwt', { session: false }), users.delete.bind(users));
+router.post('/users/:id/reinvite', passport.authenticate('jwt', { session: false }), users.resendInvite.bind(users));
 
 
 module.exports = router;

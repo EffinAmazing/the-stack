@@ -4,6 +4,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatSelectModule } from '@angular/material/select';
 
 
 
@@ -14,14 +15,16 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
     MatFormFieldModule,
     MatCheckboxModule,
     MatSlideToggleModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatSelectModule
   ],
   exports: [
     MatInputModule,
     MatFormFieldModule,
     MatCheckboxModule,
     MatSlideToggleModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatSelectModule
   ],
   providers: [
     MatDatepickerModule,

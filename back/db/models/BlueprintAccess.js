@@ -23,6 +23,14 @@ class BluePrintAccessModel extends AbstaractModel{
         return ids;
     }
 
+    async getBluePrintUsersIds(blueprintId) {
+        let list = await this.modelDB.find({ blueprintId: blueprintId }).exec();
+        console.log(list);
+        const ids = await async.map(list, (item, cb) => { cb(null, item.receiverUser) });
+        console.log(ids);
+        return ids;
+    }
+
     async hasUserAccess(userId, blueprintId) {
         let result = await this.modelDB.findOne({ receiverUser: userId, blueprintId: blueprintId });
         if (result) {

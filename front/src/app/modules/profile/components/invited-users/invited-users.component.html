@@ -1,0 +1,48 @@
+<h1 mat-dialog-title> Invited users to stack of {{data.blueprint.domain}}</h1>
+<div mat-dialog-content>
+    <p> &nbsp; </p>
+    <div *ngIf="sendingInvite" class="loading-overlay">
+        <mat-spinner></mat-spinner>
+    </div>
+    
+    <table mat-table [dataSource]="users" class="users-table">
+        <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef> Email </th>
+            <td mat-cell *matCellDef="let item"> {{ item.email }} </td>
+        </ng-container>
+        
+        <ng-container matColumnDef="firstName">
+            <th mat-header-cell *matHeaderCellDef> First Name </th>
+            <td mat-cell *matCellDef="let item"> {{ item.firstName }} </td>
+        </ng-container>
+        
+        <ng-container matColumnDef="lastName">
+            <th mat-header-cell *matHeaderCellDef> Last Name </th>
+            <td mat-cell *matCellDef="let item"> {{ item.lastName }} </td>
+        </ng-container>
+
+
+        <ng-container matColumnDef="verified">
+            <th mat-header-cell *matHeaderCellDef> Verified </th>
+            <td mat-cell *matCellDef="let item"> {{ item.verified?'Yes':'No' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>  </th>
+            <td mat-cell *matCellDef="let item"> 
+                <button *ngIf="!item.verified" 
+                    mat-raised-button color="primary" 
+                    [disabled]="sendingInvite" 
+                    (click)="handleResendInvite(item)"> Resend Invite </button>
+                <span *ngIf="inviteSended === item.id"> &nbsp; Invite was sended </span>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()"> Close </button>
+</div>
+

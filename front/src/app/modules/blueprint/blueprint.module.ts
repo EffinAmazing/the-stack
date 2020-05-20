@@ -30,7 +30,15 @@ import { InviteDialogComponent } from './components/invite-dialog/invite-dialog.
     BuildStackComponent,
     ShareComponent,
     BuilderComponent,
-    ToolsListComponent, DeleteStackDialogComponent, CreateNewStackDialogComponent, NodeDetailsComponent, InfoPopupDialogComponent, AddNewToolDialogComponent, SubdomainDetectComponent, InviteDialogComponent],
+    ToolsListComponent,
+    DeleteStackDialogComponent,
+    CreateNewStackDialogComponent,
+    NodeDetailsComponent,
+    InfoPopupDialogComponent,
+    AddNewToolDialogComponent,
+    SubdomainDetectComponent,
+    InviteDialogComponent
+  ],
   imports: [
     CommonModule,
     BlueprintRoutingModule,

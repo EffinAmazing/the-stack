@@ -14,6 +14,7 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forbiddenTags, hiddenCategories } from '../../../../core/config';
 import { AuthService } from '../../../../core/services/auth.service';
+import { SignupSigninPopupComponent } from '../../../../shared/components/signup-signin-popup/signup-signin-popup.component';
 import html2canvas from 'html2canvas';
 import * as d3 from 'd3';
 import { environment } from 'src/environments/environment';
@@ -59,7 +60,8 @@ export class BuildStackComponent implements OnInit {
       public deleteDialog: MatDialog,
       public toolsDialog: MatDialog,
       public infoDialog: MatDialog,
-      public inviteDialog: MatDialog) {
+      public inviteDialog: MatDialog,
+      public showRegisterDialog: MatDialog) {
     this.id = route.snapshot.params['id'];
     console.log(this.id);
     this.route.queryParams.subscribe((params: any) => {
@@ -180,20 +182,36 @@ export class BuildStackComponent implements OnInit {
     this.history.prevAction(this.blueprint.id);
   }
 
+  showPopupFoSignUp() {
+    const dialogRef = this.showRegisterDialog.open(SignupSigninPopupComponent, {
+      width: '640px',
+      data: { blueprint: this.blueprint }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(result);
+    });
+  }
+
   public handleUpdatedNodeData(result) {
     // console.log(result);
     if (result.data) {
-      window['dataLayer'].push({
-        event: 'node.updateInfo',
-        node:  this.nodes[result.nodeId],
-        tool: this.nodes[result.nodeId].tool
-      });
-      this.service.updateNodeTool(result.nodeId, result.data).subscribe((res) => {
-        const tool = this.nodes[result.nodeId].tool;
-        res.tool = this.nodes[result.nodeId].tool;
-        this.nodes[result.nodeId] = res;
-        this.changeNodeData$.next(this.nodes[result.nodeId]);
-      });
+      if (this.authUser) {
+        window['dataLayer'].push({
+          event: 'node.updateInfo',
+          node:  this.nodes[result.nodeId],
+          tool: this.nodes[result.nodeId].tool
+        });
+
+        this.service.updateNodeTool(result.nodeId, result.data, this.blueprint.id).subscribe((res) => {
+          const tool = this.nodes[result.nodeId].tool;
+          res.tool = this.nodes[result.nodeId].tool;
+          this.nodes[result.nodeId] = res;
+          this.changeNodeData$.next(this.nodes[result.nodeId]);
+        });
+      } else {
+        this.showPopupFoSignUp();
+      }
     }
   }
 
@@ -316,7 +334,7 @@ export class BuildStackComponent implements OnInit {
       oldPosition
     });
 
-    this.service.updateNodeTool(data.nodeId, { position: data.position }).subscribe((res) => {
+    this.service.updateNodeTool(data.nodeId, { position: data.position }, this.blueprint.id).subscribe((res) => {
       const tool = this.nodes[data.nodeId].tool;
       res.tool = this.nodes[data.nodeId].tool;
       this.nodes[data.nodeId] = res;
@@ -352,7 +370,7 @@ export class BuildStackComponent implements OnInit {
     }
   }
 
-  public handleDeselectArrow(){
+  public handleDeselectArrow() {
     document.querySelector(`path#${this.selectedArrow.lineId}`).setAttribute('stroke-width', '2');
     this.deleteArrowDots();
     this.selectedArrow = null;
@@ -368,23 +386,27 @@ export class BuildStackComponent implements OnInit {
   }
 
   public handleClickInviteUser() {
-    const dialogRef = this.inviteDialog.open(InviteDialogComponent, {
-      width: '520px',
-      data: { blueprintId: this.blueprint.id }
-    });
+    if (this.authUser) {
+      const dialogRef = this.inviteDialog.open(InviteDialogComponent, {
+        width: '520px',
+        data: { blueprintId: this.blueprint.id }
+      });
 
-    dialogRef.afterClosed().subscribe(result => {
-      console.log(result);
-      if (result) {
-        this.service.inviteUsers(result).toPromise()
-        .then(res => {
-          console.log(res);
-        })
-        .catch(err => {
-          console.log(err);
-        });
-      }
-    });
+      dialogRef.afterClosed().subscribe(result => {
+        console.log(result);
+        if (result) {
+          this.service.inviteUsers(result).toPromise()
+          .then(res => {
+            console.log(res);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+        }
+      });
+    } else {
+      this.showPopupFoSignUp();
+    }
   }
 
   public handleAddNewTool() {
@@ -535,7 +557,7 @@ export class BuildStackComponent implements OnInit {
 
     if (!data.disableHistory) {  this.history.addAction(this.blueprint.id, { name: 'hideNode', data }); }
 
-    this.service.updateNodeTool(data.item.id, { hide: data.item.hide }).subscribe((res) => {
+    this.service.updateNodeTool(data.item.id, { hide: data.item.hide }, this.blueprint.id).subscribe((res) => {
       res.tool = this.nodes[data.item.id].tool;
       this.nodes[data.item.id] = res;
       this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList  });
@@ -567,7 +589,7 @@ export class BuildStackComponent implements OnInit {
       node: data.item
     });
     this.history.addAction(this.blueprint.id, { name: 'hideNode', data: data.item });
-    this.service.updateNodeTool(data.item.id, { hide: true }).subscribe((res) => {
+    this.service.updateNodeTool(data.item.id, { hide: true }, this.blueprint.id).subscribe((res) => {
       res.tool = this.nodes[data.item.id].tool;
       this.nodes[data.item.id] = res;
     });

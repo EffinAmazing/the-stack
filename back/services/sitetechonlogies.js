@@ -3,8 +3,9 @@ const path = require('path');
 const async = require('async');
 const axios = require('axios');
 const download = require('./download');
+const configs = require('../config');
 
-const API_KEY = '06ea65ec-8f65-4a9a-9ff7-8f2883ee7966';
+const API_KEY = configs.BUILTWIDTH_API_KEY;
 
 async function getTestDataFromFile(domain){
     let url = `https://api.builtwith.com/v14/api.json?KEY=${API_KEY}&LOOKUP=${domain}`;

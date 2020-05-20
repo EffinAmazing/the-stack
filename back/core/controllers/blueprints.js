@@ -34,18 +34,9 @@ class BluePrints {
             (cb) => {
                 // 1. get blueprint of domain
                 if (user) {
-                    this._bluePrints.getByDomain(domain, user._id).then((result) => {
-                        cb(null, result);
-                    }).catch((err)=>{
-                        cb(err, null);
-                    });
+                    this._bluePrints.getByDomain(domain, user._id).then((result) => { cb(null, result); }).catch((err)=>{ cb(err, null); });
                 } else {
-                    this._bluePrints.getByDomain(domain).then((result) => {
-                        cb(null, result);
-                    }).catch((err)=>{
-                        cb(err, null);
-                    });
-
+                    this._bluePrints.getByDomain(domain).then((result) => { cb(null, result); }).catch((err)=>{ cb(err, null);  });
                 }
             },
             (blueprint, cb)=>{
@@ -57,9 +48,7 @@ class BluePrints {
                 this._toolsNodes.getNodesByBlueprint(data.blueprint.id).then((result)=>{
                     data.nodes = result;
                     cb(null, data)
-                }).catch((err)=>{
-                    cb(null, data);
-                })
+                }).catch((err)=>{ cb(null, data); })
             },
             (data, cb) => {
                 if ( data.nodes.length !== 0 ) {
@@ -343,30 +332,48 @@ class BluePrints {
         }
     }
 
+    signUserToBluePrint(req, res, next) {
+        const blueprintId = req.params.id;
+        const user = req.user;
+
+        if (blueprintId && user) {
+            this._bluePrints.signBluePrintToUser(blueprintId, user._id)
+            .then(result => {
+                res.json({
+                    result: result
+                });
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    result: "Error",
+                    message: "Server error"
+                });
+            })
+        } else {
+            res.status(400).json({
+                result: "Error",
+                message: "Bad Request"
+            });
+        }
+    }
+
     removeBluePrint(req, res, next){
         const id = req.params.id;
         if(id) {
             async.waterfall([
                 (cb)=>{
-                    this._arrows.removeAllByBlueprintId(id).then(()=>{
-                        cb(null);
-                    }).catch((err)=>{ cb(err) })
+                    this._arrows.removeAllByBlueprintId(id).then(()=>{ cb(null);  }).catch((err)=>{ cb(err) })
                 },
                 (cb)=>{
-                    this._toolsNodes.removeAllForBlueprintId(id).then(()=>{
-                        cb(null);
-                    }).catch((err)=>{ cb(err) })
+                    this._toolsNodes.removeAllForBlueprintId(id).then(()=>{  cb(null);   }).catch((err)=>{ cb(err) })
                 },
                 (cb) => {
-                    this._bluePrints.delete(id, []).then((r)=>{
-                        cb(null, r);
-                    }).catch(err => {
-                        cb(err, null)
-                    });
+                    this._bluePrints.delete(id, []).then((r)=>{ cb(null, r); }).catch(err => {  cb(err, null) });
                 }
             ], function(err, result){
                 if(err) {
-                    res.json({
+                    resres.status(500).json({
                         result: "Error",
                         message: err.message
                     })
@@ -381,6 +388,40 @@ class BluePrints {
                 result: "Error",
                 message: "Bad Request"
             })
+        }
+    }
+
+    getInvitededUsers (req, res, next) {
+        const id = req.params.id;
+        
+        if (id) {
+            async.waterfall([
+                (cb) => {
+                    this._bluePrintsAccess.getBluePrintUsersIds(id).then(ids =>{ cb(null, ids) }).catch(err=>{ cb(err, null) });
+                },
+                (ids, cb) => {
+                    this._users.getListByIDs(ids).then(list => { cb(null, list); }).catch(err => { cb(err, null) });
+                }
+            ], function(err, result) {
+                if (err) {
+                    res.status(500).json({
+                        result: "Error",
+                        message: err.message
+                    });
+                } else {
+                    
+                    res.json({
+                        result: result
+                    })
+                }
+            })
+
+            
+        } else {
+            res.json({
+                result: "Error",
+                message: "Bad Request"
+            });
         }
     }
 }

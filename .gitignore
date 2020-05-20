@@ -10,4 +10,5 @@
 /back/public/uploads/*
 /back/*.pem
 /back/*.csr
+/back/.env
 /back/public/.well-known/*

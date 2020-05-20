@@ -65,7 +65,7 @@
         <div class="bottom-actions" *ngIf="loaded" > 
           <div>
             <button *ngIf="!id" mat-raised-button color="primary" (click)="createNewStack()"> Create new stack </button>
-            <button *ngIf="authUser" mat-raised-button color="primary" (click)="handleClickInviteUser()"> Invite users </button>
+            <button mat-raised-button color="primary" (click)="handleClickInviteUser()"> Invite users </button>
           </div>
           <div>
             <span class="total-spand-tools" *ngIf="blueprint.spend"> 

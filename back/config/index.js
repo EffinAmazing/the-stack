@@ -4,10 +4,11 @@ var dotenv = require("dotenv");
 var path = require('path');
 var configs = Object.create(null);
 
+// let configs = dotenv.config();
 let data = {
     PORT: 9000,
     MONGOURI: 'mongodb://localhost:27017/',
-    DB_NAME: 'marchtach',
+    DB_NAME: 'marchtach'
 }
 
 if (process.env.NODE_ENV === "prod") {
@@ -15,7 +16,8 @@ if (process.env.NODE_ENV === "prod") {
 }
 
 //configs = dotenv.config({path: path.resolve("./server/.env.development")});
-//console.log(configs);
+configs = dotenv.config();
+data = Object.assign({}, data, configs.parsed );
 
 // exports.config = configs.parsed;
 

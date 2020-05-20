@@ -12,7 +12,19 @@
             <div class="data"> {{data.node.tool.description}} </div>
         </div>
         <mat-divider></mat-divider>
+        
         <form [formGroup]="nodeForm">
+            <div  class="info-paragraph"> 
+                <div class="title">Monthly cost: </div>
+                <div class="data">
+                    <mat-form-field class="full-width">
+                        <mat-label>Cost</mat-label>
+                        <span matPrefix>$ &nbsp;</span>
+                        <input matInput placeholder="1.00" type="number" formControlName="cost">
+                    </mat-form-field>
+                </div>
+            </div>
+            <mat-divider></mat-divider>
             <div  class="info-paragraph"> 
                 <div class="title"> start: </div>
                 <div class="data"> 
@@ -48,17 +60,6 @@
                         <input matInput placeholder="owner" type="email" [(ngModel)]="ownerTemp" [ngModelOptions]="{standalone: true}">
                     </mat-form-field>
                     <button mat-raised-button class="add-button-owner" (click)="handleAddOwner()"> <mat-icon>add</mat-icon> Add</button>
-                </div>
-            </div>
-            <mat-divider></mat-divider>
-            <div  class="info-paragraph"> 
-                <div class="title">Monthly cost: </div>
-                <div class="data">
-                    <mat-form-field class="full-width">
-                        <mat-label>Cost</mat-label>
-                        <span matPrefix>$ &nbsp;</span>
-                        <input matInput placeholder="1.00" type="number" formControlName="cost">
-                    </mat-form-field>
                 </div>
             </div>
             <mat-divider></mat-divider>

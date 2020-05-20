@@ -11,7 +11,7 @@ export class SigninFormComponent implements OnInit {
   @Output() submitForm: EventEmitter<SignInFromData> = new EventEmitter();
   signIn: FormGroup;
 
-  constructor() { 
+  constructor() {
     this.signIn = new FormGroup({
       email: new FormControl('', [Validators.email, Validators.required]),
       password: new FormControl('', [Validators.min(8), Validators.required]),
@@ -19,9 +19,7 @@ export class SigninFormComponent implements OnInit {
   }
 
 
-  ngOnInit(): void {
-    
-  }
+  ngOnInit(): void {  }
 
   public handleSubmitForm() {
     const value = this.signIn.value;

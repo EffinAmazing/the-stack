@@ -7,6 +7,15 @@ const JWTStrategy = passportJWT.Strategy;
 
 const JWT_SECRET_KEY = process.env.AUTH_SECRET_KEY || "stack-builder";
 
+exports.optionalAthentication = function (request, response, next) {
+  const auth = request.header('Authorization')
+  if (auth) {
+    passport.authenticate('jwt', { session: false })(request, response, next);
+  } else {
+    next();
+  }
+}
+
 exports.initPassport = function(){
     passport.use(new Strategy(  
       function(username, password, done) {
@@ -36,7 +45,7 @@ exports.initPassport = function(){
                   callback(null, user);
               })
               .catch((err)=>{
-                  callback(err, null);
+                  callback(null, null);
               });
         }
     ));
