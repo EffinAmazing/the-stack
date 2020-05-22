@@ -1,0 +1,36 @@
+<h1 mat-dialog-title> Invite user ({{data.user.email}}) to stacks  </h1>
+<div mat-dialog-content>
+    <table mat-table [dataSource]="stacks" class="stacks-table">
+        <ng-container matColumnDef="logo">
+            <th mat-header-cell *matHeaderCellDef> </th>
+            <td mat-cell *matCellDef="let item"> <img class="small-logo" [src]="getDomainLogo(item.domain)" /> </td>
+        </ng-container>
+
+        <ng-container matColumnDef="domain">
+            <th mat-header-cell *matHeaderCellDef> Domain </th>
+            <td mat-cell *matCellDef="let item"> {{item.domain}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="created">
+            <th mat-header-cell *matHeaderCellDef> Created </th>
+            <td mat-cell *matCellDef="let item"> {{ item.created | date }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>  </th>
+            <td mat-cell *matCellDef="let item"> 
+                <button *ngIf="!item.connected" 
+                    mat-raised-button 
+                    color="primary" 
+                    [disabled]="loading" (click)="handleInvite(item.id)"> Send Invite </button>
+                <span *ngIf="item.connected"><b> is alredy invited </b></span>
+            </td>
+        </ng-container>
+        
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()"> Close </button>
+</div>

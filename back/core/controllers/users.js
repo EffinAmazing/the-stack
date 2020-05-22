@@ -1,4 +1,5 @@
 const UserModel = require('../../db/models/Users');
+const BluePrintModel = require('../../db/models/Blueprints');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 
@@ -7,6 +8,7 @@ const JWT_SECRET_KEY = process.env.AUTH_SECRET_KEY || "stack-builder";
 class Users {
     constructor(){
         this.model = new UserModel();
+        this.blueprints = new BluePrintModel();
     }
 
     signin(req, res, next) {
@@ -222,6 +224,31 @@ class Users {
             res.status(400).json({
                 result: "Error",
                 message: 'bad request'
+            })
+        }
+    }
+
+    getUserByBluePrint(req, res, next) {
+        const id = req.params.id;
+        const userId = req.query.userId;
+
+        if (id && userId) {
+            this.blueprints.getBluePrintConnectedToUsers(id, userId)
+            .then(list => {
+                res.json({
+                    result: list
+                })
+            })
+            .catch(err =>{
+                res.status(500).json({
+                    result: 'Error',
+                    message: 'Bad Request'
+                });
+            })
+        } else {
+            res.status(400).json({
+                result: "Error",
+                message: 'Bad request'
             })
         }
     }

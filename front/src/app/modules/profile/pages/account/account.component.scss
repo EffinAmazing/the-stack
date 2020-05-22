@@ -10,10 +10,17 @@
         margin: 0;
     }
 }
-
+.item-of-blueprint{
+    margin-bottom: 30px;
+}
 .stack-info .domain-title{
     font-size: 2em;
     line-height: 2.5em;
+}
+
+.chip-list-domain-title{
+    display: inline-block;
+    margin-left: 30px;
 }
 
 .box-show-stack-button{

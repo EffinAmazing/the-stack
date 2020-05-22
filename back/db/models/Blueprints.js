@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const AbstaractModel = require('./_abstract');
 const async = require('async');
 const emailService = require('../../services/email');
+const AccessModel = require('./BlueprintAccess');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 class BluePrintModel extends AbstaractModel{
@@ -68,9 +69,9 @@ class BluePrintModel extends AbstaractModel{
         return mapped;
     }
 
-    async sendInviteUserToBluePrint( list, path ) {
+    async sendInviteUserToBluePrint( list, path, blueprintId) {
         await async.each(list, (item, cb)=>{
-            emailService.sendInviteForUser(item.email, item.user, path)
+            emailService.sendInviteForUser(item.email, item.user, path, blueprintId)
             .then(res => {
                 
                 cb(null);
@@ -82,6 +83,28 @@ class BluePrintModel extends AbstaractModel{
         })
 
         return true;
+    }
+
+    async getBluePrintConnectedToUsers(providerId, receiverId){
+        let access = new AccessModel();
+
+        let list = await this.modelDB.find({ userId: providerId }).exec();
+
+        let proceedList = await async.map(list, (item, cb) => { 
+            let mapped = this.mapDocument(item)
+            access.hasUserAccess(receiverId, mapped.id).then(result => {
+                if (result) {
+                    mapped['connected'] = true;
+                } else {
+                    mapped['connected'] = false;
+                }
+
+                cb(null, mapped);
+            }).catch(err =>{  console.log(err); cb(err) });
+
+        });
+
+        return proceedList;
     }
 }
 

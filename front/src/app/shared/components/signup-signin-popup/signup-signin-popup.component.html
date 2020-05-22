@@ -1,4 +1,4 @@
-<h1 mat-dialog-title class="popup-title">{{formActive?'Sign Up':'Sign In'}}</h1>
+<h1 mat-dialog-title class="popup-title">{{formActive === 'signup'?'Sign Up':'Sign In'}}</h1>
 <div mat-dialog-content>
     <p class="form-message"> At first, to invite users or update node data you will need to signup or sign in </p>
     <div class="notice error-notice" *ngIf="!isLoading && isError"> {{errorMessage}} </div>

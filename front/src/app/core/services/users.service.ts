@@ -45,4 +45,8 @@ export class UsersService {
     const url = window.location.href.replace(window.location.hash, '');
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}users/${id}/reinvite`, { path: url }));
   }
+
+  getBluePrintByUsers(provider, userId): Observable<any> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}users/${provider}/blueprints?userId=${userId}`));
+  }
 }

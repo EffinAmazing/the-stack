@@ -33,7 +33,8 @@
                     <th mat-header-cell *matHeaderCellDef>  </th>
                     <td mat-cell *matCellDef="let item"> 
                         <button mat-raised-button color="primary" (click)="handleClickEdit(item)"> Edit </button> &nbsp;
-                        <button mat-raised-button color="primary" (click)="handleClickDelete(item)"> Delete </button>
+                        <button mat-raised-button color="primary" (click)="handleClickDelete(item)"> Delete </button> &nbsp;
+                        <button *ngIf="item.id !== user._id" mat-raised-button color="accent" (click)="handleShowUsers(item)"> Invite </button>
                     </td>
                 </ng-container>
 

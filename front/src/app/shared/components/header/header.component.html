@@ -1,6 +1,6 @@
 <mat-toolbar color="primary">
     <mat-toolbar-row>
-      <span> App </span>
+      <a class="header-link" [routerLink]="'/profile'"> My Stacks </a>
       <div>
         <a *ngIf="user.role === 0" class="header-link" mat-button [routerLink]="'/profile/users'">
           Users

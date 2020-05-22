@@ -38,7 +38,7 @@ class ToolsNodes {
                             async.filter(list, (item, callback) => {
                                 callback(null, item.needSendInvite)
                             }, function(err, filtered) {
-                                blueprints.sendInviteUserToBluePrint(filtered, referer)
+                                blueprints.sendInviteUserToBluePrint(filtered, referer, blueprintId)
                                 .then(result=>{  console.log(result); })
                                 .catch(err=> { console.log(err); });
                             });

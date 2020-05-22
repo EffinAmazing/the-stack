@@ -4,6 +4,7 @@ import { UsersService } from '../../../../core/services/users.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmActionComponent } from '../../components/confirm-action/confirm-action.component';
 import { UpdateUserFormComponent } from '../../components/update-user-form/update-user-form.component';
+import { InviteToStackComponent } from '../../components/invite-to-stack/invite-to-stack.component';
 
 @Component({
   selector: 'app-users-managment',
@@ -21,7 +22,9 @@ export class UsersManagmentComponent implements OnInit {
     private auth: AuthService,
     private usersService: UsersService,
     public deleteDialog: MatDialog,
-    public editDialog: MatDialog) {
+    public editDialog: MatDialog,
+    public inviteUser: MatDialog
+  ) {
     this.user = this.auth.getCurrentUser();
   }
 
@@ -92,6 +95,15 @@ export class UsersManagmentComponent implements OnInit {
         });
       }
     });
+  }
+
+  handleShowUsers(user): void {
+    const dialogRef = this.inviteUser.open( InviteToStackComponent, {
+      width: '720px',
+      data: { user, providerId: this.user._id }
+    });
+
+    dialogRef.afterClosed().subscribe((res) => {  });
   }
 
   ngOnInit(): void {

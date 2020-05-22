@@ -141,7 +141,7 @@ class UserModel extends AbstaractModel{
                     providerUser: providerId,
                     receiverUser: user._id,
                     level: 'Full' });
-                return { email: email, user: user, needSendInvite: false, status: 'success' };
+                return { email: email, user: user, needSendInvite: true, status: 'success' };
             } else return { email: email, user: user, needSendInvite: false, status: 'success' };
         } else {
             try{

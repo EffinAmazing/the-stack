@@ -18,6 +18,7 @@ import { UsersManagmentComponent } from './pages/users-managment/users-managment
 import { ConfirmActionComponent } from './components/confirm-action/confirm-action.component';
 import { UpdateUserFormComponent } from './components/update-user-form/update-user-form.component';
 import { InvitedUsersComponent } from './components/invited-users/invited-users.component';
+import { InviteToStackComponent } from './components/invite-to-stack/invite-to-stack.component';
 
 
 @NgModule({
@@ -30,7 +31,8 @@ import { InvitedUsersComponent } from './components/invited-users/invited-users.
     UsersManagmentComponent,
     ConfirmActionComponent,
     UpdateUserFormComponent,
-    InvitedUsersComponent
+    InvitedUsersComponent,
+    InviteToStackComponent
   ],
   imports: [
     CommonModule,

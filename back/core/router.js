@@ -60,6 +60,7 @@ router.get('/users', passport.authenticate('jwt', { session: false }), users.get
 router.put('/users/:id', passport.authenticate('jwt', { session: false }), users.update.bind(users));
 router.delete('/users/:id', passport.authenticate('jwt', { session: false }), users.delete.bind(users));
 router.post('/users/:id/reinvite', passport.authenticate('jwt', { session: false }), users.resendInvite.bind(users));
+router.get('/users/:id/blueprints', passport.authenticate('jwt', { session: false }), users.getUserByBluePrint.bind(users));
 
 
 module.exports = router;

@@ -31,6 +31,12 @@ class BluePrintAccessModel extends AbstaractModel{
         return ids;
     }
 
+    async removeAllByBlueprintId(blueprintId){
+        let res = await this.modelDB.deleteMany({ blueprintId: blueprintId }).exec();
+
+        return res;
+    }
+
     async hasUserAccess(userId, blueprintId) {
         let result = await this.modelDB.findOne({ receiverUser: userId, blueprintId: blueprintId });
         if (result) {

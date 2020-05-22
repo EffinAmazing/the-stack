@@ -271,7 +271,7 @@ class BluePrints {
                     }, cb);
                 },
                 (filtered, cb) => {
-                    this._bluePrints.sendInviteUserToBluePrint(filtered, pathFront)
+                    this._bluePrints.sendInviteUserToBluePrint(filtered, pathFront, blueprintId)
                     .then(result=> cb(null, result))
                     .catch(err=> cb(err, null));
                 }
@@ -367,6 +367,9 @@ class BluePrints {
                 },
                 (cb)=>{
                     this._toolsNodes.removeAllForBlueprintId(id).then(()=>{  cb(null);   }).catch((err)=>{ cb(err) })
+                },
+                (cb) => {
+                    this._bluePrintsAccess.removeAllByBlueprintId(id).then(()=>{  cb(null);   }).catch((err)=>{ cb(err) })
                 },
                 (cb) => {
                     this._bluePrints.delete(id, []).then((r)=>{ cb(null, r); }).catch(err => {  cb(err, null) });

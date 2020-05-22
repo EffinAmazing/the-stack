@@ -12,11 +12,11 @@
                 [bufferValue]="75">
             </mat-progress-bar>
           </div>
-          <div *ngIf="!loadingBluePrints && !showAddStackForm && user.role === 0" class="box-show-stack-button"> 
+          <div *ngIf="!loadingBluePrints && !showAddStackForm && listBluePrints.length" class="box-show-stack-button"> 
             <button mat-raised-button color="primary" (click)="showFormAddStack()"> Add New Stack </button>
           </div>
           <div *ngIf="!loadingBluePrints && ( !listBluePrints.length  || showAddStackForm )">
-            <div *ngIf="!listBluePrints.length" class="notice notice-message"> You haven't had created stacks yet. use form below, for creating one </div>
+            <div *ngIf="!listBluePrints.length && !sharedBluePrints.length" class="notice notice-message"> You haven't had created stacks yet. use form below, for creating one </div>
             <div class="form-domain">
 
               <h2> Input Domain </h2>
@@ -32,6 +32,7 @@
               </div>
             </div>
           </div>
+          
           <div *ngIf="!loadingBluePrints" class="list-of-blueprints"> 
             
             <mat-card *ngFor="let stack of listBluePrints" class="item-of-blueprint"> 
@@ -51,24 +52,7 @@
               </div>
             </mat-card>
           </div>
-        </div>
-        <div class="great-spacer"></div>
-        <mat-divider></mat-divider>
-        <div class="great-spacer"></div>
-        <div class="invited-stack-list"> 
-          <h2> Shared for me Stacks </h2>
-          <div *ngIf="loadingSharedStacks">
-            <mat-progress-bar
-                class="loading-page-data"
-                color="primary"
-                [mode]="modeName"
-                [value]="50"
-                [bufferValue]="75">
-            </mat-progress-bar>
-          </div>
-          <div *ngIf="!loadingSharedStacks && !sharedBluePrints.length">
-            <div class="notice notice-message"> You haven't had shared stacks </div>
-          </div>
+          
           <div *ngIf="!loadingSharedStacks && sharedBluePrints.length">
             <mat-card *ngFor="let stack of sharedBluePrints" class="item-of-blueprint"> 
               <div class="item-content">
@@ -76,7 +60,11 @@
                   <img class="icon" [src]="getDomainLogo(stack.domain)" />
                 </div>
                 <div class="stack-info"> 
-                  <div class="domain-title"> {{ stack.domain }} </div>
+                  <div class="domain-title"> {{ stack.domain }}   
+                    <mat-chip-list [selectable]="false" class="chip-list-domain-title">
+                      <mat-chip color="primary" selected  [disableRipple]="false">Shared to me</mat-chip>
+                    </mat-chip-list> 
+                  </div>
                   <div> 
                     <b>created:</b>  &nbsp; <span> {{stack.created | date}} </span>  &nbsp;  &nbsp; &nbsp;
                     <a  mat-raised-button color="primary" [routerLink]="'/stack/build/' + stack.id"> View </a> &nbsp; 
@@ -85,7 +73,10 @@
               </div>
             </mat-card>
           </div>
-
         </div>
+        <div class="great-spacer"></div>
+        <mat-divider></mat-divider>
+        <div class="great-spacer"></div>
+       
     </div>
 </div>
