@@ -207,6 +207,7 @@ export class BuildStackComponent implements OnInit {
           const tool = this.nodes[result.nodeId].tool;
           res.tool = this.nodes[result.nodeId].tool;
           this.nodes[result.nodeId] = res;
+          // console.log(result.data, res);
           this.changeNodeData$.next(this.nodes[result.nodeId]);
         });
       } else {

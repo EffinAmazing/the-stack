@@ -31,6 +31,7 @@ export class BuilderComponent implements OnInit {
   @Input() loadedArrows: Observable<any>;
   @Input() historyEmit: Observable<any>;
   @Input() addedNewNode: Observable<any>;
+  @Input() updatedOutNodeData: Observable<any>;
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
   nodes: BluePrintTool[] = [];
@@ -62,6 +63,7 @@ export class BuilderComponent implements OnInit {
     let index = 0;
     this.loadedNodes.subscribe((data) => {
       this.showNodes = [];
+      console.log(' *** loadedNodes ****');
 
       if (data.list) {
         data.list.forEach((nodeId) => {
@@ -263,6 +265,10 @@ export class BuilderComponent implements OnInit {
         /* */
       }
     });
+
+    this.updatedOutNodeData.subscribe((node) => {
+      // console.log(' *** updatedOutNodeData *** ', node);
+    });
   }
 
   public processImageSrc(link) {
@@ -283,9 +289,11 @@ export class BuilderComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         node = Object.assign({}, node, result);
+        node.position = this.nodes[node.id].position;
         this.nodes[node.id] = node;
         const index = this.showNodes.findIndex((item) => item.id === node.id );
         this.showNodes[index] = node;
+
         this.updatedNodeData.emit({ nodeId: node.id, data: result });
       }
     });
@@ -304,6 +312,7 @@ export class BuilderComponent implements OnInit {
     } else {
     /*  */
       this.positionNodeChanged.emit({ nodeId: node.id, position: data.source._dragRef._activeTransform  });
+      this.nodes[node.id].position = data.source._dragRef._activeTransform;
 
       const updatedLines = this.connectedLines.map(async (item) => {
         return this.arrowUpdated.emit({ newData: item, disableHistory: true });

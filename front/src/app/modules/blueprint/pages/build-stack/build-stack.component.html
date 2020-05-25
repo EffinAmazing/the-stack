@@ -52,6 +52,7 @@
           [loadedArrows]="changedArrows$"
           [historyEmit]="history.getEmmiter(blueprint.id)"
           [addedNewNode]="addedNewNode$"
+          [updatedOutNodeData]="changeNodeData$"
           (positionNodeChanged)="updatedNodePosiotion($event)"
           (arrowAdded)="handleAddArrow($event)"
           (arrowUpdated)="handleUpdateArrow($event)"

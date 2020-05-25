@@ -136,9 +136,11 @@ export class ToolsListComponent implements OnInit {
 
     this.updatedOutNodeData.subscribe((node) => {
       if (node) {
-        node.tool.categories.forEach((cat) => {
-          this.reculcCategoryCost(cat);
-        });
+        if (node.tool && node.tool.categories) {
+          node.tool.categories.forEach((cat) => {
+            this.reculcCategoryCost(cat);
+          });
+        }
       }
     });
 
