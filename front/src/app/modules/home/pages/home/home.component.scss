@@ -1,5 +1,6 @@
 .input-domain{
-    min-width: 320px;
+    min-width: 360px;
+    color: #333333;
 
     .mat-input-element{
         border: none;
@@ -12,4 +13,128 @@
 }
 .submit-domain{
     text-align: center;
+}
+.hero-section {
+    background-color: #25282d;
+    padding-top: 70px;
+    padding-bottom: 50px;
+    color: #ffffff;
+
+    img {
+        border-radius: 10px;
+    }
+
+    .page-title{
+        font-size: 32px;
+        line-height: 1.5em;
+        margin-bottom: 30px;
+        color: #ffffff;
+    }
+
+    .page-subtitle {
+        font-size: 18px;
+        line-height: 1.8em;
+        margin-bottom: 30px;
+    }
+}
+.field-domain-input{
+    width: 360px;
+    font-size: 18px;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-weight: 100;
+    margin-bottom: 25px;
+    border: 0;
+    color: #333333;
+
+    &:focus{
+        outline: none;
+    }
+
+    &:active{
+        outline: none;
+    }
+}
+
+.error.field-error {
+    display: none;
+    font-size: 12px;
+    color: #fa3e38;
+}
+
+.riased-button-doamin {
+    width: 360px;
+    padding: 15px 25px;
+    font-size: 20px;
+    background-color: #f04a22;
+    border: 0;
+    border-radius: 7px;
+    color: #ffffff;
+    cursor: pointer;
+}
+.row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.col-md-6 {
+    width: 50%;
+
+    @media screen and (max-width: 768px){
+        width: 100%;
+    }
+}
+.col-md-5 {
+    width: 41.66%;   
+    
+    @media screen and (max-width: 768px){
+        width: 100%;
+    }
+}
+.col-md-3 {
+    width: 25%;
+
+    @media screen and (max-width: 768px){
+        width: 100%;
+    }
+}
+.col-md-7 {
+    width: 58.33%;   
+
+    @media screen and (max-width: 768px){
+        width: 100%;
+    }
+}
+.tool-ability-container {
+    text-align: center;
+}
+.footer-form-section {
+    background-color: #25282d;
+    padding-top: 70px;
+    padding-bottom: 50px;
+
+    .footer-title {
+        font-size: 32px; 
+        line-height: 36px;
+        text-align: center;
+        color: #ffffff;
+    }
+}
+.abilities-tool {
+    padding-top: 60px;
+    padding-bottom: 60px;
+
+    .ability-title {
+        font-weight: 600;
+        font-size: 16px;
+        color: #333333;
+    }
+
+    .ability-description {
+        font-size: 16px;
+    }
+}
+img {
+    max-width: 100%;
 }

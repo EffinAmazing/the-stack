@@ -9,8 +9,55 @@ import { Router } from '@angular/router';
 })
 export class HomeComponent implements OnInit {
   domain = new FormControl('', [Validators.pattern(/^([a-z.\-]+(\.)[a-z]{2,3})$/i)]);
+  outsideData: {
+    title: string,
+    subtitle: string,
+    heroImage: string,
+    abilities: Array<{ title: string, icon: string, description: string }>
+  } | null = null;
+  defaultRepeater: Array<{ title: string, icon: string, description: string }> = [];
 
-  constructor(private router: Router) { }
+  constructor(private router: Router) {
+    console.log(' test ');
+    if (window['outsideData']) {
+      this.outsideData = window['outsideData'];
+
+      console.log(' *** this.defaultRepeater *** ', this.defaultRepeater);
+    }
+
+    this.defaultRepeater.push({
+      title: 'Manage your existing stack',
+      icon: this.getAssetsFolder() + 'assets/images/default-icon.png',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
+        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+    });
+
+    this.defaultRepeater.push({
+      title: 'Manage your existing stack',
+      icon: this.getAssetsFolder() + 'assets/images/default-icon.png',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
+        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+    });
+
+    this.defaultRepeater.push({
+      title: 'Manage your existing stack',
+      icon: this.getAssetsFolder() + 'assets/images/default-icon.png',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
+        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+    });
+
+    this.defaultRepeater.push({
+      title: 'Manage your existing stack',
+      icon: this.getAssetsFolder() + 'assets/images/default-icon.png',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
+        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+    });
+
+    if (this.outsideData) {
+      this.defaultRepeater = this.outsideData.abilities;
+    }
+
+  }
 
   ngOnInit(): void {  }
 
@@ -29,6 +76,14 @@ export class HomeComponent implements OnInit {
       value = arr[0];
       data.target.value = value;
       this.domain.setValue( value );
+    }
+  }
+
+  public getAssetsFolder() {
+    if (typeof window['assets'] !== 'undefined') {
+      return window['assets'];
+    } else {
+      return '/';
     }
   }
 }
