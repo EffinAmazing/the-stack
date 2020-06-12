@@ -17,34 +17,45 @@
 .hero-section {
     background-color: #25282d;
     padding-top: 70px;
-    padding-bottom: 50px;
+    padding-bottom: 85px;
     color: #ffffff;
+    font-family: "proxima-nova", sans-serif;
 
     img {
         border-radius: 10px;
     }
 
     .page-title{
-        font-size: 32px;
+        font-size: 34px;
         line-height: 1.5em;
-        margin-bottom: 30px;
+        margin-bottom: 34px;
         color: #ffffff;
+        font-family: "proxima-nova", sans-serif;
+        white-space: pre-line;
     }
 
     .page-subtitle {
-        font-size: 18px;
+        font-size: 20px;
         line-height: 1.8em;
-        margin-bottom: 30px;
+        margin-bottom: 30px !important;
+        font-family: "proxima-nova", sans-serif;
+        margin-bottom: 34px;        
+    }
+
+    .hero-image-box {
+        text-align: right;
     }
 }
 .field-domain-input{
-    width: 360px;
-    font-size: 18px;
+    width: 420px;
+    max-width: 100%;
+    font-size: 20px;
     padding: 12px 20px;
     border-radius: 5px;
     font-weight: 100;
-    margin-bottom: 25px;
+    line-height: 1em;
     border: 0;
+    box-sizing: border-box;
     color: #333333;
 
     &:focus{
@@ -55,19 +66,29 @@
         outline: none;
     }
 }
+.form-domain .field-box{
+    margin-bottom: 20px;
+}
+
+.tool-ability-container{
+    padding-left: 10px;
+    padding-right: 10px;
+}
 
 .error.field-error {
-    display: none;
+    display: block;
     font-size: 12px;
     color: #fa3e38;
 }
 
 .riased-button-doamin {
-    width: 360px;
-    padding: 15px 25px;
-    font-size: 20px;
+    width: 420px;
+    max-width: 100%;
+    padding: 12px 24px;
+    font-size: 24px;
     background-color: #f04a22;
-    border: 0;
+    border: 0; 
+    line-height: 1.1em;
     border-radius: 7px;
     color: #ffffff;
     cursor: pointer;
@@ -80,6 +101,8 @@
 }
 .col-md-6 {
     width: 50%;
+    padding: 0 20px;
+    box-sizing: border-box;
 
     @media screen and (max-width: 768px){
         width: 100%;
@@ -87,6 +110,8 @@
 }
 .col-md-5 {
     width: 41.66%;   
+    padding: 0 20px;
+    box-sizing: border-box;
     
     @media screen and (max-width: 768px){
         width: 100%;
@@ -94,13 +119,17 @@
 }
 .col-md-3 {
     width: 25%;
+    padding: 0 20px;
+    box-sizing: border-box;
 
     @media screen and (max-width: 768px){
         width: 100%;
     }
 }
 .col-md-7 {
-    width: 58.33%;   
+    width: 58.33%; 
+    padding: 0 20px; 
+    box-sizing: border-box; 
 
     @media screen and (max-width: 768px){
         width: 100%;
@@ -110,29 +139,39 @@
     text-align: center;
 }
 .footer-form-section {
+    font-family: "proxima-nova", sans-serif;
     background-color: #25282d;
-    padding-top: 70px;
-    padding-bottom: 50px;
+    padding-top: 75px;
+    padding-bottom: 75px;
 
     .footer-title {
         font-size: 32px; 
-        line-height: 36px;
+        line-height: 36px;   
         text-align: center;
         color: #ffffff;
+        margin-bottom: 40px !important;
     }
 }
 .abilities-tool {
-    padding-top: 60px;
-    padding-bottom: 60px;
+    font-family: "proxima-nova", sans-serif;
+    padding-top: 75px;
+    padding-bottom: 70px;
 
     .ability-title {
         font-weight: 600;
-        font-size: 16px;
-        color: #333333;
+        font-size: 18px;
+        color: rgb(37, 40, 45);
+        line-height: 1.444em;
+        text-align: center;
+        margin-bottom: 12px !important;
     }
 
     .ability-description {
         font-size: 16px;
+        color: rgb(37, 40, 45);
+        line-height: 1.375em;
+        text-align: center;
+        font-weight: 400;
     }
 }
 img {

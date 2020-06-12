@@ -3,7 +3,7 @@
         <div class="mt-section-container">
             <div class="row"> 
                 <div class="col-md-5">
-                    <h2 class="page-title"> {{ outsideData ? outsideData.title : 'Build Your Perfect Marketing Technology Stack' }} </h2>
+                    <h2 class="page-title"> {{ outsideData ? outsideData.title : 'Build Your Perfect \n Marketing Technology Stack' }} </h2>
                     <p class="page-subtitle"> {{ outsideData ? outsideData.subtitle : 
                         'Easily visualize and find new ways to optimize your entire marketing stack all in one place' }}</p>
                     <div class="form-domain">
@@ -14,14 +14,15 @@
                                 required 
                                 (input)="handleInput($event)" 
                                 (keyup.enter)="submitDomain()">
+                            <span class="error field-error" *ngIf="hasError"> Please enter a valid domain </span>
                         </div>
                         <div class="button-box">
                             <button class="riased-button-doamin" (click)="submitDomain()">Submit</button>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-7">
-                    <img [src]="getAssetsFolder() + 'assets/images/screen.jpg'" />
+                <div class="col-md-7 hero-image-box">
+                    <img class="hero-image" [src]="getHeroImageUrl()" />
                 </div>
             </div>
         </div>
@@ -52,6 +53,7 @@
                                 required 
                                 (input)="handleInput($event)" 
                                 (keyup.enter)="submitDomain()">
+                                <span class="error field-error" *ngIf="hasError"> Please enter a valid domain </span>
                         </div>
                         <div class="button-box">
                             <button class="riased-button-doamin" (click)="submitDomain()">Submit</button>

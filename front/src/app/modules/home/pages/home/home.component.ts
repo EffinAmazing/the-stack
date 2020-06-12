@@ -16,6 +16,7 @@ export class HomeComponent implements OnInit {
     abilities: Array<{ title: string, icon: string, description: string }>
   } | null = null;
   defaultRepeater: Array<{ title: string, icon: string, description: string }> = [];
+  hasError = false;
 
   constructor(private router: Router) {
     console.log(' test ');
@@ -64,6 +65,16 @@ export class HomeComponent implements OnInit {
   submitDomain() {
     if (!this.domain.invalid) {
       this.router.navigateByUrl('/blueprints/build?domain=' + this.domain.value);
+    } else {
+      this.hasError = true;
+    }
+  }
+
+  getHeroImageUrl() {
+    if (this.outsideData) {
+      return this.outsideData.heroImage;
+    } else {
+      return this.getAssetsFolder() + 'assets/images/screen-stack.png';
     }
   }
 
