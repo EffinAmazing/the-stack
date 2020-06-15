@@ -1,11 +1,19 @@
 <div class="main">
-    <app-header *ngIf="authUser" [user]="authUser"></app-header>
-    <div class="mt-container"> 
-      <h2> Build Your Stack </h2>  
-      
-      
+  <div class="app-container">
+    <div class="stack-section-container"> 
+      <app-header *ngIf="authUser" [user]="authUser"></app-header>
+      <div class="stack-builder-title">
+        <h2 > Build Your Stack </h2>  
+        <div class="share-block" *ngIf="loaded">
+          <span class="title"> Share </span>
+          <div class="waiting-process" *ngIf="isWaiting"> <mat-spinner [diameter]="25"></mat-spinner> </div>
+          <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/facebook.svg'" /> </button>
+          <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/linkedin.svg'" /> </button>
+          <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/twitter.svg'" /> </button>
+          <!-- <button mat-icon-button class="share-image-button" (click)="handleShare('email')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/email.svg'" /> </button> -->
+        </div>
+      </div>
       <div class="stackContainer">
-        
         <div class="stackActions" *ngIf="loaded" >
           <div>
               <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> Show or Hide Tools </button>
@@ -13,14 +21,7 @@
               <button mat-raised-button (click)="handleAddNewTool()"> <mat-icon>add</mat-icon> Add Tool </button>
           </div>
           <div>
-            <div class="share-block" *ngIf="loaded">
-              <span class="title"> Share </span>
-              <div class="waiting-process" *ngIf="isWaiting"> <mat-spinner [diameter]="25"></mat-spinner> </div>
-              <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/facebook.svg'" /> </button>
-              <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/linkedin.svg'" /> </button>
-              <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/twitter.svg'" /> </button>
-              <!-- <button mat-icon-button class="share-image-button" (click)="handleShare('email')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/email.svg'" /> </button> -->
-            </div> 
+             
           </div>
           <div>
             
@@ -78,9 +79,12 @@
             <button mat-raised-button class="delete-arrow-action" (click)="removeStack()"> Delete stack </button>
           </div>
         </div>
-        <mat-divider></mat-divider>
-        <div #categoriesList>
-          <app-tools-list  [ngClass]="{'hideTools': false}" *ngIf="loaded" 
+      </div>
+    </div>
+
+
+      <div #categoriesList>
+        <app-tools-list  [ngClass]="{'hideTools': false}" *ngIf="loaded" 
             [loadedNodes]="changedNodes$" 
             [loadedCategories]="changedCategories$"
             [updatedOutNodeData]="changeNodeData$"
@@ -89,8 +93,8 @@
             (closeTools)="handleCloseTools()"
             (updatedNodeData)="handleUpdatedNodeData($event)"
             ></app-tools-list>
-        </div>
       </div>
       <canvas id="share-image-canvas"></canvas>
-    </div>
+    
+  </div>
 </div>

@@ -13,7 +13,7 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
-        margin-bottom: 80px;
+        margin-bottom: 0px;
     }
 
     .total-spand-tools{
@@ -27,28 +27,7 @@
         }
     }
 
-    .share-block{
-        position: relative;
-        text-align: center;
-        display: inline-block;
-        padding-left: 10px;
-
-        .title{
-            position: absolute;
-            top: -14px;
-            font-weight: bold;
-            font-size: 1.1em;
-            display: inline-block;
-            text-align: center;
-            width: 100%;
-            left: 0;
-        }
-
-        .social-icon{
-            width: 22px;
-            height: 22px;
-        }
-    }
+    
 
     .stackActions{
         min-height: 60px;
@@ -131,10 +110,54 @@
     display: none;
 }
 
+.share-block{
+    position: relative;
+    text-align: center;
+    display: flex;
+    padding-left: 10px;
+    float: right;
+    align-items: center;
+
+    .title{
+        font-size: 18px;
+        display: inline-block;
+        text-align: center;
+        left: 0;
+    }
+
+    .social-icon{
+        width: 22px;
+        height: 22px;
+    }
+}
+
 .waiting-process{
     position: absolute;
     left: -10px;
     top: 5px;
+}
+
+.stack-builder-title {
+    border-top: solid 1px rgb(220, 219, 220);
+    border-bottom: solid 1px rgb(220, 219, 220);
+    margin: 0;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-left: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.stack-section-container {
+    overflow: hidden;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    box-shadow: 4px 4px 20px 0px rgba(0, 0, 0, 0.06);
+    margin-bottom: 20px;
+
+    h2 {
+        margin: 0;
+    }
 }
 
 .toolsList{

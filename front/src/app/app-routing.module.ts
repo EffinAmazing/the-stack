@@ -34,10 +34,20 @@ const routes: Routes = [
     redirectTo: 'home',
     pathMatch: 'full'
   }
+  /*{
+    path: '',
+    loadChildren: async () => {
+      const { HomeModule } =  await import('./modules/home/home.module');
+      return HomeModule;
+    },
+  },*/
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, {
+    urlUpdateStrategy: 'eager',
+    paramsInheritanceStrategy: 'always'
+  })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

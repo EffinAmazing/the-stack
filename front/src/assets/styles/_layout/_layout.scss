@@ -7,13 +7,26 @@ html, body{
 }
 
 .mt-container{
-    padding: 30px 60px;
+    padding: 30px 0px;
 }
 .mt-flex{
     display: flex;
     align-items: center;
     justify-content: center;
     justify-items: center;
+}
+
+.profile-data .mat-button {
+    font-size: 18px;
+    font-weight: 400;
+}
+
+.profile-data .logout-button {
+    font-weight: 600;
+}
+
+.header-link.app-logo-text {
+    font-weight: 800;
 }
 
 .mt-full-screen {
@@ -75,6 +88,14 @@ html, body{
 }
 
 .mt-section-container {
-    max-width: 1200px;
+    max-width: $laptop-M-w;
     margin: auto;
+}
+
+.app-container{
+    max-width: $laptop-M-w;
+    padding: 0px 15px;
+    margin: auto;
+    margin-top: 50px;
+    margin-bottom: 60px;
 }

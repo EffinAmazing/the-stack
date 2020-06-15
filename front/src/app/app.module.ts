@@ -9,7 +9,9 @@ import { HomeModule } from './modules/home/home.module';
 import { NoCacheHeadersInterceptor } from './core/interceptors/no-cache-headers.interceptor';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { ProfileModule } from './modules/profile/profile.module';
-import { AuthInterceptor } from "./core/interceptors/auth.interceptor";
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { Router, NavigationStart } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 @NgModule({
   declarations: [
@@ -41,4 +43,16 @@ import { AuthInterceptor } from "./core/interceptors/auth.interceptor";
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+
+export class AppModule {
+  constructor(private router: Router) {
+    this.router.events.pipe(
+      filter( (e) => e instanceof NavigationStart)
+    ).subscribe(e => {
+      // console.log(e, window.location.search);
+      if (window['analytics']) {
+        window['analytics'].page();
+      }
+    });
+  }
+}
