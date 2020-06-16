@@ -282,7 +282,7 @@ export class BuilderComponent implements OnInit {
   public handleClick(node) {
 
     const dialogRef = this.detailsDialog.open(NodeDetailsComponent, {
-      width: '820px',
+      width: '620px',
       data: { node }
     });
 

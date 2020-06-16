@@ -1,4 +1,6 @@
-<h1 mat-dialog-title>Edit User</h1>
+<h1 mat-dialog-title>
+    Edit User <button mat-icon-button class="close-button" [mat-dialog-close]><mat-icon>clear</mat-icon></button>
+</h1>
 <div mat-dialog-content>
     <form [formGroup]="userForm">
         <div class="container-form">
@@ -35,7 +37,7 @@
         </div>
     </form>
 </div>
-<div mat-dialog-actions>
-    <button mat-button (click)="onCancelClick()"> Cancel </button>
-    <button mat-button (click)="onUpdateClick()"> Update </button>
+<div mat-dialog-actions direction="right">
+    <button class="stack-button" (click)="onCancelClick()"> <mat-icon>clear</mat-icon> Cancel </button>
+    <button class="stack-button" color="primary" (click)="onUpdateClick()"> <mat-icon>done</mat-icon>  Update </button>
 </div>

@@ -84,7 +84,7 @@ export class AccountComponent implements OnInit {
   handleDeleteClick(stack) {
     // this.blueprints.removeBluePrint(id)
     const dialogRef = this.deleteDialog.open(DeleteStackDialogComponent, {
-      width: '320px',
+      width: '570px',
       data: { domain: stack.domain }
     });
 
@@ -114,6 +114,11 @@ export class AccountComponent implements OnInit {
   showFormAddStack() {
     console.log(' *** showFormAddStack *** ');
     this.showAddStackForm = true;
+  }
+
+  hideFormAddStack() {
+    console.log(' *** hideFormAddStack *** ');
+    this.showAddStackForm = false;
   }
 
   handleInput(data) {

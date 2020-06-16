@@ -7,13 +7,26 @@ html, body{
 }
 
 .mt-container{
-    padding: 30px 60px;
+    padding: 30px 0px;
 }
 .mt-flex{
     display: flex;
     align-items: center;
     justify-content: center;
     justify-items: center;
+}
+
+.profile-data .mat-button {
+    font-size: 18px;
+    font-weight: 400;
+}
+
+.profile-data .logout-button {
+    font-weight: 600;
+}
+
+.header-link.app-logo-text {
+    font-weight: 800;
 }
 
 .mt-full-screen {
@@ -25,6 +38,14 @@ html, body{
     text-align: center;
     font-size: $font-h2-size;
     font-weight: 400;
+}
+
+.mat-button-wrapper img {
+    max-width: 100%;
+}
+
+.mat-button-wrapper img {
+    width: 22px;
 }
 
 .dot-drag-arrow{
@@ -40,8 +61,25 @@ html, body{
     cursor: pointer;
 }
 
+.stack-section-container {
+    overflow: hidden;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    box-shadow: 4px 4px 20px 0px rgba(0, 0, 0, 0.06);
+    margin-bottom: 20px;
+
+    h2 {
+        margin: 0;
+        font-weight: 300;
+    }
+}
+
+.app-container .mat-icon-button{
+    background: transparent;
+}
+
 .mat-toolbar.mat-primary{
-    background: #dddddd;
+    background: #eaeaea;
     color: #333333;
 }
 .mat-toolbar-row, .mat-toolbar-single-row{
@@ -75,6 +113,14 @@ html, body{
 }
 
 .mt-section-container {
-    max-width: 1200px;
+    max-width: $laptop-M-w;
     margin: auto;
+}
+
+.app-container{
+    max-width: $laptop-M-w;
+    padding: 0px 15px;
+    margin: auto;
+    margin-top: 50px;
+    margin-bottom: 60px;
 }

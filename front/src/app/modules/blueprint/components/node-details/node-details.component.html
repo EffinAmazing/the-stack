@@ -1,18 +1,20 @@
 <h1 mat-dialog-title> <img class="node-icon" crossorigin [src]="data.node.tool.logo?processImageSrc(data.node.tool.logo):getAssetsFolder() + 'assets/images/layers.png'"  />
-    {{data.node.tool.name}} </h1>
+    {{data.node.tool.name}} <button mat-icon-button class="close-button" [mat-dialog-close]><mat-icon>clear</mat-icon></button> 
+</h1>
+<div class="dialog-categories-list" *ngIf="data.node">
+    <div class="info-paragraph"> 
+        <div class="title"> Categories: </div>
+        <div class="data"> <span *ngIf="data.node.tool.categories">{{data.node.tool.categories.join(', ') }}</span> </div>
+    </div> 
+</div>
+<div class="dialog-description-box">
+    <div class="info-paragraph">
+        <div class="data"> {{data.node.tool.description}} </div>
+    </div>
+</div>
 <div mat-dialog-content>
     <div class="nodeData" *ngIf="data.node">
-        <mat-divider></mat-divider>
-        <div class="info-paragraph"> 
-            <div class="title"> Categories: </div>
-            <div class="data"> <span *ngIf="data.node.tool.categories">{{data.node.tool.categories.join(', ') }}</span> </div>
-        </div> 
-        <mat-divider></mat-divider>
-        <div class="info-paragraph">
-            <div class="data"> {{data.node.tool.description}} </div>
-        </div>
-        <mat-divider></mat-divider>
-        
+
         <form [formGroup]="nodeForm">
             <div  class="info-paragraph"> 
                 <div class="title">Monthly cost: </div>
@@ -20,13 +22,12 @@
                     <mat-form-field class="full-width">
                         <mat-label>Cost</mat-label>
                         <span matPrefix>$ &nbsp;</span>
-                        <input matInput placeholder="1.00" type="number" formControlName="cost">
+                        <input matInput placeholder="1.00" type="number" formControlName="cost" cdkFocusInitial>
                     </mat-form-field>
                 </div>
             </div>
-            <mat-divider></mat-divider>
             <div  class="info-paragraph"> 
-                <div class="title"> start: </div>
+                <div class="title"> Start: </div>
                 <div class="data"> 
                     <mat-form-field>
                         <mat-label (click)="startPicker.open()">Choose a date</mat-label>
@@ -36,9 +37,8 @@
                     </mat-form-field>    
                 </div>
             </div>
-            <mat-divider></mat-divider>
             <div  class="info-paragraph"> 
-                <div class="title"> end: </div>
+                <div class="title"> End: </div>
                 <div class="data"> 
                     <mat-form-field>
                         <mat-label (click)="endPicker.open()">Choose a date</mat-label>
@@ -48,9 +48,8 @@
                     </mat-form-field>  
                 </div>
             </div>
-            <mat-divider></mat-divider>
             <div  class="info-paragraph"> 
-                <div class="title"> owner: </div>
+                <div class="title"> Owner: </div>
                 <div class="data">
                     <input type="hidden" formControlName="owner" />
                     <div class="list-owners"><span *ngFor="let item of getOwners()" class="item-owners" > {{item}}  &nbsp; 
@@ -59,10 +58,9 @@
                         <mat-label>Owners</mat-label>
                         <input matInput placeholder="owner" type="email" [(ngModel)]="ownerTemp" [ngModelOptions]="{standalone: true}">
                     </mat-form-field>
-                    <button mat-raised-button class="add-button-owner" (click)="handleAddOwner()"> <mat-icon>add</mat-icon> Add</button>
+                    <button mat-icon-button class="add-button-owner" (click)="handleAddOwner()"> <mat-icon>add</mat-icon> </button>
                 </div>
             </div>
-            <mat-divider></mat-divider>
             <div  class="info-paragraph"> 
                 <div class="title"> people who are trained on it: </div>
                 <div class="data">
@@ -73,13 +71,13 @@
                         <mat-label>Trained On</mat-label>
                         <input matInput placeholder="Trained On" type="email" [(ngModel)]="trainOnTemp" [ngModelOptions]="{standalone: true}">
                     </mat-form-field>
-                    <button mat-raised-button class="add-button-owner" (click)="handleAddTrainedOn()"> <mat-icon>add</mat-icon> Add</button>
+                    <button mat-icon-button class="add-button-owner" (click)="handleAddTrainedOn()"> <mat-icon>add</mat-icon> </button>
                 </div>
             </div>
         </form>
     </div>
 </div>
-<div mat-dialog-actions>
-  <button mat-raised-button (click)="onNoClick()">Close</button>
-  <button mat-raised-button color="primary" [mat-dialog-close]="nodeForm.value" >Update</button>
+<div mat-dialog-actions direction="right">
+  <button class="stack-button" (click)="onNoClick()"> <mat-icon>clear</mat-icon> Close</button>
+  <button class="stack-button" color="primary" [mat-dialog-close]="nodeForm.value" > <mat-icon>done</mat-icon> Update</button>
 </div>

@@ -9,3 +9,84 @@
         color: #333333;
     }
 }
+.mat-form-field.mat-primary.mat-focused {
+    .mat-form-field-label{
+        color: rgb(255, 65, 0);
+    }
+
+    .mat-form-field-ripple{
+        background-color: rgb(255, 65, 0);
+        border-color: rgb(255, 65, 0);
+    }
+
+}
+.divider-buttons {
+    background-color: rgb(220, 219, 220);
+    width: 1px;
+    height: 20px;
+    display: inline-block;
+}
+.app-container .actions-container {
+    display: flex;
+    align-items: center;
+}
+.mat-dialog-container .mat-dialog-content {
+    padding-top: 22px;
+    padding-bottom: 22px;
+    border-top: solid 1px rgb(220, 219, 220);
+    border-bottom: solid 1px rgb(220, 219, 220); 
+    font-size: 18px;
+    color: rgb(37, 40, 45);
+    line-height: 1.333;
+}
+
+.mat-dialog-container  .close-button {
+    float: right;
+    margin-top: -8px;
+    margin-right: -10px;
+}
+
+.mat-dialog-container  .mat-dialog-actions[direction="right"]{
+    justify-content: flex-end;
+}
+.app-container .stack-button:disabled, .cdk-global-overlay-wrapper .stack-button:disabled{
+    opacity: 0.5;
+}
+.app-container .stack-button.delete-arrow-action, .cdk-global-overlay-wrapper .stack-button.delete-arrow-action{
+    color: #ff2300;
+}
+.app-container .stack-button[color="primary"], .cdk-global-overlay-wrapper .stack-button[color="primary"]{
+    color: rgb(255, 65, 0);
+}
+.mat-form-field {
+    .mat-form-field-label {
+        padding-left: 0;
+    }
+}
+.app-container .stack-button, .cdk-global-overlay-wrapper .stack-button{
+    background: transparent;
+    border: none;
+    font-family: $font-family;
+    text-decoration: none;
+    font-size: 18px;
+    color: rgb(37, 40, 45);
+    line-height: 2em;
+    padding-right: 15px;
+    padding-right: 15px;
+    cursor: pointer;
+    outline: none;
+
+    &:active {
+        outline: none;
+    }
+
+    &.icon-button{
+        padding-left: 15px;
+    }
+
+    .mat-icon {
+        vertical-align: middle;
+        margin-top: -4px;
+    }
+
+}

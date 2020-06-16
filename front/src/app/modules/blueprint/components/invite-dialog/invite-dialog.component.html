@@ -1,17 +1,17 @@
 <h1 mat-dialog-title> 
-    Invite users
+    Invite users  <button mat-icon-button class="close-button" [mat-dialog-close]><mat-icon>clear</mat-icon></button> 
 </h1>
 <div mat-dialog-content>
     <div class="form-field-box">
-        <mat-form-field >
+        <mat-form-field class="input-full-width">
             <mat-label>Email</mat-label>
-            <input matInput placeholder="email" type="email" required [formControl]="email" >
+            <input matInput placeholder="email" type="email" required [formControl]="email" cdkFocusInitial>
             <mat-error *ngIf="email.invalid"> Please enter a valid email </mat-error>
         </mat-form-field>
     </div>
-    <div>
-        <button mat-raised-button color="primary" class="add-button-owner" (click)="sendInvite()"> 
-            <mat-icon>send</mat-icon> &nbsp; Invite
-        </button>
-    </div>
+</div>
+<div mat-dialog-actions direction="right">
+    <button class="stack-button" color="primary" (click)="sendInvite()"> 
+        <mat-icon>send</mat-icon> &nbsp; Invite
+    </button>
 </div>

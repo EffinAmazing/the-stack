@@ -1,6 +1,6 @@
 <div class="tools-list-categoreies">
-    <h2> Tools </h2>
     <div class="total-stack"> Total stack cost: <span class="red"> ${{totalCost}}</span> </div>
+    <h2 > Tools </h2>
     <div class="categories-list">
         <mat-accordion [multi]="true" *ngIf="categoriesList.length">
             <mat-expansion-panel *ngFor="let item of categoriesList" [expanded]="!item.needToBeCollapsed">
@@ -30,8 +30,8 @@
                                     <mat-datepicker #startPicker></mat-datepicker>
                                 </mat-form-field>
                                 <div class="node-edit-actions">
-                                    <button class="edit-field-button cancel" mat-icon-button (click)="cancelUpdates(nodeId, 'start')"><mat-icon>clear</mat-icon></button> 
-                                    <button class="edit-field-button confirm" mat-icon-button (click)="confirmUpdates(nodeId, 'start')"><mat-icon>done</mat-icon></button> 
+                                    <button class="edit-field-button stack-button" (click)="cancelUpdates(nodeId, 'start')"><mat-icon>clear</mat-icon></button> 
+                                    <button class="edit-field-button stack-button"  color="primary"  (click)="confirmUpdates(nodeId, 'start')"><mat-icon>done</mat-icon></button> 
                                 </div>
                             </div>
                         </div>
@@ -48,8 +48,8 @@
                                     <mat-datepicker #endPicker></mat-datepicker>
                                 </mat-form-field>
                                 <div class="node-edit-actions">
-                                    <button class="edit-field-button cancel" mat-icon-button (click)="cancelUpdates(nodeId, 'end')"><mat-icon>clear</mat-icon></button> 
-                                    <button class="edit-field-button confirm" mat-icon-button (click)="confirmUpdates(nodeId, 'end')"><mat-icon>done</mat-icon></button> 
+                                    <button class="edit-field-button stack-button" (click)="cancelUpdates(nodeId, 'end')"><mat-icon>clear</mat-icon></button> 
+                                    <button class="edit-field-button stack-button"  color="primary"  (click)="confirmUpdates(nodeId, 'end')"><mat-icon>done</mat-icon></button> 
                                 </div>
                             </div>
                         </div>
@@ -65,8 +65,8 @@
                                     <input matInput placeholder="1.00" type="number" [(ngModel)]="nodes[nodeId].cost">
                                 </mat-form-field>
                                 <div class="node-edit-actions">
-                                    <button class="edit-field-button cancel" mat-icon-button (click)="cancelUpdates(nodeId, 'cost')"><mat-icon>clear</mat-icon></button> 
-                                    <button class="edit-field-button confirm" mat-icon-button (click)="confirmUpdates(nodeId, 'cost')"><mat-icon>done</mat-icon></button> 
+                                    <button class="edit-field-button stack-button" (click)="cancelUpdates(nodeId, 'cost')"><mat-icon>clear</mat-icon></button> 
+                                    <button class="edit-field-button stack-button"  color="primary"  (click)="confirmUpdates(nodeId, 'cost')"><mat-icon>done</mat-icon></button> 
                                 </div>
                             </div>
                         </div>
@@ -81,8 +81,8 @@
                                     <input matInput placeholder="owner" type="text" [(ngModel)]="nodes[nodeId].owner">
                                 </mat-form-field>
                                 <div class="node-edit-actions">
-                                    <button class="edit-field-button cancel" mat-icon-button (click)="cancelUpdates(nodeId, 'owner')"><mat-icon>clear</mat-icon></button> 
-                                    <button class="edit-field-button confirm" mat-icon-button (click)="confirmUpdates(nodeId, 'owner')"><mat-icon>done</mat-icon></button> 
+                                    <button class="edit-field-button stack-button" (click)="cancelUpdates(nodeId, 'owner')"><mat-icon>clear</mat-icon></button> 
+                                    <button class="edit-field-button stack-button" color="primary" (click)="confirmUpdates(nodeId, 'owner')" ><mat-icon>done</mat-icon></button> 
                                 </div>
                             </div>
                         </div>

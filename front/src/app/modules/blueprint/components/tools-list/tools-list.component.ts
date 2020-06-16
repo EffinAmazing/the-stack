@@ -192,7 +192,7 @@ export class ToolsListComponent implements OnInit {
   public handleClickInfo(node) {
 
     const dialogRef = this.detailsDialog.open(NodeDetailsComponent, {
-      width: '820px',
+      width: '620px',
       data: { node }
     });
 

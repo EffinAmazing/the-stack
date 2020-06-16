@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  serverURI: 'https://mtsb-api.effinamazing.com'
+  serverURI: 'https://mtsb-api.mcgaw.io'
 };

@@ -218,7 +218,7 @@ export class BuildStackComponent implements OnInit {
 
   public handleClickInfo() {
     const dialogRef = this.deleteDialog.open(InfoPopupDialogComponent, {
-      width: '620px',
+      width: '570px',
       data: { domain: this.blueprint.domain }
     });
 
@@ -598,7 +598,7 @@ export class BuildStackComponent implements OnInit {
 
   public removeStack() {
     const dialogRef = this.deleteDialog.open(DeleteStackDialogComponent, {
-      width: '320px',
+      width: '570px',
       data: { domain: this.blueprint.domain }
     });
 
@@ -619,7 +619,7 @@ export class BuildStackComponent implements OnInit {
 
   public createNewStack() {
     const dialogRef = this.deleteDialog.open(CreateNewStackDialogComponent, {
-      width: '320px',
+      width: '570px',
       data: { domain: this.blueprint.domain }
     });
 

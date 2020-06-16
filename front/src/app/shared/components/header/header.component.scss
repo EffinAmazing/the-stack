@@ -1,6 +1,15 @@
 .header-link{
     color: #333333;
     text-decoration: none;
+
+    &.profile-link{
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+.profile-data {
+    display: flex;
+    align-items: center;
 }
 .spacer{
     width: 60%;

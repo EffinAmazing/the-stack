@@ -1,12 +1,12 @@
-<h1 mat-dialog-title></h1>
+<h1 mat-dialog-title> New Stack  <button mat-icon-button class="close-button" [mat-dialog-close]><mat-icon>clear</mat-icon></button>  </h1>
 <div mat-dialog-content>
-  <p> Input Domain </p>
-  <mat-form-field appearance="outline" class="input-domain">
+  <mat-form-field  class="input-full-width">
     <mat-label>Domain name:</mat-label>
-    <input matInput (input)="handleInput($event)">
+    <input matInput (input)="handleInput($event)" cdkFocusInitial>
   </mat-form-field>
 </div>
-<div mat-dialog-actions>
-  <button mat-button (click)="onNoClick()">No Thanks</button>
-  <button mat-button (click)="submitDomain()" >Submit</button>
+<div mat-dialog-actions direction="right">
+  <button class="stack-button" (click)="onNoClick()"> <mat-icon>clear</mat-icon> Cancel</button>
+  <div class="divider-buttons"></div>
+  <button class="stack-button" color="primary" (click)="submitDomain()" > <mat-icon>add</mat-icon> Submit</button>
 </div>

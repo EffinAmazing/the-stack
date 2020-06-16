@@ -1,7 +1,7 @@
 .stackContainer{
     max-width: 1170px;
     margin: auto;
-    margin-top: 50px;
+    margin-top: 15px;
     position: relative;
 
     .mat-button-icon-info{
@@ -117,12 +117,16 @@
     padding-left: 10px;
     float: right;
     align-items: center;
+    margin-top: -5px;
 
     .title{
         font-size: 18px;
         display: inline-block;
         text-align: center;
         left: 0;
+        font-weight: 300;
+        margin-right: 10px;
+        font-family: "proxima-nova", sans-serif;
     }
 
     .social-icon{
@@ -133,7 +137,7 @@
 
 .waiting-process{
     position: absolute;
-    left: -10px;
+    left: -20px;
     top: 5px;
 }
 
@@ -143,20 +147,43 @@
     margin: 0;
     padding-top: 15px;
     padding-bottom: 15px;
+    padding-right: 5px;
     padding-left: 15px;
     display: flex;
     justify-content: space-between;
 }
 
-.stack-section-container {
-    overflow: hidden;
-    border-top-left-radius: 7px;
-    border-top-right-radius: 7px;
-    box-shadow: 4px 4px 20px 0px rgba(0, 0, 0, 0.06);
-    margin-bottom: 20px;
+.stack-builder-top-actions {
+    border-bottom: solid 1px rgb(220, 219, 220);
+    padding-left: 15px;
+    padding-top: 15px;
+    padding-right: 15px;
+    padding-bottom: 15px;
 
-    h2 {
-        margin: 0;
+    .stackActions {
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+.stack-builder-bottom-actions {
+    border-top: solid 1px rgb(220, 219, 220);
+    border-bottom: solid 1px rgb(220, 219, 220);
+    padding: 15px;
+
+    .price-amount {
+        color: rgb(255, 65, 0);
+        font-weight: 600;
+    }
+
+    .total-spand-tools {
+        font-size: 18px;
+        line-height: 2em;
+    }
+
+    .bottom-actions{
+        display: flex;
+        justify-content: space-between;
     }
 }
 

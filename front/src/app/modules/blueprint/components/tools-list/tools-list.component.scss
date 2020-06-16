@@ -5,9 +5,31 @@
     left: 0;
     right: 0;
     background-color: #ffffff;
-    
-    padding: 20px;
+    padding-top: 20px;
     z-index: 200;
+
+    .total-stack {
+        float: right;
+        margin-top: 5px;
+        font-size: 16px;
+        font-weight: 300;
+        color: rgb(37, 40, 45);
+        line-height: 2.75;
+        margin-right: 30px;
+
+        .red {
+            color: rgb(255, 65, 0);
+            font-weight: 600;
+        }
+    }
+
+    h2{
+        color: rgb(37, 40, 45);
+        font-weight: bold;
+        line-height: 2;
+        padding-left: 15px;
+        font-size: 22px;
+    }
 
     .close{
         position: absolute;
@@ -27,6 +49,12 @@
     padding: 0 5px;
     padding-bottom: 5px;
     overflow: auto;
+
+    .mat-accordion {
+        .mat-expansion-panel:first-child{
+            margin-top: 5px;
+        }
+    }
 }
 
 .nodes-holder{ 
@@ -40,6 +68,7 @@
 
     .node-edit-actions{
         margin-top: -10px;
+        text-align: right;
     }
     
 
@@ -119,6 +148,9 @@
 }
 
 .edit-field-button{
+    border-radius: 50%;
+    padding: 0 5px;
+
     &.mat-icon-button{
         width: 30px;
         height: 30px;
@@ -130,21 +162,25 @@
     }
 
     &.confirm {
-        background-color: #ff4100;
+        background-color: transparent;
         color: #ffffff;
     }
 
     .mat-icon{
-        font-size: 14px;
+        font-size: 22px;
     }
 }
 
 .category-total-spand{
     text-align: right;
-    font-weight: 600;
+    font-weight: 300;
     margin-right: 20px;
+    font-size: 16px;
+    color: rgb(37, 40, 45);
+    line-height: 1.75;
     
     .red {
-        color: #A33;
+        color: rgb(255, 65, 0);
+        font-weight: 600;
     }
 }

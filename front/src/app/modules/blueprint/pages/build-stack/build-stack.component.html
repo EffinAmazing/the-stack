@@ -7,35 +7,40 @@
         <div class="share-block" *ngIf="loaded">
           <span class="title"> Share </span>
           <div class="waiting-process" *ngIf="isWaiting"> <mat-spinner [diameter]="25"></mat-spinner> </div>
-          <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/facebook.svg'" /> </button>
-          <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/linkedin.svg'" /> </button>
-          <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/twitter.svg'" /> </button>
+          <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/fb.svg'" /> </button>
+          <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/ln.svg'" /> </button>
+          <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/tw.svg'" /> </button>
           <!-- <button mat-icon-button class="share-image-button" (click)="handleShare('email')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/email.svg'" /> </button> -->
         </div>
       </div>
-      <div class="stackContainer">
+      <div class="stack-builder-top-actions">
         <div class="stackActions" *ngIf="loaded" >
-          <div>
-              <button mat-raised-button (click)="handleHideList()"> <mat-icon>list</mat-icon> Show or Hide Tools </button>
-              
-              <button mat-raised-button (click)="handleAddNewTool()"> <mat-icon>add</mat-icon> Add Tool </button>
+          <div class="actions-container">
+            <button class="stack-button first-button" (click)="handleHideList()"> <mat-icon>view_list</mat-icon> Show or Hide Tools </button>
+            <div class="divider-buttons"></div>
+            <button class="stack-button" (click)="handleAddNewTool()"> <mat-icon>add</mat-icon> Add Tool </button>
           </div>
           <div>
              
           </div>
-          <div>
-            
-            <button mat-raised-button *ngIf="selectedArrow" (click)="handleDeselectArrow()"> Cancel </button>
-            <button mat-raised-button *ngIf="selectedArrow" class="delete-arrow-action" (click)="handleRemoveArrow()"> <mat-icon>clear</mat-icon>  Delete Arrow </button>
-            <button mat-stroked-button 
+          <div class="actions-container">
+            <button class="stack-button" *ngIf="selectedArrow" (click)="handleDeselectArrow()"> Cancel </button>
+            <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
+            <button class="stack-button delete-arrow-action" *ngIf="selectedArrow" (click)="handleRemoveArrow()"> <mat-icon>clear</mat-icon>  Delete Arrow </button>
+            <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
+            <button class="stack-button icon-button" 
                 [disabled]="history.isActivePrev(blueprint.id)"
-                (click)="handlePrevAction()"> <mat-icon>undo</mat-icon> </button>
-            <button mat-stroked-button 
+                (click)="handlePrevAction()"> <mat-icon><img [src]="getAssetsFolder() + 'assets/images/undo.svg'" /></mat-icon> </button>
+            <div class="divider-buttons"></div>
+            <button class="stack-button icon-button" 
                 [disabled]="history.isActiveNext(blueprint.id)"
-                (click)="handleNextAction()"> <mat-icon>redo</mat-icon> </button>
+                (click)="handleNextAction()"> <mat-icon><img [src]="getAssetsFolder() + 'assets/images/redo.svg'" /> </mat-icon> </button>
             
           </div>
         </div>
+      </div>
+      <div class="stackContainer">
+        
         <div class="loading-data-section" *ngIf="!loaded && !isError">
           <mat-spinner></mat-spinner>
           <p class="loading-message"> Data being processed please wait... </p>
@@ -63,12 +68,10 @@
           (updatedNodeData)="handleUpdatedNodeData($event)"
           ></app-builder>
 
-
+      </div>
+      
+      <div class="stack-builder-bottom-actions">
         <div class="bottom-actions" *ngIf="loaded" > 
-          <div>
-            <button *ngIf="!id" mat-raised-button color="primary" (click)="createNewStack()"> Create new stack </button>
-            <button mat-raised-button color="primary" (click)="handleClickInviteUser()"> Invite users </button>
-          </div>
           <div>
             <span class="total-spand-tools" *ngIf="blueprint.spend"> 
               Estimated Monthly Tool Spend: <span class="price-amount"> ${{ parsePrice(blueprint.spend) }} </span> 
@@ -76,7 +79,13 @@
             </span> 
           </div>
           <div>
-            <button mat-raised-button class="delete-arrow-action" (click)="removeStack()"> Delete stack </button>
+          </div>
+          <div  class="actions-container">
+            <button class="stack-button" color="primary" (click)="createNewStack()"> <mat-icon>add</mat-icon> Create new stack </button>
+            <div class="divider-buttons"></div>
+            <button class="stack-button" color="primary" (click)="handleClickInviteUser()"> <mat-icon>person_add</mat-icon> Invite users </button>
+            <div class="divider-buttons"></div>
+            <button class="stack-button" (click)="removeStack()"> <mat-icon>delete</mat-icon> Delete stack </button>
           </div>
         </div>
       </div>
