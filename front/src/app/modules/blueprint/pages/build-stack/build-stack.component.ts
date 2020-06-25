@@ -203,30 +203,6 @@ export class BuildStackComponent implements OnInit {
     });
   }
 
-  private getAddedAndRemovedItems(prevArr: Array<number | string>, nextArr: Array<number | string>): {
-      added: Array<number | string>, removed: Array<number | string> } {
-    const added = [];
-    const removed = [];
-
-
-    prevArr.forEach(item => {
-      if ( nextArr.indexOf( item ) === -1) {
-        removed.push(item);
-      }
-    });
-
-    nextArr.forEach(item => {
-      if (prevArr.length === 0 || prevArr.indexOf(item) === -1) {
-        added.push(item);
-      }
-    });
-
-    return {
-      added,
-      removed
-    };
-  }
-
   public handleUpdatedNodeData(result) {
     // console.log(result);
     if (result.data) {
@@ -237,55 +213,6 @@ export class BuildStackComponent implements OnInit {
           tool: this.nodes[result.nodeId].tool
         });
 
-        console.log( result.data, this.nodes[result.nodeId] );
-
-        if (result.data.cost !== this.nodes[result.nodeId].cost) {
-          window['dataLayer'].push({
-            event: 'stackbuilder.node.updateCost',
-            oldCost: this.nodes[result.nodeId].cost,
-            newCost: result.data.cost,
-            tool: this.nodes[result.nodeId].tool
-          });
-        }
-
-        if (result.data.owner !== this.nodes[result.nodeId].owner) {
-          const ownersUpdates = this.getAddedAndRemovedItems(this.nodes[result.nodeId].owner.split(','), result.data.owner.split(','));
-          ownersUpdates.added.forEach(item => {
-            window['dataLayer'].push({
-              event: 'stackbuilder.node.addedOwner',
-              tool: this.nodes[result.nodeId].tool,
-              email: item
-            });
-          });
-
-          ownersUpdates.removed.forEach(item => {
-            window['dataLayer'].push({
-              event: 'stackbuilder.node.removedOwner',
-              tool: this.nodes[result.nodeId].tool,
-              email: item
-            });
-          });
-        }
-
-        if ( result.data.trainedOn !==  this.nodes[result.nodeId].trainedOn) {
-          const usersUpdates = this.getAddedAndRemovedItems(this.nodes[result.nodeId].trainedOn.split(','),
-            result.data.trainedOn.split(','));
-          usersUpdates.added.forEach(item => {
-            window['dataLayer'].push({
-              event: 'stackbuilder.node.addedUser',
-              tool: this.nodes[result.nodeId].tool,
-              email: item
-            });
-          });
-
-          usersUpdates.removed.forEach(item => {
-            window['dataLayer'].push({
-              event: 'stackbuilder.node.removedUser',
-              tool: this.nodes[result.nodeId].tool,
-              email: item
-            });
-          });
-        }
 
         this.service.updateNodeTool(result.nodeId, result.data, this.blueprint.id).subscribe((res) => {
           const tool = this.nodes[result.nodeId].tool;

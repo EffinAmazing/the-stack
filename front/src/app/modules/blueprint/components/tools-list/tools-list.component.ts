@@ -189,6 +189,29 @@ export class ToolsListComponent implements OnInit {
     }
   }
 
+  private getAddedAndRemovedItems(prevArr: Array<number | string>, nextArr: Array<number | string>): {
+      added: Array<number | string>, removed: Array<number | string> } {
+    const added = [];
+    const removed = [];
+
+    prevArr.forEach(item => {
+      if ( nextArr.indexOf( item ) === -1) {
+        removed.push(item);
+      }
+    });
+
+    nextArr.forEach(item => {
+      if (prevArr.length === 0 || prevArr.indexOf(item) === -1) {
+        added.push(item);
+      }
+    });
+
+    return {
+      added,
+      removed
+    };
+  }
+
   public handleClickInfo(node) {
 
     const dialogRef = this.detailsDialog.open(NodeDetailsComponent, {
@@ -206,6 +229,62 @@ export class ToolsListComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         node = Object.assign({}, node, result);
+
+        console.log('result.cost', result.cost, node.cost );
+        if (result.cost !== node.cost) {
+          window['dataLayer'].push({
+            event: 'stackbuilder.node.updateCost',
+            oldCost: node.cost,
+            newCost: result.cost,
+            tool: node.tool
+          });
+        }
+
+        console.log('result.owner', result.owner, node.owner );
+        if (result.owner !== node.owner) {
+          const ownersUpdates = this.getAddedAndRemovedItems(node.owner.split(','), result.owner.split(','));
+          ownersUpdates.added.forEach(item => {
+            window['dataLayer'].push({
+              event: 'stackbuilder.node.addedOwner',
+              tool: node.tool,
+              email: item
+            });
+          });
+
+          ownersUpdates.removed.forEach(item => {
+            if (item) {
+              window['dataLayer'].push({
+                event: 'stackbuilder.node.removedOwner',
+                tool: node.tool,
+                email: item
+              });
+            }
+          });
+        }
+
+        console.log('result.trainedOn', result.trainedOn, node.trainedOn );
+        if ( result.trainedOn !==  node.trainedOn) {
+          const usersUpdates = this.getAddedAndRemovedItems(node.trainedOn.split(','),
+            result.trainedOn.split(','));
+          usersUpdates.added.forEach(item => {
+            window['dataLayer'].push({
+              event: 'stackbuilder.node.addedUser',
+              tool: node.tool,
+              email: item
+            });
+          });
+
+          usersUpdates.removed.forEach(item => {
+            if ( item ) {
+              window['dataLayer'].push({
+                event: 'stackbuilder.node.removedUser',
+                tool: node.tool,
+                email: item
+              });
+            }
+          });
+        }
+
         this.nodes[node.id] = node;
         node.tool.categories.forEach((cat) => {
           this.reculcCategoryCost(cat);
