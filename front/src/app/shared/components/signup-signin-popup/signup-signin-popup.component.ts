@@ -109,6 +109,13 @@ export class SignupSigninPopupComponent {
 
       this.userService.createUser(data).toPromise().then(res => {
         console.log(res);
+
+        window['dataLayer'].push({
+          event: 'stackbuilder.signup',
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName
+        });
         this.loginIn(data);
       }).catch((err) => {
         this.isLoading = false;

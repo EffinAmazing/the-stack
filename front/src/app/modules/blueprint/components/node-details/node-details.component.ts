@@ -52,7 +52,7 @@ export class NodeDetailsComponent  {
 
   public getTrainedOn(): string[] {
     const trainedOn = this.nodeForm.get('trainedOn').value;
-    
+
     if (trainedOn === '') {
       return [];
     } else {
@@ -70,7 +70,7 @@ export class NodeDetailsComponent  {
     }
 
     const duplicat = list.find(item => item === email);
-    if (!duplicat) { 
+    if (!duplicat) {
       list.push(email);
     }
 

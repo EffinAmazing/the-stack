@@ -175,10 +175,20 @@ export class BuildStackComponent implements OnInit {
   }
 
   public handleNextAction() {
+    window['dataLayer'].push({
+      event: 'stackbuilder.redo',
+      stack: this.blueprint
+    });
+
     this.history.nextAction(this.blueprint.id);
   }
 
   public handlePrevAction() {
+    window['dataLayer'].push({
+      event: 'stackbuilder.undo',
+      stack: this.blueprint
+    });
+
     this.history.prevAction(this.blueprint.id);
   }
 
@@ -193,15 +203,89 @@ export class BuildStackComponent implements OnInit {
     });
   }
 
+  private getAddedAndRemovedItems(prevArr: Array<number | string>, nextArr: Array<number | string>): {
+      added: Array<number | string>, removed: Array<number | string> } {
+    const added = [];
+    const removed = [];
+
+
+    prevArr.forEach(item => {
+      if ( nextArr.indexOf( item ) === -1) {
+        removed.push(item);
+      }
+    });
+
+    nextArr.forEach(item => {
+      if (prevArr.length === 0 || prevArr.indexOf(item) === -1) {
+        added.push(item);
+      }
+    });
+
+    return {
+      added,
+      removed
+    };
+  }
+
   public handleUpdatedNodeData(result) {
     // console.log(result);
     if (result.data) {
       if (this.authUser) {
         window['dataLayer'].push({
-          event: 'node.updateInfo',
+          event: 'stackbuilder.node.updateInfo',
           node:  this.nodes[result.nodeId],
           tool: this.nodes[result.nodeId].tool
         });
+
+        console.log( result.data, this.nodes[result.nodeId] );
+
+        if (result.data.cost !== this.nodes[result.nodeId].cost) {
+          window['dataLayer'].push({
+            event: 'stackbuilder.node.updateCost',
+            oldCost: this.nodes[result.nodeId].cost,
+            newCost: result.data.cost,
+            tool: this.nodes[result.nodeId].tool
+          });
+        }
+
+        if (result.data.owner !== this.nodes[result.nodeId].owner) {
+          const ownersUpdates = this.getAddedAndRemovedItems(this.nodes[result.nodeId].owner.split(','), result.data.owner.split(','));
+          ownersUpdates.added.forEach(item => {
+            window['dataLayer'].push({
+              event: 'stackbuilder.node.addedOwner',
+              tool: this.nodes[result.nodeId].tool,
+              email: item
+            });
+          });
+
+          ownersUpdates.removed.forEach(item => {
+            window['dataLayer'].push({
+              event: 'stackbuilder.node.removedOwner',
+              tool: this.nodes[result.nodeId].tool,
+              email: item
+            });
+          });
+        }
+
+        if ( result.data.trainedOn !==  this.nodes[result.nodeId].trainedOn) {
+          const usersUpdates = this.getAddedAndRemovedItems(this.nodes[result.nodeId].trainedOn.split(','),
+            result.data.trainedOn.split(','));
+          usersUpdates.added.forEach(item => {
+            window['dataLayer'].push({
+              event: 'stackbuilder.node.addedUser',
+              tool: this.nodes[result.nodeId].tool,
+              email: item
+            });
+          });
+
+          usersUpdates.removed.forEach(item => {
+            window['dataLayer'].push({
+              event: 'stackbuilder.node.removedUser',
+              tool: this.nodes[result.nodeId].tool,
+              email: item
+            });
+          });
+        }
 
         this.service.updateNodeTool(result.nodeId, result.data, this.blueprint.id).subscribe((res) => {
           const tool = this.nodes[result.nodeId].tool;
@@ -306,9 +390,9 @@ export class BuildStackComponent implements OnInit {
       const lineId = this.selectedArrow.lineId;
 
       window['dataLayer'].push({
-        event: 'arrow.remove',
-        startNode:  this.nodes[this.selectedArrow.start.nodeId],
-        endNode: this.nodes[this.selectedArrow.end.nodeId]
+        event: 'stackbuilder.node.connected',
+        parentTool:  this.nodes[this.selectedArrow.start.nodeId].tool,
+        childTool: this.nodes[this.selectedArrow.end.nodeId].tool
       });
 
       this.handleRemoveArrows([lineId], true);
@@ -329,8 +413,8 @@ export class BuildStackComponent implements OnInit {
       });
     }
     window['dataLayer'].push({
-      event: 'node.updatePosition',
-      node:  this.nodes[data.nodeId],
+      event: 'stackbuilder.node.updatePosition',
+      node:  this.nodes[data.nodeId].tool,
       newPosition: data.position,
       oldPosition
     });
@@ -396,6 +480,10 @@ export class BuildStackComponent implements OnInit {
       dialogRef.afterClosed().subscribe(result => {
         console.log(result);
         if (result) {
+          window['dataLayer'].push({
+            event: 'stackbuilder.invite',
+            email: result.emails.join(',')
+          });
           this.service.inviteUsers(result).toPromise()
           .then(res => {
             console.log(res);
@@ -489,7 +577,7 @@ export class BuildStackComponent implements OnInit {
         this.nodes[node.id] = node;
 
         window['dataLayer'].push({
-          event: 'node.addedNew',
+          event: 'stackbuilder.node.added',
           node,
           tool: tools[node.toolId]
         });
@@ -504,7 +592,7 @@ export class BuildStackComponent implements OnInit {
       unhideNodes = listToUnhide.map((nodeId) => {
         this.nodes[nodeId].hide = false;
         window['dataLayer'].push({
-          event: 'node.unhide',
+          event: 'stackbuilder.node.added',
           node: this.nodes[nodeId],
           tool: this.nodes[nodeId].tool
         });
@@ -545,14 +633,16 @@ export class BuildStackComponent implements OnInit {
     if (!data.item.hide) {
       data.item.hide = true;
       window['dataLayer'].push({
-        event: 'node.hide',
-        node: data.item
+        event: 'stackbuilder.node.hide',
+        node: data.item,
+        tool: data.item.tool
       });
     } else {
       data.item.hide = false;
       window['dataLayer'].push({
-        event: 'node.unhide',
-        node: data.item
+        event: 'stackbuilder.node.added',
+        node: data.item,
+        tool: data.item.tool
       });
     }
 
@@ -569,9 +659,9 @@ export class BuildStackComponent implements OnInit {
     // console.log(data);
     this.history.addAction(this.blueprint.id, { name: 'addArrow', data });
     window['dataLayer'].push({
-      event: 'arrow.add',
-      startNode: this.nodes[data.start.nodeId],
-      endNode: this.nodes[data.end.nodeId]
+      event: 'stackbuilder.node.connected',
+      parentTool: this.nodes[data.start.nodeId].tool,
+      childTool: this.nodes[data.end.nodeId].tool
     });
     this.service.addArrow(this.blueprint.id, data).toPromise().then((result) => {
       // console.log(result);
@@ -586,8 +676,10 @@ export class BuildStackComponent implements OnInit {
   public handleHideNode(data) {
     // console.log('handleHideNode', data);
     window['dataLayer'].push({
-      event: 'node.hide',
-      node: data.item
+      event: 'stackbuilder.node.hide',
+      node: data.item,
+      tool: data.item.tool
+
     });
     this.history.addAction(this.blueprint.id, { name: 'hideNode', data: data.item });
     this.service.updateNodeTool(data.item.id, { hide: true }, this.blueprint.id).subscribe((res) => {
@@ -607,7 +699,7 @@ export class BuildStackComponent implements OnInit {
       if ( result ) {
         console.log(this.service);
         window['dataLayer'].push({
-          event: 'stack.remove',
+          event: 'stackbuilder.remove',
           stack: this.blueprint
         });
         this.service.removeBluePrint(this.blueprint.id).toPromise().then(() => {
@@ -626,6 +718,10 @@ export class BuildStackComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.router.onSameUrlNavigation = 'reload';
+        window['dataLayer'].push({
+          event: 'stackbuilder.create',
+          domain: result
+        });
         this.router.navigateByUrl('/stack/build?domain=' + result, { skipLocationChange: false });
         window.location.href = window.location.origin + window.location.pathname + '#/stack/build?domain=' + result;
         window.location.reload();

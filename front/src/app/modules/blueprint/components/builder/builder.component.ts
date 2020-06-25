@@ -286,6 +286,13 @@ export class BuilderComponent implements OnInit {
       data: { node }
     });
 
+    window['dataLayer'].push({
+      event: 'stackbuilder.node.openInfo',
+      node,
+      tool: node.tool,
+      via: 'diagram'
+    });
+
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         node = Object.assign({}, node, result);

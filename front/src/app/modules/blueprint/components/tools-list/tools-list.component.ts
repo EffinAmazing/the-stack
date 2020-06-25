@@ -196,6 +196,13 @@ export class ToolsListComponent implements OnInit {
       data: { node }
     });
 
+    window['dataLayer'].push({
+      event: 'stackbuilder.node.openInfo',
+      node,
+      tool: node.tool,
+      via: 'table'
+    });
+
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         node = Object.assign({}, node, result);

@@ -64,7 +64,11 @@ export class HomeComponent implements OnInit {
 
   submitDomain() {
     if (!this.domain.invalid) {
-      this.router.navigateByUrl('/blueprints/build?domain=' + this.domain.value);
+      window['dataLayer'].push({
+          event: 'stackbuilder.domainInput',
+          domain: this.domain.value
+      });
+      this.router.navigateByUrl('/stack/build?domain=' + this.domain.value);
     } else {
       this.hasError = true;
     }

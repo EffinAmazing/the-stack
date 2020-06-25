@@ -21,6 +21,7 @@ export class SignupComponent implements OnInit {
   constructor(private service: UsersService, private router: Router, private route: ActivatedRoute, private auth: AuthService) {
     this.code = route.snapshot.params['code'];
     // console.log(this.code);
+    window['dataLayer'] = window['dataLayer'] || [];
   }
 
   ngOnInit(): void {
@@ -59,7 +60,12 @@ export class SignupComponent implements OnInit {
       this.service.createUser(data).toPromise().then(res => {
         console.log(res);
         this.isLoading = false;
-
+        window['dataLayer'].push({
+          event: 'stackbuilder.signup',
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName
+        });
         /**/
         // window.location.href = window.location.origin + window.location.pathname + '#/profile/signin';
         // window.location.reload();
@@ -73,7 +79,12 @@ export class SignupComponent implements OnInit {
       console.log('this.id', this.id);
       this.service.completeUserSignup(this.id, this.code, data).toPromise().then(res => {
         this.isLoading = false;
-
+        window['dataLayer'].push({
+          event: 'stackbuilder.signup',
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName
+        });
         this.loginAfterSignUp(data);
       }).catch(err => {
         this.isLoading = false;
