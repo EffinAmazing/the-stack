@@ -242,7 +242,7 @@ export class ToolsListComponent implements OnInit {
 
         console.log('result.owner', result.owner, node.owner );
         if (result.owner !== node.owner) {
-          const ownersUpdates = this.getAddedAndRemovedItems(node.owner.split(','), result.owner.split(','));
+          const ownersUpdates = this.getAddedAndRemovedItems(node.owner ? node.owner.split(',') : [], result.owner.split(','));
           ownersUpdates.added.forEach(item => {
             window['dataLayer'].push({
               event: 'stackbuilder.node.addedOwner',
@@ -264,7 +264,7 @@ export class ToolsListComponent implements OnInit {
 
         console.log('result.trainedOn', result.trainedOn, node.trainedOn );
         if ( result.trainedOn !==  node.trainedOn) {
-          const usersUpdates = this.getAddedAndRemovedItems(node.trainedOn.split(','),
+          const usersUpdates = this.getAddedAndRemovedItems(node.trainedOn ? node.trainedOn.split(',') : [],
             result.trainedOn.split(','));
           usersUpdates.added.forEach(item => {
             window['dataLayer'].push({

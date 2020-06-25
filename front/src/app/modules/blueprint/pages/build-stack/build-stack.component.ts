@@ -175,20 +175,11 @@ export class BuildStackComponent implements OnInit {
   }
 
   public handleNextAction() {
-    window['dataLayer'].push({
-      event: 'stackbuilder.redo',
-      stack: this.blueprint
-    });
 
     this.history.nextAction(this.blueprint.id);
   }
 
   public handlePrevAction() {
-    window['dataLayer'].push({
-      event: 'stackbuilder.undo',
-      stack: this.blueprint
-    });
-
     this.history.prevAction(this.blueprint.id);
   }
 
@@ -272,6 +263,13 @@ export class BuildStackComponent implements OnInit {
               default:
                 break;
             }
+
+
+            window['dataLayer'].push({
+              event: 'stackbuilder.shared',
+              social: media,
+              domain: this.blueprint.domain
+            });
 
             this.isWaiting = false;
           }).catch(err => console.log(err));

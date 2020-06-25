@@ -13,6 +13,7 @@ export class ActionHistoryService {
   public emiters: { [key: string]: BehaviorSubject<{ action: HistoryAction, undo: boolean } | null> }  = {};
 
   constructor() {
+    window['dataLayer'] = window['dataLayer'] || [];
   }
 
   public getEmmiter(id: string): BehaviorSubject<{ action: HistoryAction, undo: boolean } | null> {
@@ -60,6 +61,12 @@ export class ActionHistoryService {
     if (this.historyList[id] && this.emiters[id]) {
       const action = this.historyList[id].pop();
       this.revertedList[id].push(action);
+
+      window['dataLayer'].push({
+        event: 'stackbuilder.undo',
+        action: action.name,
+      });
+
       this.emiters[id].next({ action, undo: true });
     }
   }
@@ -68,6 +75,10 @@ export class ActionHistoryService {
     if (this.revertedList[id] && this.revertedList[id].length) {
       const action = this.revertedList[id].pop();
       this.historyList[id].push(action);
+      window['dataLayer'].push({
+        event: 'stackbuilder.redo',
+        action: action.name,
+      });
       this.emiters[id].next({ action, undo: false });
     }
   }
