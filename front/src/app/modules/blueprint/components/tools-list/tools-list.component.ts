@@ -236,7 +236,8 @@ export class ToolsListComponent implements OnInit {
             event: 'stackbuilder.node.updateCost',
             oldCost: node.cost,
             newCost: result.cost,
-            tool: node.tool
+            tool: node.tool,
+            node
           });
         }
 
@@ -247,7 +248,8 @@ export class ToolsListComponent implements OnInit {
             window['dataLayer'].push({
               event: 'stackbuilder.node.addedOwner',
               tool: node.tool,
-              email: item
+              email: item,
+              node
             });
           });
 
@@ -256,7 +258,8 @@ export class ToolsListComponent implements OnInit {
               window['dataLayer'].push({
                 event: 'stackbuilder.node.removedOwner',
                 tool: node.tool,
-                email: item
+                email: item,
+                node
               });
             }
           });
@@ -270,7 +273,8 @@ export class ToolsListComponent implements OnInit {
             window['dataLayer'].push({
               event: 'stackbuilder.node.addedUser',
               tool: node.tool,
-              email: item
+              email: item,
+              node
             });
           });
 
@@ -279,7 +283,8 @@ export class ToolsListComponent implements OnInit {
               window['dataLayer'].push({
                 event: 'stackbuilder.node.removedUser',
                 tool: node.tool,
-                email: item
+                email: item,
+                node
               });
             }
           });

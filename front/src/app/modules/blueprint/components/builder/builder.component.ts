@@ -49,7 +49,7 @@ export class BuilderComponent implements OnInit {
   dotForDrag: HTMLDivElement | null = null;
   disableTillDrawLine = false;
 
-  constructor(private detailsDialog: MatDialog) { }
+  constructor(private detailsDialog: MatDialog) {  }
 
   ngOnInit(): void {
     this.svgD3 = this.arrowHelper.initSvg('svg#paint');
@@ -79,6 +79,11 @@ export class BuilderComponent implements OnInit {
                 const xIndex = (index - yIndex * maxItems);
                 item.position.y = (yIndex + 1) * offsetY + Math.floor(offsetY * 0.5);
                 item.position.x = xIndex * offsetX;
+                window['dataLayer'].push({
+                  event: 'stackbuilder.node.loaded',
+                  node: item,
+                  tool: item.tool
+                });
               }
               arrToChange.push({nodeId: item.id, position: item.position});
               index++;
@@ -328,7 +333,8 @@ export class BuilderComponent implements OnInit {
             event: 'stackbuilder.node.updateCost',
             oldCost: node.cost,
             newCost: result.cost,
-            tool: node.tool
+            tool: node.tool,
+            node
           });
         }
 
@@ -339,7 +345,8 @@ export class BuilderComponent implements OnInit {
             window['dataLayer'].push({
               event: 'stackbuilder.node.addedOwner',
               tool: node.tool,
-              email: item
+              email: item,
+              node
             });
           });
 
@@ -348,7 +355,8 @@ export class BuilderComponent implements OnInit {
               window['dataLayer'].push({
                 event: 'stackbuilder.node.removedOwner',
                 tool: node.tool,
-                email: item
+                email: item,
+                node
               });
             }
           });
@@ -362,7 +370,8 @@ export class BuilderComponent implements OnInit {
             window['dataLayer'].push({
               event: 'stackbuilder.node.addedUser',
               tool: node.tool,
-              email: item
+              email: item,
+              node
             });
           });
 
@@ -371,7 +380,8 @@ export class BuilderComponent implements OnInit {
               window['dataLayer'].push({
                 event: 'stackbuilder.node.removedUser',
                 tool: node.tool,
-                email: item
+                email: item,
+                node
               });
             }
           });

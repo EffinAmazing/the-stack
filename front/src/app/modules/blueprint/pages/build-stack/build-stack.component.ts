@@ -315,9 +315,10 @@ export class BuildStackComponent implements OnInit {
       const lineId = this.selectedArrow.lineId;
 
       window['dataLayer'].push({
-        event: 'stackbuilder.node.connected',
+        event: 'stackbuilder.node.disconnected',
         parentTool:  this.nodes[this.selectedArrow.start.nodeId].tool,
-        childTool: this.nodes[this.selectedArrow.end.nodeId].tool
+        childTool: this.nodes[this.selectedArrow.end.nodeId].tool,
+        stack: this.blueprint
       });
 
       this.handleRemoveArrows([lineId], true);
@@ -339,9 +340,10 @@ export class BuildStackComponent implements OnInit {
     }
     window['dataLayer'].push({
       event: 'stackbuilder.node.updatePosition',
-      node:  this.nodes[data.nodeId].tool,
+      node:  this.nodes[data.nodeId],
       newPosition: data.position,
-      oldPosition
+      oldPosition,
+      tool: this.nodes[data.nodeId].tool
     });
 
     this.service.updateNodeTool(data.nodeId, { position: data.position }, this.blueprint.id).subscribe((res) => {
@@ -504,7 +506,8 @@ export class BuildStackComponent implements OnInit {
         window['dataLayer'].push({
           event: 'stackbuilder.node.added',
           node,
-          tool: tools[node.toolId]
+          tool: tools[node.toolId],
+          stack: this.blueprint
         });
 
         return node;
@@ -519,7 +522,8 @@ export class BuildStackComponent implements OnInit {
         window['dataLayer'].push({
           event: 'stackbuilder.node.added',
           node: this.nodes[nodeId],
-          tool: this.nodes[nodeId].tool
+          tool: this.nodes[nodeId].tool,
+          stack: this.blueprint
         });
         return this.nodes[nodeId];
       });
@@ -560,14 +564,16 @@ export class BuildStackComponent implements OnInit {
       window['dataLayer'].push({
         event: 'stackbuilder.node.hide',
         node: data.item,
-        tool: data.item.tool
+        tool: data.item.tool,
+        stack: this.blueprint
       });
     } else {
       data.item.hide = false;
       window['dataLayer'].push({
         event: 'stackbuilder.node.added',
         node: data.item,
-        tool: data.item.tool
+        tool: data.item.tool,
+        stack: this.blueprint
       });
     }
 
@@ -586,7 +592,8 @@ export class BuildStackComponent implements OnInit {
     window['dataLayer'].push({
       event: 'stackbuilder.node.connected',
       parentTool: this.nodes[data.start.nodeId].tool,
-      childTool: this.nodes[data.end.nodeId].tool
+      childTool: this.nodes[data.end.nodeId].tool,
+      stack: this.blueprint
     });
     this.service.addArrow(this.blueprint.id, data).toPromise().then((result) => {
       // console.log(result);
@@ -603,8 +610,8 @@ export class BuildStackComponent implements OnInit {
     window['dataLayer'].push({
       event: 'stackbuilder.node.hide',
       node: data.item,
-      tool: data.item.tool
-
+      tool: data.item.tool,
+      stack: this.blueprint
     });
     this.history.addAction(this.blueprint.id, { name: 'hideNode', data: data.item });
     this.service.updateNodeTool(data.item.id, { hide: true }, this.blueprint.id).subscribe((res) => {

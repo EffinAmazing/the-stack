@@ -103,7 +103,7 @@ export class NodeDetailsComponent  {
     if (index !== -1) {
       list.splice(index, 1);
       owners =  list.join(',');
-      this.nodeForm.get('owner').setValue(owners)
+      this.nodeForm.get('owner').setValue(owners);
     }
   }
 
@@ -111,10 +111,11 @@ export class NodeDetailsComponent  {
     let trainedOn = this.nodeForm.get('trainedOn').value;
     const list:string[] = trainedOn.split(',');
     const index = list.findIndex((item) => item === email);
+    console.log('index', index);
     if (index !== -1) {
       list.splice(index, 1);
       trainedOn =  list.join(',');
-      this.nodeForm.get('owner').setValue(trainedOn)
+      this.nodeForm.get('trainedOn').setValue(trainedOn);
     }
   }
 
