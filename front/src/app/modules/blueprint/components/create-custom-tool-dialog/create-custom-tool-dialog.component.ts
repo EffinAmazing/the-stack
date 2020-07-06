@@ -41,10 +41,15 @@ export class CreateCustomToolDialogComponent {
     });
 
     this.dialogRef.afterOpened().subscribe(() => {
-      this.iconImage.nativeElement.addEventListener('load', (result) => {
+      if (this.iconImage.nativeElement.complete) {
         const ctx = this.canvasForIcon.nativeElement.getContext('2d');
         ctx.drawImage(this.iconImage.nativeElement, 0, 0);
-      });
+      } else {
+        this.iconImage.nativeElement.addEventListener('load', (result) => {
+          const ctx = this.canvasForIcon.nativeElement.getContext('2d');
+          ctx.drawImage(this.iconImage.nativeElement, 0, 0);
+        });
+      }
     });
   }
 

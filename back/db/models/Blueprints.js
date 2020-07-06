@@ -50,6 +50,22 @@ class BluePrintModel extends AbstaractModel{
         return this.mapDocument(doc);
     }
 
+    async copyBluePrint(blueprintId, userId) {
+        const blueprint = await this.getOne(blueprintId);
+
+        let data = {
+            domain: blueprint.domain,
+            uniqCode: ""
+        }
+
+        if (userId) {
+            data['userId'] = userId;
+        }
+
+        let newDoc = await this.create(data);
+        return this.mapDocument(newDoc);
+    }
+
     async one(id){
         let blueprint = await this.modelDB.findOne({ _id: id }).exec();
         return this.mapDocument( blueprint );

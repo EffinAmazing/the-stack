@@ -102,6 +102,29 @@ class ToolsNodesModel extends AbstaractModel {
 
         return tools
     }
+
+    async copyNodes(formId, newId) {
+        let list = await this.getNodesByBlueprint(formId);
+        let keysTable = {};
+
+        let nodes = await async.map(list, (item, callback)=> {
+            let data = {
+                blueprintId: newId,
+                toolId: item.toolId,
+                position: item.position,
+                start: item.start,
+                end: item.end,
+                cost: item.cost,
+                hide: item.hide
+            }
+            this.addOne(data).then(mappedDoc => {
+                keysTable[item.id] = mappedDoc.id;
+                callback(null, mappedDoc);
+            }).catch(err => { callback(err, null) });
+        });
+
+        return keysTable;
+    }
 }
 
 module.exports = ToolsNodesModel;

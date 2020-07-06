@@ -42,6 +42,31 @@ class ArrowsModel extends AbstaractModel {
         return mapped;
     }
 
+    async copyArrows(fromId, newId, keysTable) {
+        let list = await this.modelDB.find({ blueprintId: fromId }).exec();
+
+        let arrows = await async.map(list, (item, callback) => {
+            const startNode = item.start.nodeId;
+            const endNode = item.end.nodeId;
+
+            let start = Object.assign({}, item.start, { nodeId: keysTable[startNode] });
+            let end = Object.assign({}, item.end, { nodeId: keysTable[endNode] });
+
+            let lineId = item.lineId.replace(startNode, keysTable[startNode]).replace(endNode, keysTable[endNode]);
+
+            this.createArrowForBluePrint(newId, {
+                start: start,
+                end: end,
+                lineId: lineId
+            }).then(document => {
+                callback(null, document);
+            }).catch(err => { callback(err, null); });
+
+        });
+
+        return arrows;
+    }
+
     async removeAllByBlueprintId(blueprintId){
         let result = await this.modelDB.deleteMany({ blueprintId: blueprintId }).exec();
         return result;

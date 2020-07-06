@@ -337,18 +337,29 @@ class BluePrints {
         const user = req.user;
 
         if (blueprintId && user) {
-            this._bluePrints.signBluePrintToUser(blueprintId, user._id)
-            .then(result => {
-                res.json({
-                    result: result
-                });
-            })
-            .catch(err => {
-                console.log(err);
-                res.status(500).json({
-                    result: "Error",
-                    message: "Server error"
-                });
+            /*  */
+            async.waterfall([
+                (cb) => {
+                    this._bluePrints.copyBluePrint(blueprintId, user._id).then(blueprint => { cb(null, blueprint); }).catch(err=>{ cb(err) });
+                },
+                (blueprint, cb) => {
+                    this._toolsNodes.copyNodes(blueprintId, blueprint.id).then((keysTable)=>{ cb(null, blueprint, keysTable); }).catch(err => { cb(err); });
+                },
+                (blueprint, keysTable, cb) => {
+                    this._arrows.copyArrows(blueprintId, blueprint.id, keysTable).then(()=>{ cb(null, blueprint); }).catch(err => { cb(err) });
+                }
+            ], function(err, result) {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({
+                        result: "Error",
+                        message: "Server error"
+                    });
+                } else {
+                    res.json({
+                        result: result
+                    });
+                }
             })
         } else {
             res.status(400).json({

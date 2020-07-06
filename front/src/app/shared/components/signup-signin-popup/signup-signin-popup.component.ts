@@ -62,7 +62,7 @@ export class SignupSigninPopupComponent {
     this.stackService.signUserToBluePrint(this.data.blueprint.id).toPromise()
       .then(res => {
         this.router.onSameUrlNavigation = 'reload';
-        this.router.navigateByUrl('/stack/build/' + this.data.blueprint.id, { skipLocationChange: false });
+        this.router.navigateByUrl('/stack/build/' + res.id, { skipLocationChange: false });
         this.dialogRef.close();
       })
       .catch(err => {
