@@ -81,4 +81,12 @@ export class BlueprintsService {
   signUserToBluePrint(id): Observable<any> {
     return this.mapper.mapResponse(this.http.put(`${this.serverURI}blueprints/${id}/signin`, {}));
   }
+
+  createCustom(data: FormData): Observable<BluePrintTool> {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolsnodes/custom`, data));
+  }
+
+  updateCustom(nodeId: string, data: FormData): Observable<BluePrintTool> {
+    return this.mapper.mapResponse(this.http.put(`${this.serverURI}toolsnodes/custom/${nodeId}`, data));
+  }
 }

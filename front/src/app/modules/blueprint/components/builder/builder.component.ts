@@ -27,6 +27,7 @@ export class BuilderComponent implements OnInit {
   @Output() hideNode: EventEmitter<any> = new EventEmitter();
   @Output() removeArrows: EventEmitter<any> = new EventEmitter();
   @Output() selectArrow: EventEmitter<any> = new EventEmitter();
+  @Output() callEditNode: EventEmitter<string> = new EventEmitter();
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
   @Input() historyEmit: Observable<any>;
@@ -325,76 +326,77 @@ export class BuilderComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
 
-        console.log(result);
-        console.log('result.cost', result.cost, node.cost );
-
-        if (result.cost !== node.cost) {
-          window['dataLayer'].push({
-            event: 'stackbuilder.node.updateCost',
-            oldCost: node.cost,
-            newCost: result.cost,
-            tool: node.tool,
-            node
-          });
-        }
-
-        console.log('result.owner', result.owner, node.owner );
-        if (result.owner !== node.owner) {
-          const ownersUpdates = this.getAddedAndRemovedItems(node.owner ? node.owner.split(',') : [], result.owner.split(','));
-          ownersUpdates.added.forEach(item => {
+        if (typeof result === 'string') {
+          this.callEditNode.emit(result);
+        } else {
+          if (result.cost !== node.cost) {
             window['dataLayer'].push({
-              event: 'stackbuilder.node.addedOwner',
+              event: 'stackbuilder.node.updateCost',
+              oldCost: node.cost,
+              newCost: result.cost,
               tool: node.tool,
-              email: item,
               node
             });
-          });
+          }
 
-          ownersUpdates.removed.forEach(item => {
-            if (item) {
+          console.log('result.owner', result.owner, node.owner );
+          if (result.owner !== node.owner) {
+            const ownersUpdates = this.getAddedAndRemovedItems(node.owner ? node.owner.split(',') : [], result.owner.split(','));
+            ownersUpdates.added.forEach(item => {
               window['dataLayer'].push({
-                event: 'stackbuilder.node.removedOwner',
+                event: 'stackbuilder.node.addedOwner',
                 tool: node.tool,
                 email: item,
                 node
               });
-            }
-          });
-        }
-
-        console.log('result.trainedOn', result.trainedOn, node.trainedOn );
-        if ( result.trainedOn !==  node.trainedOn) {
-          const usersUpdates = this.getAddedAndRemovedItems(node.trainedOn ? node.trainedOn.split(',') : [],
-            result.trainedOn.split(','));
-          usersUpdates.added.forEach(item => {
-            window['dataLayer'].push({
-              event: 'stackbuilder.node.addedUser',
-              tool: node.tool,
-              email: item,
-              node
             });
-          });
 
-          usersUpdates.removed.forEach(item => {
-            if ( item ) {
+            ownersUpdates.removed.forEach(item => {
+              if (item) {
+                window['dataLayer'].push({
+                  event: 'stackbuilder.node.removedOwner',
+                  tool: node.tool,
+                  email: item,
+                  node
+                });
+              }
+            });
+          }
+
+          // console.log('result.trainedOn', result.trainedOn, node.trainedOn );
+          if ( result.trainedOn !==  node.trainedOn) {
+            const usersUpdates = this.getAddedAndRemovedItems(node.trainedOn ? node.trainedOn.split(',') : [],
+              result.trainedOn.split(','));
+            usersUpdates.added.forEach(item => {
               window['dataLayer'].push({
-                event: 'stackbuilder.node.removedUser',
+                event: 'stackbuilder.node.addedUser',
                 tool: node.tool,
                 email: item,
                 node
               });
-            }
-          });
+            });
+
+            usersUpdates.removed.forEach(item => {
+              if ( item ) {
+                window['dataLayer'].push({
+                  event: 'stackbuilder.node.removedUser',
+                  tool: node.tool,
+                  email: item,
+                  node
+                });
+              }
+            });
+          }
+
+          node = Object.assign({}, node, result);
+          node.position = this.nodes[node.id].position;
+
+          this.nodes[node.id] = node;
+          const index = this.showNodes.findIndex((item) => item.id === node.id );
+          this.showNodes[index] = node;
+
+          this.updatedNodeData.emit({ nodeId: node.id, data: result });
         }
-
-        node = Object.assign({}, node, result);
-        node.position = this.nodes[node.id].position;
-
-        this.nodes[node.id] = node;
-        const index = this.showNodes.findIndex((item) => item.id === node.id );
-        this.showNodes[index] = node;
-
-        this.updatedNodeData.emit({ nodeId: node.id, data: result });
       }
     });
 

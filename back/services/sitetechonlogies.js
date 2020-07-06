@@ -49,7 +49,7 @@ exports.getDomainTool = async function(domain) {
     let  tool;
     
     try {
-        let data = await download.dwonloadImage(_path, 'https://logo.clearbit.com/' + domain);
+        let data = await download.downloadImage(_path, 'https://logo.clearbit.com/' + domain);
         
         tool = {
             categories: ['WebSite'],
@@ -89,7 +89,7 @@ exports.saveLogo = async function(id, url) {
     const _path = path.resolve(__dirname, '../public/tools-logos', id + '.png');
     let  tool;
     
-    let data = await download.dwonloadImage(_path, url);
+    let data = await download.downloadImage(_path, url);
 
     return data;
 }

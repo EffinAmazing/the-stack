@@ -10,6 +10,7 @@ import { CreateNewStackDialogComponent } from '../../components/create-new-stack
 import { InfoPopupDialogComponent } from '../../components/info-popup-dialog/info-popup-dialog.component';
 import { AddNewToolDialogComponent } from '../../components/add-new-tool-dialog/add-new-tool-dialog.component';
 import { InviteDialogComponent } from '../../components/invite-dialog/invite-dialog.component';
+import { CreateCustomToolDialogComponent } from '../../components/create-custom-tool-dialog/create-custom-tool-dialog.component';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forbiddenTags, hiddenCategories } from '../../../../core/config';
@@ -61,6 +62,7 @@ export class BuildStackComponent implements OnInit {
       public toolsDialog: MatDialog,
       public infoDialog: MatDialog,
       public inviteDialog: MatDialog,
+      public customToolDialog: MatDialog,
       public showRegisterDialog: MatDialog) {
     this.id = route.snapshot.params['id'];
     console.log(this.id);
@@ -95,21 +97,23 @@ export class BuildStackComponent implements OnInit {
     let hidden = 0;
     this.blueprint = data.blueprint;
     data.nodes.forEach((item) => {
-      const tool = data.tools.find((atool) =>  atool.id === item.toolId );
-      item.tool = tool;
-      this.nodes[item.id] = item;
-      this.nodesList.push(item.id);
-      if (item.hide ) { hidden++; }
-      if (item.tool.categories && item.tool.categories.length > 0) {
-        item.tool.categories.forEach((cat) => {
-          if (this.categories[cat]) {
-            this.categories[cat].push(item.id);
-          } else {
-            this.categories[cat] = [ item.id ];
-          }
-        });
-      } else {
-        this.categories['None'].push(item.id);
+      if (item.toolId) {
+        const tool = data.tools.find((atool) =>  atool.id === item.toolId );
+        item.tool = tool;
+        this.nodes[item.id] = item;
+        this.nodesList.push(item.id);
+        if (item.hide ) { hidden++; }
+        if ( item.tool.categories && item.tool.categories.length > 0) {
+          item.tool.categories.forEach((cat) => {
+            if (this.categories[cat]) {
+              this.categories[cat].push(item.id);
+            } else {
+              this.categories[cat] = [ item.id ];
+            }
+          });
+        } else {
+          this.categories['None'].push(item.id);
+        }
       }
       /* */
     });
@@ -425,6 +429,32 @@ export class BuildStackComponent implements OnInit {
     }
   }
 
+  public handleCeateCustomTool(node: BluePrintTool | void) {
+    const dialogRef = this.customToolDialog.open(CreateCustomToolDialogComponent, {
+      width: '620px',
+      data: {
+        node,
+        blueprintId: this.blueprint.id
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if ( result ) {
+        if (!node) {
+          this.addedNewNode$.next([ result ]);
+        } else {
+          this.nodes[node.id] = result;
+          this.changeNodeData$.next(this.nodes[node.id]);
+        }
+      }
+    });
+  }
+
+  public handleEditCustomTool(id: string) {
+    const node = this.nodes[id];
+    this.handleCeateCustomTool(node);
+  }
+
   public handleAddNewTool() {
     const dialogRef = this.deleteDialog.open(AddNewToolDialogComponent, {
       width: '620px',
@@ -435,29 +465,32 @@ export class BuildStackComponent implements OnInit {
       const listToCreate = [];
       const listToUnhide = [];
       if (result) {
-        for (const key in result) {
-          if (result.hasOwnProperty(key)) {
-            if (!result[key].nodeId) {
-              listToCreate.push({
-                  blueprintId: this.blueprint.id,
-                  toolId: result[key].id,
-                  hide: false,
-                  dependencies: []
-              });
-            } else {
-              listToUnhide.push(result[key].nodeId);
+        if (typeof result === 'object') {
+          for (const key in result) {
+            if (result.hasOwnProperty(key)) {
+              if (!result[key].nodeId) {
+                listToCreate.push({
+                    blueprintId: this.blueprint.id,
+                    toolId: result[key].id,
+                    hide: false,
+                    dependencies: []
+                });
+              } else {
+                listToUnhide.push(result[key].nodeId);
+              }
             }
           }
+
+          this.proceedAddNewNodes(listToCreate, listToUnhide, result).then(nodes => {
+            if (nodes.length) {
+              this.addedNewNode$.next(nodes);
+            }
+          }).catch(err => console.log(err));
+
+
+        } else if (typeof result === 'string' && result === 'create') {
+          this.handleCeateCustomTool();
         }
-
-        this.proceedAddNewNodes(listToCreate, listToUnhide, result).then(nodes => {
-          if (nodes.length) {
-            this.addedNewNode$.next(nodes);
-          }
-        }).catch(err => console.log(err));
-
-
-
         /*if (listToCreate.length > 0) {
           this.service.addNewNodeItems(listToCreate).toPromise().then(nodes => {
             const nodesIds: string[] = [];
@@ -606,7 +639,6 @@ export class BuildStackComponent implements OnInit {
   }
 
   public handleHideNode(data) {
-    // console.log('handleHideNode', data);
     window['dataLayer'].push({
       event: 'stackbuilder.node.hide',
       node: data.item,
@@ -629,7 +661,6 @@ export class BuildStackComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
 
       if ( result ) {
-        console.log(this.service);
         window['dataLayer'].push({
           event: 'stackbuilder.remove',
           stack: this.blueprint

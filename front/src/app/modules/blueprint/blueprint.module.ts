@@ -24,6 +24,7 @@ import { InfoPopupDialogComponent } from './components/info-popup-dialog/info-po
 import { AddNewToolDialogComponent } from './components/add-new-tool-dialog/add-new-tool-dialog.component';
 import { SubdomainDetectComponent } from './components/subdomain-detect/subdomain-detect.component';
 import { InviteDialogComponent } from './components/invite-dialog/invite-dialog.component';
+import { CreateCustomToolDialogComponent } from './components/create-custom-tool-dialog/create-custom-tool-dialog.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { InviteDialogComponent } from './components/invite-dialog/invite-dialog.
     InfoPopupDialogComponent,
     AddNewToolDialogComponent,
     SubdomainDetectComponent,
-    InviteDialogComponent
+    InviteDialogComponent,
+    CreateCustomToolDialogComponent
   ],
   imports: [
     CommonModule,

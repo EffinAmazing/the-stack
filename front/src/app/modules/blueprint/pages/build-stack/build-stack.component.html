@@ -66,6 +66,7 @@
           (removeArrows)="handleRemoveArrows($event)"
           (selectArrow)="handleSlectArrow($event)"
           (updatedNodeData)="handleUpdatedNodeData($event)"
+          (callEditNode)="handleEditCustomTool($event)"
           ></app-builder>
 
       </div>
@@ -101,6 +102,7 @@
             (toogleVisibilityNode)="handleHideNodeItem($event)"
             (closeTools)="handleCloseTools()"
             (updatedNodeData)="handleUpdatedNodeData($event)"
+            (callEditNode)="handleEditCustomTool($event)"
             ></app-tools-list>
       </div>
       <canvas id="share-image-canvas"></canvas>

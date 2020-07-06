@@ -16,6 +16,9 @@
             <div mat-line>{{toolItem.categories?.join(', ')}}</div>
         </mat-list-item>
     </mat-list>
+    <div *ngIf="tools.length === 0 && toolsDataLoaded" class="create-custom-tool">
+      <button class="stack-button" color="primary" (click)="handleCreateNewTool()"> <mat-icon>add</mat-icon> Create New Tool</button> 
+    </div>
   </div>
 </div>
 <div mat-dialog-actions direction="right">

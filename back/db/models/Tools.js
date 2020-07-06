@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const async = require('async');
+// const fs = require('fs');
 const techservice = require('../../services/sitetechonlogies');
+const files = require('../../services/download');
 const AbstaractModel = require('./_abstract');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
@@ -23,6 +25,37 @@ class ToolsModel extends AbstaractModel{
         });
 
         this.initModel();
+    }
+
+    async createOne(data, icon) {
+        if ( data.name ) {
+            data.tag = 'custom';
+            if (!data.categories) {
+                data.categories = [];
+            } else if (typeof data.categories === 'string') {
+                data.categories = data.categories.split(',');
+            }
+            let doc = await super.create(data, []);
+            // icon.pipe(fs.createWriteStream('/tools-logos/' + doc._id  + '.png'));
+            try {
+                let path = await files.uploadImage(icon, 'tools-logos/' + doc._id  + '.png');
+                let mappedDoc = await this.updateTool(doc._id, { logo: '/tools-logos/' + doc.id  + '.png' });
+
+                return mappedDoc;
+            } catch (err) {
+                console.log(err);
+                return this.mapDocument(doc);
+            }
+          
+        } else {
+            throw Error('Incorrect data');
+        }
+    }
+
+    async updateToolIcon(toolId, icon) {
+        let path = await files.uploadImage(icon, 'tools-logos/' + toolId  + '.png');
+
+        return path;
     }
 
     async proceedTools(tools){

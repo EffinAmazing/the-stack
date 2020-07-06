@@ -153,6 +153,93 @@ class ToolsNodes {
         }
     }
 
+    createCustom(req, res, next) {
+        const nodeData = req.body.node;
+        const toolData = req.body.tool;
+        const icon = req.files.icon
+
+        if (nodeData && toolData) {
+            // console.log(node, tool, icon);
+            async.waterfall([
+                (cb) => {
+                    this.tools.createOne(toolData, icon).then((res) =>{ cb(null, res) }).catch(err => { cb(err, null) });
+                },
+                (toolDoc, cb) =>{
+                    nodeData['toolId'] = toolDoc.id;
+                    this.model.addOne(nodeData).then(theNode => {
+                        theNode['tool'] = toolDoc;
+                        cb(null, theNode)
+                    }).catch(err => { cb(err, null) })
+                }
+            ], function(err, result) {
+                if (err) {
+                    res.status(500).json({
+                        result: "Error",
+                        message: err.message
+                    })
+                } else {
+                    res.json({
+                        result: result
+                    })
+                }
+            })
+            
+        } else {
+            res.status(400).json({
+                result: "Error",
+                message: 'Bad request'
+            });
+        }
+    }
+
+    updateCustom (req, res, next) {
+        const nodeData = req.body.node;
+        const toolData = req.body.tool;
+        const toolId = req.body.toolId;
+        const ID = req.params.id
+        const icon = req.files.icon;
+
+        if ( ID && nodeData && toolData && toolId ) {
+            async.waterfall([
+                (cb) => {
+                    this.model.updateOne(ID, nodeData).then(doc => { cb(null, doc) }).catch(err => { cb(err, null) });
+                },
+                (nodeDoc, cb) => {
+                    this.tools.updateTool(toolId, toolData).then(toolDoc => {
+                        nodeDoc['tool'] = toolDoc;
+                        cb(null, nodeDoc);
+                    }).catch(err => { console.log(err);  cb(err, null) });
+                },
+                (nodeDoc, cb) => {
+                    if (icon) {
+                        this.tools.updateToolIcon(toolId, icon)
+                            .then(() => {
+                                cb(null, nodeDoc);
+                            }).catch(err => { cb(err, null) });
+                    } else {
+                        cb(null, nodeDoc);
+                    }
+                }
+            ], function(err, result) {
+                if (err) {
+                    res.status(500).json({
+                        result: "Error",
+                        message: err.message
+                    })
+                } else {
+                    res.json({
+                        result: result
+                    })
+                }
+            })
+        } else {
+            res.status(400).json({
+                result: "Error",
+                message: 'Bad request'
+            });
+        }
+    }
+
     getListOfTools( req, res, next  ){
         const name = req.query.name;
         const blueprintId = req.query.blueprint;

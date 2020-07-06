@@ -21,6 +21,7 @@ export class ToolsListComponent implements OnInit {
   @Output() toogleVisibilityNode: EventEmitter<any> = new EventEmitter();
   @Output() closeTools: EventEmitter<any> = new EventEmitter();
   @Output() updatedNodeData: EventEmitter<{ nodeId: string, data: BluePrintTool }> = new EventEmitter();
+  @Output() callEditNode: EventEmitter<string> = new EventEmitter();
   categories: any;
   totalCost: number;
   categoriesList: Array<{
@@ -228,76 +229,80 @@ export class ToolsListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        node = Object.assign({}, node, result);
+        if (typeof result === 'string') {
+          this.callEditNode.emit(result);
+        } else {
+          node = Object.assign({}, node, result);
 
-        console.log('result.cost', result.cost, node.cost );
-        if (result.cost !== node.cost) {
-          window['dataLayer'].push({
-            event: 'stackbuilder.node.updateCost',
-            oldCost: node.cost,
-            newCost: result.cost,
-            tool: node.tool,
-            node
-          });
-        }
-
-        console.log('result.owner', result.owner, node.owner );
-        if (result.owner !== node.owner) {
-          const ownersUpdates = this.getAddedAndRemovedItems(node.owner ? node.owner.split(',') : [], result.owner.split(','));
-          ownersUpdates.added.forEach(item => {
+          console.log('result.cost', result.cost, node.cost );
+          if (result.cost !== node.cost) {
             window['dataLayer'].push({
-              event: 'stackbuilder.node.addedOwner',
+              event: 'stackbuilder.node.updateCost',
+              oldCost: node.cost,
+              newCost: result.cost,
               tool: node.tool,
-              email: item,
               node
             });
-          });
+          }
 
-          ownersUpdates.removed.forEach(item => {
-            if (item) {
+          console.log('result.owner', result.owner, node.owner );
+          if (result.owner !== node.owner) {
+            const ownersUpdates = this.getAddedAndRemovedItems(node.owner ? node.owner.split(',') : [], result.owner.split(','));
+            ownersUpdates.added.forEach(item => {
               window['dataLayer'].push({
-                event: 'stackbuilder.node.removedOwner',
+                event: 'stackbuilder.node.addedOwner',
                 tool: node.tool,
                 email: item,
                 node
               });
-            }
-          });
-        }
-
-        console.log('result.trainedOn', result.trainedOn, node.trainedOn );
-        if ( result.trainedOn !==  node.trainedOn) {
-          const usersUpdates = this.getAddedAndRemovedItems(node.trainedOn ? node.trainedOn.split(',') : [],
-            result.trainedOn.split(','));
-          usersUpdates.added.forEach(item => {
-            window['dataLayer'].push({
-              event: 'stackbuilder.node.addedUser',
-              tool: node.tool,
-              email: item,
-              node
             });
-          });
 
-          usersUpdates.removed.forEach(item => {
-            if ( item ) {
+            ownersUpdates.removed.forEach(item => {
+              if (item) {
+                window['dataLayer'].push({
+                  event: 'stackbuilder.node.removedOwner',
+                  tool: node.tool,
+                  email: item,
+                  node
+                });
+              }
+            });
+          }
+
+          console.log('result.trainedOn', result.trainedOn, node.trainedOn );
+          if ( result.trainedOn !==  node.trainedOn) {
+            const usersUpdates = this.getAddedAndRemovedItems(node.trainedOn ? node.trainedOn.split(',') : [],
+              result.trainedOn.split(','));
+            usersUpdates.added.forEach(item => {
               window['dataLayer'].push({
-                event: 'stackbuilder.node.removedUser',
+                event: 'stackbuilder.node.addedUser',
                 tool: node.tool,
                 email: item,
                 node
               });
-            }
+            });
+
+            usersUpdates.removed.forEach(item => {
+              if ( item ) {
+                window['dataLayer'].push({
+                  event: 'stackbuilder.node.removedUser',
+                  tool: node.tool,
+                  email: item,
+                  node
+                });
+              }
+            });
+          }
+
+          this.nodes[node.id] = node;
+          node.tool.categories.forEach((cat) => {
+            this.reculcCategoryCost(cat);
           });
+
+          this.reculcAllCost();
+          /* */
+          this.updatedNodeData.emit({ nodeId: node.id, data: result });
         }
-
-        this.nodes[node.id] = node;
-        node.tool.categories.forEach((cat) => {
-          this.reculcCategoryCost(cat);
-        });
-
-        this.reculcAllCost();
-        /* */
-        this.updatedNodeData.emit({ nodeId: node.id, data: result });
       }
     });
   }

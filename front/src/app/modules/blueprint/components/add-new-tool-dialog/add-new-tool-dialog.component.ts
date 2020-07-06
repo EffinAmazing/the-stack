@@ -16,7 +16,8 @@ export class AddNewToolDialogComponent {
   tool: Tool | null = null;
   toolSearchName = '';
   cachedValue = '';
-  runedTimout = false;
+  toolsDataLoaded = false;
+  runedTimeout = false;
   tools: Tool[] = [];
   selected: { [key: string]: Tool } = {};
 
@@ -30,8 +31,8 @@ export class AddNewToolDialogComponent {
     public handleInputText(evt) {
       // console.log(evt.data, evt.target.value);
       if (evt.target.value !== '') {
-        if (!this.runedTimout) {
-          this.runedTimout = true;
+        if (!this.runedTimeout) {
+          this.runedTimeout = true;
           setTimeout(() => {
             this.getToolsData();
           }, timeout);
@@ -42,20 +43,25 @@ export class AddNewToolDialogComponent {
     private getToolsData() {
       if (this.toolSearchName !== this.cachedValue) {
         this.cachedValue = this.toolSearchName;
-        this.runedTimout = true;
+        this.runedTimeout = true;
         setTimeout(() => {
-          this.runedTimout = false;
+          this.runedTimeout = false;
           this.getToolsData();
         }, timeout);
       } else {
-        this.runedTimout = false;
+        this.runedTimeout = false;
         console.log(this.toolSearchName);
         this.service.getToolsList(this.toolSearchName, this.data.blueprintId).toPromise().then((result) => {
           this.tools = result;
+          this.toolsDataLoaded = true;
         }).catch(err => {
           console.log(err);
         });
       }
+    }
+
+    public handleCreateNewTool() {
+      this.dialogRef.close('create');
     }
 
     public handleSelectTool(tool: Tool) {

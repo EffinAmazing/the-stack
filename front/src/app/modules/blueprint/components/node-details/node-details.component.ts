@@ -21,7 +21,7 @@ export class NodeDetailsComponent  {
   constructor(
     public dialogRef: MatDialogRef<NodeDetailsComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { node: BluePrintTool, blueprintId: string }) {
-      console.log(data);
+      // console.log(data);
       this.nodeForm = new FormGroup({
         start: new FormControl(data.node.start),
         end: new FormControl(data.node.end),
@@ -75,7 +75,7 @@ export class NodeDetailsComponent  {
     }
 
     owners = list.join(',');
-    this.nodeForm.get('owner').setValue(owners)
+    this.nodeForm.get('owner').setValue(owners);
   }
 
   public addTrainedOn(email: string): void{
@@ -111,7 +111,6 @@ export class NodeDetailsComponent  {
     let trainedOn = this.nodeForm.get('trainedOn').value;
     const list:string[] = trainedOn.split(',');
     const index = list.findIndex((item) => item === email);
-    console.log('index', index);
     if (index !== -1) {
       list.splice(index, 1);
       trainedOn =  list.join(',');
@@ -135,13 +134,17 @@ export class NodeDetailsComponent  {
       this.trainOnTemp = '';
     }
   }
-  
+
   public getAssetsFolder() {
     if (typeof window['assets'] !== 'undefined') {
       return window['assets'];
     } else {
       return '/';
     }
+  }
+
+  public clickEditNode() {
+    this.dialogRef.close(this.data.node.id);
   }
 
   onNoClick(): void {

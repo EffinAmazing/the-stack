@@ -1,5 +1,11 @@
-<h1 mat-dialog-title> <img class="node-icon" crossorigin [src]="data.node.tool.logo?processImageSrc(data.node.tool.logo):getAssetsFolder() + 'assets/images/layers.png'"  />
-    {{data.node.tool.name}} <button mat-icon-button class="close-button" [mat-dialog-close]><mat-icon>clear</mat-icon></button> 
+<h1 mat-dialog-title> 
+    <img class="node-icon" crossorigin [src]="data.node.tool.logo?processImageSrc(data.node.tool.logo):getAssetsFolder() + 'assets/images/layers.png'"  />
+    {{data.node.tool.name}} 
+    <button mat-icon-button class="close-button" [mat-dialog-close]><mat-icon>clear</mat-icon></button> 
+    <button *ngIf="data.node.tool.tag === 'custom'" 
+        class="close-button" 
+        mat-icon-button 
+        (click)="clickEditNode()"> <mat-icon>edit</mat-icon> </button>
 </h1>
 <div class="dialog-categories-list" *ngIf="data.node">
     <div class="info-paragraph"> 
@@ -17,7 +23,7 @@
 
         <form [formGroup]="nodeForm">
             <div  class="info-paragraph"> 
-                <div class="title">Monthly cost: </div>
+                <div class="title"> Monthly cost: </div>
                 <div class="data">
                     <mat-form-field class="full-width">
                         <mat-label>Cost</mat-label>
