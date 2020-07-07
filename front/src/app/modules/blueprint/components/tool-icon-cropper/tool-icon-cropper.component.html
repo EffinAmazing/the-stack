@@ -1,0 +1,20 @@
+<h1 mat-dialog-title> 
+    Cropping Image
+</h1>
+<div mat-dialog-content>
+    <div *ngIf="!fileUrl; then thenBlock else elseBlock"></div>
+    <ng-template #thenBlock>
+        <div class="choose-image-box">
+            <input #fileInput class="hidden-input-file" type="file" (change)="handleFileInputChange()"  accept="image/*" />
+            <button class="stack-button" color="primary" (click)="handleClickChooseImage()"> <mat-icon>image</mat-icon> Choose Image  </button>
+        </div>
+    </ng-template>
+    <ng-template #elseBlock>
+        <app-image-cropper [imgSrc]="fileUrl" (cropImageUpdated)="handleUpdateImage($event)"></app-image-cropper>
+    </ng-template>
+</div>
+<div mat-dialog-actions direction="right">
+    <button class="stack-button" (click)="onCloseClick()"> <mat-icon>clear</mat-icon> Close</button>
+    <button class="stack-button" color="primary" (click)="onSaveClick()"> <mat-icon>done</mat-icon> Save</button>
+</div>  
+

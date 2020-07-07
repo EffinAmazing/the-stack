@@ -9,8 +9,11 @@
             <div class="form-field-box">
                 <div class="title">Icon: </div>
                 <div class="data"> 
-                    <mat-icon> <img #iconImage [src]="getAssetsFolder() + 'assets/images/layers.png'" /> </mat-icon>
-                    <canvas id="canvas_for_icon" #canvasForIcon width="73" height="73"></canvas>
+                    <div class="data-icon-block">
+                        <mat-icon class="data-icon-box"> <img #iconImage [src]="getImageUrl()" crossorigin /> </mat-icon>
+                        <canvas id="canvas_for_icon" #canvasForIcon width="73" height="73"></canvas>
+                        <button class="stack-button edit-image-button" color="primary" (click)="showCropper()"> <mat-icon>edit</mat-icon> </button>
+                    </div>
                 </div>
             </div>
 

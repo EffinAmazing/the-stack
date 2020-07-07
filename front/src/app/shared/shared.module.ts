@@ -8,11 +8,12 @@ import { CommonBehaviorsModule } from './modules/material/common-behaviors/commo
 import { HeaderComponent } from './components/header/header.component';
 import { SignupSigninPopupComponent } from './components/signup-signin-popup/signup-signin-popup.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { ImageCropperComponent } from './components/image-cropper/image-cropper.component';
 
 
 
 @NgModule({
-  declarations: [ HeaderComponent, SignupSigninPopupComponent ],
+  declarations: [ HeaderComponent, SignupSigninPopupComponent, ImageCropperComponent ],
   imports: [
     CommonModule,
     FormsControlsModule,
@@ -25,7 +26,8 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
   ],
   exports: [
     HeaderComponent,
-    SignupSigninPopupComponent
+    SignupSigninPopupComponent,
+    ImageCropperComponent
   ]
 })
 export class SharedModule { }

@@ -1,10 +1,10 @@
 import { Component, Inject, ViewChild, ElementRef } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
 import { environment } from '../../../../../environments/environment';
-import { blob } from 'd3';
+import { ToolIconCropperComponent } from '../tool-icon-cropper/tool-icon-cropper.component';
 
 const host = environment.serverURI;
 
@@ -27,6 +27,7 @@ export class CreateCustomToolDialogComponent {
 
   constructor( public dialogRef: MatDialogRef<CreateCustomToolDialogComponent>,
                private service: BlueprintsService,
+               public cropperDialog: MatDialog,
                @Inject(MAT_DIALOG_DATA) public data: { blueprintId: string, node: BluePrintTool | void }) {
     this.toolForm = new FormGroup({
       name: new FormControl(data.node && data.node.tool && data.node.tool.name ? data.node.tool.name : '', [Validators.required]),
@@ -41,14 +42,14 @@ export class CreateCustomToolDialogComponent {
     });
 
     this.dialogRef.afterOpened().subscribe(() => {
+      this.iconImage.nativeElement.addEventListener('load', (result) => {
+        const ctx = this.canvasForIcon.nativeElement.getContext('2d');
+        ctx.drawImage(this.iconImage.nativeElement, 0, 0, 73, 73);
+      });
+
       if (this.iconImage.nativeElement.complete) {
         const ctx = this.canvasForIcon.nativeElement.getContext('2d');
-        ctx.drawImage(this.iconImage.nativeElement, 0, 0);
-      } else {
-        this.iconImage.nativeElement.addEventListener('load', (result) => {
-          const ctx = this.canvasForIcon.nativeElement.getContext('2d');
-          ctx.drawImage(this.iconImage.nativeElement, 0, 0);
-        });
+        ctx.drawImage(this.iconImage.nativeElement, 0, 0, 73, 73);
       }
     });
   }
@@ -58,6 +59,14 @@ export class CreateCustomToolDialogComponent {
       return link;
     } else {
       return host + link;
+    }
+  }
+
+  public getImageUrl() {
+    if (this.data.node && this.data.node.tool && this.data.node.tool.logo) {
+      return host + this.data.node.tool.logo;
+    } else {
+      return this.getAssetsFolder() + 'assets/images/layers.png';
     }
   }
 
@@ -254,6 +263,7 @@ export class CreateCustomToolDialogComponent {
       this.isProcced = true;
       if (!this.data.node || this.imageUpdated ) {
         this.canvasForIcon.nativeElement.toBlob((result) => {
+          this.imageUpdated = false;
           formData.append('icon', result, 'icon.png');
           this.proceedFormSubmit(formData);
         });
@@ -261,6 +271,21 @@ export class CreateCustomToolDialogComponent {
         this.proceedFormSubmit(formData);
       }
     }
+  }
+
+  public showCropper() {
+    const dialogRef = this.cropperDialog.open(ToolIconCropperComponent, {
+      width: '460px',
+      data: { }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+
+      if (result) {
+        this.iconImage.nativeElement.src = result;
+        this.imageUpdated = true;
+      }
+    });
   }
 
   onNoClick(): void {

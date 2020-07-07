@@ -20,6 +20,15 @@
         right: 0px;
     }
 
+    .data-icon-box{
+        width: 73px;
+        height: 73px;
+
+        img {
+            width: 73px;
+            height: 73px;
+        }
+    }
     
     @media screen and (max-width: 768px) {
         flex-wrap: wrap;
@@ -54,4 +63,11 @@
     align-items: center;
     justify-content: center;
     background-color: rgba(50, 50, 50, 0.5);
+}
+.data-icon-block{
+    max-width: 150px;
+
+    .edit-image-button {
+        float: right;
+    }
 }

@@ -273,7 +273,29 @@ export class BuilderComponent implements OnInit {
     });
 
     this.updatedOutNodeData.subscribe((node) => {
-      // console.log(' *** updatedOutNodeData *** ', node);
+      console.log(' *** updatedOutNodeData *** ', node);
+      if (node) {
+        const indexNode = this.showNodes.findIndex(item => item.id === node.id);
+
+        if (indexNode) {
+          const oldNode = this.showNodes[indexNode];
+          const newNode: BluePrintTool = Object.assign({}, oldNode, {
+            tool: node.tool,
+            cost: node.cost,
+            owner: node.owner,
+            trainedOn: node.trainedOn,
+            start: node.start,
+            end: node.end
+          });
+
+          newNode.tool.logo += '?v=' + Date.now();
+
+          const newList = [...this.showNodes];
+          // console.log(newList, indexNode, oldNode, newNode);
+          newList[indexNode] = newNode;
+          this.showNodes = newList;
+        }
+      }
     });
   }
 
@@ -322,6 +344,8 @@ export class BuilderComponent implements OnInit {
       tool: node.tool,
       via: 'diagram'
     });
+
+    console.log(node, node.tool);
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
