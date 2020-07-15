@@ -15,7 +15,7 @@ export class AuthService {
   }
 
   login(email:string, password:string ) {
-    return this.mapper.mapResponse(this.http.post(`${this.serverURI}users/signin`, { username: email, password }))
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}users/signin`, { username: email, password }));
   }
 
   logout() {

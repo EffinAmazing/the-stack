@@ -47,4 +47,7 @@
             </div>
             <div class="hide-item-from-stack" (click)="hideNodeFormStack(node)"> <mat-icon>clear</mat-icon> </div>
     </div>
+    <div #selectMany [ngClass]="{'select-many-elements': true, 'visible': isMultiselect }"> </div>
+    <div #selectorArea class="seletor-area-box"> </div>
+    <div #moveSelectedArea class="moved-selected-area"></div>
 </div>

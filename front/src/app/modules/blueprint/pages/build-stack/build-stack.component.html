@@ -28,6 +28,8 @@
             <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
             <button class="stack-button delete-arrow-action" *ngIf="selectedArrow" (click)="handleRemoveArrow()"> <mat-icon>clear</mat-icon>  Delete Arrow </button>
             <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
+            <button [ngClass]="{'stack-button': true, 'icon-button': true, 'active-selection': isMultiSelectActive}" (click)="multiSelectHandler()"> <mat-icon>select_all</mat-icon> Multi Select {{isMultiSelectActive?'ON':'OFF'}} </button>
+            <div class="divider-buttons" ></div>
             <button class="stack-button icon-button" 
                 [disabled]="history.isActivePrev(blueprint.id)"
                 (click)="handlePrevAction()"> <mat-icon><img [src]="getAssetsFolder() + 'assets/images/undo.svg'" /></mat-icon> </button>
@@ -59,6 +61,7 @@
           [historyEmit]="history.getEmmiter(blueprint.id)"
           [addedNewNode]="addedNewNode$"
           [updatedOutNodeData]="changeNodeData$"
+          [multiselect]="toggleMultiSelect$"
           (positionNodeChanged)="updatedNodePosiotion($event)"
           (arrowAdded)="handleAddArrow($event)"
           (arrowUpdated)="handleUpdateArrow($event)"
@@ -67,6 +70,7 @@
           (selectArrow)="handleSlectArrow($event)"
           (updatedNodeData)="handleUpdatedNodeData($event)"
           (callEditNode)="handleEditCustomTool($event)"
+          (groupMoveCompleted)="handleGroupMove($event)"
           ></app-builder>
 
       </div>

@@ -1,5 +1,6 @@
-import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
+import { Pointer, Area } from '../../../../shared/models/general';
 import { DrawArrow } from '../../../../shared/models/draws-item';
 import { MatDialog } from '@angular/material/dialog';
 import { NodeDetailsComponent } from '../node-details/node-details.component';
@@ -18,37 +19,52 @@ const host = environment.serverURI;
   templateUrl: './builder.component.html',
   styleUrls: ['./builder.component.scss']
 })
-export class BuilderComponent implements OnInit {
-  @ViewChild('stackWorkFlow') stackWorkFlow: ElementRef;
-  @Output() positionNodeChanged: EventEmitter<any> = new EventEmitter();
+export class BuilderComponent implements OnInit, AfterViewInit {
+  @ViewChild('stackWorkFlow') stackWorkFlow: ElementRef<HTMLDivElement>;
+  @ViewChild('selectMany') selectMany: ElementRef<HTMLDivElement>;
+  @ViewChild('selectorArea') selectorArea: ElementRef<HTMLDivElement>;
+  @ViewChild('moveSelectedArea') moveSelectedArea: ElementRef<HTMLDivElement>;
+  @Output() positionNodeChanged: EventEmitter<{
+    nodeId: string,
+    position: Pointer,
+    disableHistory?: Boolean
+  }> = new EventEmitter();
   @Output() updatedNodeData: EventEmitter<any> = new EventEmitter();
-  @Output() arrowAdded: EventEmitter<any> = new EventEmitter();
-  @Output() arrowUpdated: EventEmitter<any> = new EventEmitter();
-  @Output() hideNode: EventEmitter<any> = new EventEmitter();
-  @Output() removeArrows: EventEmitter<any> = new EventEmitter();
+  @Output() arrowAdded: EventEmitter<DrawArrow> = new EventEmitter();
+  @Output() arrowUpdated: EventEmitter<{ newData?: DrawArrow, oldData?: DrawArrow, disableHistory?: Boolean}> = new EventEmitter();
+  @Output() hideNode: EventEmitter<{ item: BluePrintTool, disableHistory?: Boolean }> = new EventEmitter();
+  @Output() removeArrows: EventEmitter<string[]> = new EventEmitter();
   @Output() selectArrow: EventEmitter<any> = new EventEmitter();
   @Output() callEditNode: EventEmitter<string> = new EventEmitter();
+  @Output() groupMoveCompleted: EventEmitter<{ nodeIds: string[], diff: Pointer }> = new EventEmitter();
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
   @Input() historyEmit: Observable<any>;
   @Input() addedNewNode: Observable<any>;
   @Input() updatedOutNodeData: Observable<any>;
+  @Input() multiselect: Observable<boolean>;
+  isMultiselect = false;
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
   nodes: BluePrintTool[] = [];
   // nodes: BluePrintTool[] = [];
   showNodes: BluePrintTool[] = [];
   listOfArrows: Array<DrawArrow> = [];
-  connectedLines: Array<any> = [];
+  connectedLines: Array<DrawArrow> = [];
   activeArrow: DrawArrow;
   svgD3: any;
   activeNode;
   startPositionNode = '';
-  hoveredNode: any;
   isMoving = false;
   oldArrowData: DrawArrow | null;
   dotForDrag: HTMLDivElement | null = null;
   disableTillDrawLine = false;
+  startSelecting = false;
+  starMoveSelected = false;
+  startPointer: Pointer = { x: -1, y: -1 };
+  selectOffsetData: Pointer = { x: 0, y: 0 };
+  selectedNodes: Array<{ node: BluePrintTool, elRef: HTMLDivElement }> = [];
+  moveSelectStart: Pointer = { x: -1, y: -1 };
 
   constructor(private detailsDialog: MatDialog) {  }
 
@@ -60,8 +76,21 @@ export class BuilderComponent implements OnInit {
     const maxItems = 5;
     const arrToChange = [];
 
-
     let index = 0;
+    console.log(this.multiselect);
+    this.multiselect.subscribe(result => {
+      this.isMultiselect = result;
+      if (!result) {
+        if ( this.selectedNodes.length > 0 ) {
+          this.selectedNodes.forEach(item => {
+            item.elRef.classList.remove('selected');
+          });
+
+          this.moveSelectedArea.nativeElement.style.display = 'none';
+        }
+      }
+    });
+
     this.loadedNodes.subscribe((data) => {
       this.showNodes = [];
       console.log(' *** loadedNodes ****');
@@ -94,7 +123,7 @@ export class BuilderComponent implements OnInit {
             if (this.nodes[item.id] && this.listOfArrows.length) {
                 // console.log('hidden item');
                 const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(item.id) !== -1 );
-                const ids = [];
+                const ids: string[] = [];
                 if (arrowsToRemove.length) {
                   arrowsToRemove.forEach(element => {
                     ids.push(element.lineId);
@@ -232,7 +261,6 @@ export class BuilderComponent implements OnInit {
             }
             break;
           case 'updateArrow':
-            console.log(result);
             if (result.undo) {
               const k = this.listOfArrows.findIndex((item) => item.lineId === result.action.data.oldData.lineId);
               this.listOfArrows.splice(k, 1, result.action.data.oldData);
@@ -241,6 +269,74 @@ export class BuilderComponent implements OnInit {
               const k = this.listOfArrows.findIndex((item) => item.lineId === result.action.data.newData.lineId);
               this.listOfArrows.splice(k, 1, result.action.data.newData);
               this.arrowHelper.updateExistedArrow(result.action.data.newData);
+            }
+            break;
+          case 'groupMove':
+            const nodes = this.showNodes.filter(item => {
+              return result.action.data.nodeIds.findIndex(nodeId => nodeId === item.id) !== -1;
+            });
+
+            const selectedNodes = nodes.map((item) => {
+              const elRef = document.querySelector(`#node-${item.id}`) as HTMLDivElement;
+              return { node: item, elRef };
+            });
+
+            const arrowLines = this.listOfArrows.filter((itemArrow) => {
+              let start = false;
+              let end = false;
+
+              start = nodes.findIndex((node) => itemArrow.start.nodeId === node.id) !== -1;
+              end = nodes.findIndex((node) => itemArrow.end.nodeId === node.id) !== -1;
+              return start || end;
+            });
+
+            const diff = result.action.data.diff;
+            let toUpdate: Array<{ nodeId: string, position: Pointer }> = [];
+            if (result.undo) {
+              if (this.moveSelectedArea) {
+                this.moveSelectedArea.nativeElement.style.transform = `translate3d(0px, 0px, 0px)`;
+                const y = parseInt( this.moveSelectedArea.nativeElement.style.top, 10 );
+                const x = parseInt( this.moveSelectedArea.nativeElement.style.left, 10 );
+                this.moveSelectedArea.nativeElement.style.top = (y - diff.y) + 'px';
+                this.moveSelectedArea.nativeElement.style.left = (x - diff.x) + 'px';
+              }
+              toUpdate = selectedNodes.map(item => {
+                item.elRef.style.transform = `translate3d(${item.node.position.x - diff.x}px, ${item.node.position.y - diff.y}px, 0px)`;
+                item.node.position = { x: item.node.position.x - diff.x, y: item.node.position.y - diff.y };
+                return { nodeId: item.node.id, position: item.node.position };
+              });
+            } else {
+              if (this.moveSelectedArea) {
+                this.moveSelectedArea.nativeElement.style.transform = `translate3d(0px, 0px, 0px)`;
+                const y = parseInt( this.moveSelectedArea.nativeElement.style.top, 10 );
+                const x = parseInt( this.moveSelectedArea.nativeElement.style.left, 10 );
+                this.moveSelectedArea.nativeElement.style.top = (y + diff.y) + 'px';
+                this.moveSelectedArea.nativeElement.style.left = (x + diff.x) + 'px';
+              }
+              toUpdate = selectedNodes.map(item => {
+                item.elRef.style.transform = `translate3d(${item.node.position.x + diff.x}px, ${item.node.position.y + diff.y}px, 0px)`;
+                item.node.position = { x: item.node.position.x + diff.x, y: item.node.position.y + diff.y };
+                return { nodeId: item.node.id, position: item.node.position };
+              });
+
+            }
+            const promises = toUpdate.map(async (props) => {
+              this.positionNodeChanged.emit(Object.assign({}, props, { disableHistory: true }));
+              return props;
+            });
+
+            Promise.all(promises).then(() => {
+              console.log('position updated');
+            }).catch((err) => {
+              console.log(err);
+            });
+            if (arrowLines) {
+              const updatedLines = arrowLines.map(async (item) => {
+                this.arrowHelper.updateExistedArrow(item, container);
+                return this.arrowUpdated.emit({ newData: item, disableHistory: true });
+              });
+
+              Promise.all(updatedLines).then(() => { console.log('completed update'); }).catch(err => console.log(err));
             }
             break;
         }
@@ -273,7 +369,6 @@ export class BuilderComponent implements OnInit {
     });
 
     this.updatedOutNodeData.subscribe((node) => {
-      console.log(' *** updatedOutNodeData *** ', node);
       if (node) {
         const indexNode = this.showNodes.findIndex(item => item.id === node.id);
 
@@ -345,8 +440,6 @@ export class BuilderComponent implements OnInit {
       via: 'diagram'
     });
 
-    console.log(node, node.tool);
-
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
 
@@ -363,7 +456,6 @@ export class BuilderComponent implements OnInit {
             });
           }
 
-          console.log('result.owner', result.owner, node.owner );
           if (result.owner !== node.owner) {
             const ownersUpdates = this.getAddedAndRemovedItems(node.owner ? node.owner.split(',') : [], result.owner.split(','));
             ownersUpdates.added.forEach(item => {
@@ -387,7 +479,6 @@ export class BuilderComponent implements OnInit {
             });
           }
 
-          // console.log('result.trainedOn', result.trainedOn, node.trainedOn );
           if ( result.trainedOn !==  node.trainedOn) {
             const usersUpdates = this.getAddedAndRemovedItems(node.trainedOn ? node.trainedOn.split(',') : [],
               result.trainedOn.split(','));
@@ -505,7 +596,7 @@ export class BuilderComponent implements OnInit {
         });
         dot1.style.transform = `translate3d(${poiterStart.x}px, ${poiterStart.y}px, 0px)`;
       } else {
-        console.log(`#node-${this.selectedArrow.start.nodeId} .pointers>.pointer-${this.selectedArrow.start.pos}`);
+        // console.log(`#node-${this.selectedArrow.start.nodeId} .pointers>.pointer-${this.selectedArrow.start.pos}`);
       }
 
       // 2. add end dot
@@ -530,7 +621,7 @@ export class BuilderComponent implements OnInit {
         this.selectArrow.emit(this.selectedArrow);
         line.setAttribute('stroke-width', '4');
       } else {
-        console.log(`#node-${this.selectedArrow.end.nodeId} .pointers>.pointer-${this.selectedArrow.end.pos}`);
+       // console.log(`#node-${this.selectedArrow.end.nodeId} .pointers>.pointer-${this.selectedArrow.end.pos}`);
       }
     });
   }
@@ -629,7 +720,7 @@ export class BuilderComponent implements OnInit {
         pointers = evt.event.target.parentNode;
       }
 
-      const dot = container.querySelector('#dot-' + node.id);
+      const dot = container.querySelector('#dot-' + node.id) as HTMLElement;
 
       this.connectedLines.forEach((item) => {
         this.arrowHelper.updateExistedArrow(item, container);
@@ -661,7 +752,7 @@ export class BuilderComponent implements OnInit {
 
   public handleMouseOverPointer(evt, node, pos) {
     if ( this.activeArrow ) {
-      console.log(evt.x, evt.y);
+      // console.log(evt.x, evt.y);
       const container = this.stackWorkFlow.nativeElement;
       const data = this.arrowHelper.getArrowPointer(evt.target, container, pos, { x: evt.x, y: evt.y});
       this.activeArrow.end.nodeId = node.id;
@@ -682,7 +773,7 @@ export class BuilderComponent implements OnInit {
 
   public handleMouseOutPointer() {
     if (this.activeArrow) {
-      console.log('out');
+      // console.log('out');
       this.activeArrow.end.nodeId = null;
       this.activeArrow.end.elRef = null;
     }
@@ -796,6 +887,209 @@ export class BuilderComponent implements OnInit {
       this.removeArrows.emit([this.listOfArrows[index].lineId]);
       this.listOfArrows.splice(index, 1);
     }
+  }
+
+  ngAfterViewInit() {
+    const container = this.stackWorkFlow.nativeElement;
+
+    this.selectMany.nativeElement.addEventListener('mousedown', (evt) => {
+
+      this.startSelecting = true;
+      this.selectorArea.nativeElement.style.display = 'block';
+      const offsetParent = this.stackWorkFlow.nativeElement.offsetParent as HTMLDivElement;
+      this.selectOffsetData = { x: offsetParent.offsetLeft,
+        y: offsetParent.offsetTop };
+
+      this.startPointer = { x: evt.pageX - this.selectOffsetData.x, y: evt.pageY - this.selectOffsetData.y };
+      if ( this.selectedNodes.length > 0 ) {
+        this.selectedNodes.forEach(item => {
+          item.elRef.style.transform = `translate3d(${item.node.position.x}px, ${item.node.position.y}px, 0px)`;
+          item.elRef.classList.remove('selected');
+        });
+
+        this.connectedLines.forEach((itemArrow) => {
+          this.arrowHelper.updateExistedArrow(itemArrow, container);
+        });
+      }
+
+    });
+
+    this.selectMany.nativeElement.addEventListener('mousemove', (evt) => {
+      // console.log(evt);
+      if (this.startSelecting) {
+        const X = evt.pageX - this.selectOffsetData.x;
+        const Y = evt.pageY - this.selectOffsetData.y;
+        // console.log(this.startPointer.x, this.startPointer.y, X, Y);
+
+        if (this.startPointer.x > X) {
+          this.selectorArea.nativeElement.style.left = X + 'px';
+          this.selectorArea.nativeElement.style.width = (this.startPointer.x - X) + 'px';
+        } else {
+          this.selectorArea.nativeElement.style.width = (X - this.startPointer.x) + 'px';
+          this.selectorArea.nativeElement.style.left = this.startPointer.x + 'px';
+        }
+
+        if (this.startPointer.y > Y) {
+          this.selectorArea.nativeElement.style.top = Y + 'px';
+          this.selectorArea.nativeElement.style.height = (this.startPointer.y - Y) + 'px';
+        } else {
+          this.selectorArea.nativeElement.style.top = this.startPointer.y + 'px';
+          this.selectorArea.nativeElement.style.height = (Y - this.startPointer.y) + 'px';
+        }
+      }
+    });
+
+    this.selectMany.nativeElement.addEventListener('mouseup', (evt) => {
+      this.startSelecting = false;
+      this.selectorArea.nativeElement.style.display = 'none';
+
+      const X = evt.pageX - this.selectOffsetData.x;
+      const Y = evt.pageY - this.selectOffsetData.y;
+      const area: Area = { x: 0, y: 0, width: 0, height: 0 };
+      if (this.startPointer.x > X) {
+        area.x = X;
+        area.width = (this.startPointer.x - X);
+      } else {
+        area.width = (X - this.startPointer.x);
+        area.x = this.startPointer.x;
+      }
+
+      if (this.startPointer.y > Y) {
+        area.y = Y;
+        area.height = (this.startPointer.y - Y);
+      } else {
+        area.y = this.startPointer.y;
+        area.height = (Y - this.startPointer.y);
+      }
+      if (area.height > 20 || area.width > 20) {
+        this.getSelectedNodes(area);
+      } else {
+        this.moveSelectedArea.nativeElement.style.display = 'none';
+      }
+    });
+
+    this.selectMany.nativeElement.addEventListener('mouseout', (evt) => {
+      if (this.startSelecting) {
+        this.startSelecting = false;
+        this.selectorArea.nativeElement.style.display = 'none';
+      }
+    });
+
+    this.moveSelectedArea.nativeElement.addEventListener('mousedown', (evt) => {
+      this.moveSelectStart = { x: evt.pageX - this.selectOffsetData.x - containerOffset, 
+        y: evt.pageY - this.selectOffsetData.y - containerOffset };
+      this.starMoveSelected = true;
+    });
+    this.moveSelectedArea.nativeElement.addEventListener('mousemove', (evt) => {
+      if (this.starMoveSelected) {
+        const X = evt.pageX - this.selectOffsetData.x - containerOffset;
+        const Y = evt.pageY - this.selectOffsetData.y - containerOffset;
+        const dx = X - this.moveSelectStart.x;
+        const dy = Y - this.moveSelectStart.y;
+        this.moveSelectedArea.nativeElement.style.transform = `translate3d(${dx}px, ${dy}px, 0px)`;
+        this.selectedNodes.forEach((item) => {
+          item.elRef.style.transform = `translate3d(${item.node.position.x + dx}px, ${item.node.position.y + dy}px, 0px)`;
+        });
+
+        this.connectedLines.forEach((itemArrow) => {
+          this.arrowHelper.updateExistedArrow(itemArrow, container);
+        });
+      }
+      //
+    });
+    this.moveSelectedArea.nativeElement.addEventListener('mouseup', (evt) => {
+      this.starMoveSelected = false;
+      const X = evt.pageX - this.selectOffsetData.x - containerOffset;
+      const Y = evt.pageY - this.selectOffsetData.y - containerOffset;
+      const dx = X - this.moveSelectStart.x;
+      const dy = Y - this.moveSelectStart.y;
+      this.completeGroupMove({ x: dx, y: dy });
+    });
+    this.moveSelectedArea.nativeElement.addEventListener('mouseleave', (evt) => {
+      if (this.starMoveSelected) {
+        this.starMoveSelected = false;
+        const X = evt.pageX - this.selectOffsetData.x - containerOffset;
+        const Y = evt.pageY - this.selectOffsetData.y - containerOffset;
+        const dx = X - this.moveSelectStart.x;
+        const dy = Y - this.moveSelectStart.y;
+        this.completeGroupMove({ x: dx, y: dy });
+      }
+    });
+  }
+
+  private completeGroupMove(different: Pointer): void {
+    this.moveSelectedArea.nativeElement.style.transform = `translate3d(0px, 0px, 0px)`;
+    const y = parseInt( this.moveSelectedArea.nativeElement.style.top, 10 );
+    const x = parseInt( this.moveSelectedArea.nativeElement.style.left, 10 );
+    this.moveSelectedArea.nativeElement.style.top = (y + different.y) + 'px';
+    this.moveSelectedArea.nativeElement.style.left = (x + different.x) + 'px';
+
+    if (this.selectedNodes.length > 0) {
+      const nodeIds: string[] = [];
+      const toUpdate = this.selectedNodes.map(item => {
+        nodeIds.push(item.node.id);
+        item.node.position = { x: item.node.position.x + different.x, y: item.node.position.y + different.y };
+        return { nodeId: item.node.id, position: item.node.position };
+      });
+
+      const promises = toUpdate.map(async (props) => {
+        // props.disableHistory = true;
+        this.positionNodeChanged.emit(Object.assign({}, props, { disableHistory: true }));
+        return props;
+      });
+
+      Promise.all(promises).then((result) => {
+        console.log('position updated');
+      }).catch((err) => {
+        console.log(err);
+      });
+
+      if (this.connectedLines) {
+        const updatedLines = this.connectedLines.map(async (item) => {
+          return this.arrowUpdated.emit({ newData: item, disableHistory: true });
+        });
+
+        Promise.all(updatedLines).then(() => { console.log('completed update'); }).catch(err => console.log(err));
+      }
+
+      this.groupMoveCompleted.emit({ nodeIds, diff: different });
+    }
+  }
+
+  private getSelectedNodes(area: Area): void {
+    const endX = area.x + area.width;
+    const endY = area.y + area.height;
+    const selectedNodes = this.showNodes.filter(item => {
+      const elRef = document.querySelector(`#node-${item.id}`) as HTMLDivElement;
+      return item.position.x > area.x - elRef.offsetWidth && item.position.x < endX - containerOffset
+        && item.position.y > area.y - containerOffset && item.position.y < endY - containerOffset;
+    });
+
+    this.moveSelectedArea.nativeElement.style.display = 'block';
+    this.moveSelectedArea.nativeElement.style.transform = `translate3d(0px, 0px, 0px)`;
+
+    this.moveSelectedArea.nativeElement.style.top = area.y + 'px';
+    this.moveSelectedArea.nativeElement.style.left = area.x + 'px';
+    this.moveSelectedArea.nativeElement.style.width = area.width + 'px';
+    this.moveSelectedArea.nativeElement.style.height = area.height + 'px';
+
+    this.selectedNodes = selectedNodes.map((item) => {
+      const elRef = document.querySelector(`#node-${item.id}`) as HTMLDivElement;
+      elRef.classList.add('selected');
+      //
+      return { node: item, elRef };
+    });
+
+    const lines = this.listOfArrows.filter((itemArrow) => {
+      let start = false;
+      let end = false;
+      // itemArrow.start.nodeId === item.id || itemArrow.end.nodeId === item.id;
+
+      start = selectedNodes.findIndex((node) => itemArrow.start.nodeId === node.id) !== -1;
+      end = selectedNodes.findIndex((node) => itemArrow.end.nodeId === node.id) !== -1;
+      return start || end;
+    });
+    this.connectedLines = lines;
   }
 
 }

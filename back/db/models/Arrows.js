@@ -61,7 +61,6 @@ class ArrowsModel extends AbstaractModel {
             }).then(document => {
                 callback(null, document);
             }).catch(err => { callback(err, null); });
-
         });
 
         return arrows;

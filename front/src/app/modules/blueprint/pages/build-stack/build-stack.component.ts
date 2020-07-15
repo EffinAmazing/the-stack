@@ -4,6 +4,8 @@ import { SocialShareService } from '../../../../core/services/social-share.servi
 import { UploadImagesService } from '../../../../core/services/upload-images.service';
 import { ActionHistoryService } from '../../../../core/services/action-history.service';
 import { Tool, BluePrintTool, BluePrint } from '../../../../shared/models/tool';
+import { User } from '../../../../shared/models/users';
+import { Pointer } from '../../../../shared/models/general';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteStackDialogComponent } from '../../components/delete-stack-dialog/delete-stack-dialog.component';
 import { CreateNewStackDialogComponent } from '../../components/create-new-stack-dialog/create-new-stack-dialog.component';
@@ -19,6 +21,7 @@ import { SignupSigninPopupComponent } from '../../../../shared/components/signup
 import html2canvas from 'html2canvas';
 import * as d3 from 'd3';
 import { environment } from 'src/environments/environment';
+import { DrawArrow } from 'src/app/shared/models/draws-item';
 
 
 
@@ -40,15 +43,18 @@ export class BuildStackComponent implements OnInit {
   changedCategories$: BehaviorSubject<any> = new BehaviorSubject({});
   changeNodeData$: BehaviorSubject<BluePrintTool | null> = new BehaviorSubject(null);
   addedNewNode$: BehaviorSubject<BluePrintTool[] | null> = new BehaviorSubject(null);
+  toggleMultiSelect$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   nodesForUpdate: any = [];
-  selectedArrow: any;
+  selectedArrow: DrawArrow;
   hideList = true;
   loaded = false;
   domain = '';
   isError = false;
   isWaiting = false;
   errMessage = 'Something went wrong plaese check domain and try again';
-  authUser: any;
+  isMultiSelectActive = false;
+  authUser: User;
+
 
   constructor(
       private service: BlueprintsService,
@@ -71,6 +77,7 @@ export class BuildStackComponent implements OnInit {
       // console.log(params);
       window['dataLayer'] = window['dataLayer'] || [];
       this.authUser = this.auth.getCurrentUser();
+      console.log(this.authUser);
     });
   }
 
@@ -179,7 +186,6 @@ export class BuildStackComponent implements OnInit {
   }
 
   public handleNextAction() {
-
     this.history.nextAction(this.blueprint.id);
   }
 
@@ -692,5 +698,13 @@ export class BuildStackComponent implements OnInit {
     });
   }
 
+  public multiSelectHandler() {
+    this.isMultiSelectActive = !this.isMultiSelectActive;
+    this.toggleMultiSelect$.next(this.isMultiSelectActive);
+  }
+
+  public handleGroupMove(data: { nodeIds: string[], diff: Pointer }) {
+    this.history.addAction(this.blueprint.id, { name: 'groupMove', data  });
+  }
 
 }
