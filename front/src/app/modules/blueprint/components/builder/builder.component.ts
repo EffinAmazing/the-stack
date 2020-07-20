@@ -94,10 +94,12 @@ export class BuilderComponent implements OnInit, AfterViewInit {
     this.loadedNodes.subscribe((data) => {
       this.showNodes = [];
       console.log(' *** loadedNodes ****');
-
+      /*  */
       if (data.list) {
+        let isNewStack = true;
         data.list.forEach((nodeId) => {
           const item = data.nodes[nodeId];
+
           //
           if (!item.hide) {
             if (typeof item.position.x !== 'number') {
@@ -117,6 +119,8 @@ export class BuilderComponent implements OnInit, AfterViewInit {
               }
               arrToChange.push({nodeId: item.id, position: item.position});
               index++;
+            } else {
+              isNewStack = false;
             }
             this.showNodes.push(item);
           } else {
@@ -138,9 +142,17 @@ export class BuilderComponent implements OnInit, AfterViewInit {
         });
 
         this.nodes = data.nodes;
+        console.log(data)
+        if (isNewStack) {
+          window['dataLayer'].push({
+            event: 'stackbuilder.create',
+            domain: data.domain
+          });
+        }
 
         const promises = arrToChange.map(async (props) => {
           props.disableHistory = true;
+          props.disableGTM = true;
           this.positionNodeChanged.emit(props);
           return props;
         });
@@ -406,7 +418,7 @@ export class BuilderComponent implements OnInit, AfterViewInit {
       added: Array<number | string>, removed: Array<number | string> } {
     const added = [];
     const removed = [];
-
+    // console.log('prevArr', prevArr, 'nextArr', nextArr);
 
     prevArr.forEach(item => {
       if ( nextArr.indexOf( item ) === -1) {
@@ -415,7 +427,7 @@ export class BuilderComponent implements OnInit, AfterViewInit {
     });
 
     nextArr.forEach(item => {
-      if (prevArr.length === 0 || prevArr.indexOf(item) === -1) {
+      if ((prevArr.length === 0 || prevArr.indexOf(item) === -1) && item !== '') {
         added.push(item);
       }
     });
@@ -482,6 +494,8 @@ export class BuilderComponent implements OnInit, AfterViewInit {
           if ( result.trainedOn !==  node.trainedOn) {
             const usersUpdates = this.getAddedAndRemovedItems(node.trainedOn ? node.trainedOn.split(',') : [],
               result.trainedOn.split(','));
+
+            // console.log(usersUpdates.added, usersUpdates.removed);
             usersUpdates.added.forEach(item => {
               window['dataLayer'].push({
                 event: 'stackbuilder.node.addedUser',

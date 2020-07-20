@@ -34,8 +34,8 @@ export class CreateCustomToolDialogComponent {
       categories: new FormControl(data.node && data.node.tool && data.node.tool.categories ? data.node.tool.categories.join(',') : ''),
       description: new FormControl(data.node && data.node.tool && data.node.tool.description ? data.node.tool.description : ''),
       link: new FormControl(data.node && data.node.tool && data.node.tool.link ? data.node.tool.link : ''),
-      start: new FormControl(data.node && data.node.start ? data.node.start : '', [Validators.required]),
-      end: new FormControl(data.node && data.node.end ? data.node.end : '', [Validators.required]),
+      start: new FormControl(data.node && data.node.start ? data.node.start : '', []),
+      end: new FormControl(data.node && data.node.end ? data.node.end : '', []),
       owner: new FormControl(data.node && data.node.owner ? data.node.owner : ''),
       cost: new FormControl(data.node && data.node.cost ? data.node.cost : ''),
       trainedOn: new FormControl(data.node && data.node.trainedOn ? data.node.trainedOn : '')

@@ -347,14 +347,18 @@ export class BuildStackComponent implements OnInit {
         newPosition: data.position,
         oldPosition }
       });
+
     }
-    window['dataLayer'].push({
-      event: 'stackbuilder.node.updatePosition',
-      node:  this.nodes[data.nodeId],
-      newPosition: data.position,
-      oldPosition,
-      tool: this.nodes[data.nodeId].tool
-    });
+
+    if (!data.disableGTM) {
+      window['dataLayer'].push({
+        event: 'stackbuilder.node.updatePosition',
+        node:  this.nodes[data.nodeId],
+        newPosition: data.position,
+        oldPosition,
+        tool: this.nodes[data.nodeId].tool
+      });
+    }
 
     this.service.updateNodeTool(data.nodeId, { position: data.position }, this.blueprint.id).subscribe((res) => {
       const tool = this.nodes[data.nodeId].tool;
@@ -372,12 +376,12 @@ export class BuildStackComponent implements OnInit {
     this.loaded = true;
     if (this.nodesForUpdate.length) {
       this.service.hideNodes(this.nodesForUpdate).subscribe((data) => {
-        this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList });
+        this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain });
         this.changedCategories$.next( this.categories );
         this.getArrowsList();
       });
     } else {
-      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList });
+      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain });
       this.changedCategories$.next( this.categories );
       this.getArrowsList();
     }
@@ -448,6 +452,17 @@ export class BuildStackComponent implements OnInit {
       if ( result ) {
         if (!node) {
           this.addedNewNode$.next([ result ]);
+          window['dataLayer'].push({
+            event: 'stackbuilder.node.loaded',
+            node: result,
+            tool: result.tool,
+          });
+          window['dataLayer'].push({
+            event: 'stackbuilder.node.added',
+            node: result,
+            tool: result.tool,
+            stack: this.blueprint
+          });
         } else {
           this.nodes[node.id] = result;
           this.changeNodeData$.next(this.nodes[node.id]);
@@ -621,7 +636,7 @@ export class BuildStackComponent implements OnInit {
     this.service.updateNodeTool(data.item.id, { hide: data.item.hide }, this.blueprint.id).subscribe((res) => {
       res.tool = this.nodes[data.item.id].tool;
       this.nodes[data.item.id] = res;
-      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList  });
+      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain  });
     });
   }
 
@@ -687,10 +702,6 @@ export class BuildStackComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.router.onSameUrlNavigation = 'reload';
-        window['dataLayer'].push({
-          event: 'stackbuilder.create',
-          domain: result
-        });
         this.router.navigateByUrl('/stack/build?domain=' + result, { skipLocationChange: false });
         window.location.href = window.location.origin + window.location.pathname + '#/stack/build?domain=' + result;
         window.location.reload();

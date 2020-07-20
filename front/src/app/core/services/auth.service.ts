@@ -9,9 +9,10 @@ import {  environment } from '../../../environments/environment';
 })
 export class AuthService {
   serverURI = environment.serverURI + '/';
+  first = true;
 
-  constructor(private http: HttpClient, private mapper: ResponseMappers ) { 
-
+  constructor(private http: HttpClient, private mapper: ResponseMappers ) {
+    window['dataLayer'] = window['dataLayer'] || [];
   }
 
   login(email:string, password:string ) {
@@ -25,11 +26,34 @@ export class AuthService {
 
   getCurrentUser() {
     const str = localStorage.getItem("session_user");
-    return JSON.parse( decodeURI(str) );
+    const user = JSON.parse( decodeURI(str) );
+    if (user && this.first) {
+      this.first = false;
+      window['dataLayer'].push({
+        event: 'stackbuilder.auth',
+        user: {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName
+        }
+      });
+    }
+    return user;
   }
 
   setSession(authResult) {
     const userStr = encodeURI( JSON.stringify(authResult.user) );
+    if (authResult.user && this.first) {
+      this.first = false;
+      window['dataLayer'].push({
+        event: 'stackbuilder.auth',
+        user: {
+          email: authResult.user.email,
+          firstName: authResult.user.firstName,
+          lastName: authResult.user.lastName
+        }
+      });
+    }
     localStorage.setItem('session_user', userStr);
     localStorage.setItem('auth_token', authResult.token);
   }
