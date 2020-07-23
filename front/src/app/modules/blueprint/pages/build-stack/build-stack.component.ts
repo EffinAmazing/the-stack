@@ -83,7 +83,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       public customToolDialog: MatDialog,
       public showRegisterDialog: MatDialog) {
     this.id = route.snapshot.params['id'];
-    console.log(this.id);
+    // console.log(this.id);
     this.route.queryParams.subscribe((params: any) => {
       this.domain = params.domain;
       // console.log(params);
@@ -130,7 +130,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     if (typeof data === 'string') {
       return this.isError = true;
     }
-    console.log(data);
+    // console.log(data);
     let hidden = 0;
     this.blueprint = data.blueprint;
     data.nodes.forEach((item) => {
@@ -453,6 +453,9 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   public handleDeselectArrow() {
     document.querySelector(`path#${this.selectedArrow.lineId}`).setAttribute('stroke-width', '2');
     this.deleteArrowDots();
+
+    document.querySelector(`#node-${this.selectedArrow.start.nodeId}`).classList.remove('has-selected-arrow');
+    document.querySelector(`#node-${this.selectedArrow.end.nodeId}`).classList.remove('has-selected-arrow');
     this.selectedArrow = null;
   }
 

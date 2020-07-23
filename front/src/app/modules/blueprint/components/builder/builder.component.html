@@ -1,5 +1,5 @@
 <div>
-    <div id="stackWorkflow" class="stackWorkflow" #stackWorkFlow (mousemove)="handleMouseMove($event)" 
+    <div id="stackWorkflow" [ngClass]="{'stackWorkflow': true, 'drawingArrow': isDrawingArrow}" #stackWorkFlow (mousemove)="handleMouseMove($event)" 
       (click)="handleClickOnWorkspace()"
       (mouseup)="handleMouseUp()" (mouselout)="handleMouseUp()">
         <div class="for-svg-bg"></div>

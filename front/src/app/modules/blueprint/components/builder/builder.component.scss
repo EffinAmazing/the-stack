@@ -196,8 +196,24 @@
         .pointers>div:before{
             opacity: 1;
         }
+    }
 
+    &.has-selected-arrow:hover {
+        .hide-item-from-stack{
+            display: none;
+        }
+    }
+}
 
+.drawingArrow .toolNode {
+    .hide-item-from-stack{
+        display: none;
+    }
+
+    &:hover{
+        .hide-item-from-stack{
+            display: none;
+        }
     }
 }
 

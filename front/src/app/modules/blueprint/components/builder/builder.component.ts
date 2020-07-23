@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
 import { Pointer, Area } from '../../../../shared/models/general';
 import { DrawArrow } from '../../../../shared/models/draws-item';
@@ -19,7 +19,7 @@ const host = environment.serverURI;
   templateUrl: './builder.component.html',
   styleUrls: ['./builder.component.scss']
 })
-export class BuilderComponent implements OnInit, AfterViewInit {
+export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('stackWorkFlow') stackWorkFlow: ElementRef<HTMLDivElement>;
   @ViewChild('selectMany') selectMany: ElementRef<HTMLDivElement>;
   @ViewChild('selectorArea') selectorArea: ElementRef<HTMLDivElement>;
@@ -65,6 +65,7 @@ export class BuilderComponent implements OnInit, AfterViewInit {
   selectOffsetData: Pointer = { x: 0, y: 0 };
   selectedNodes: Array<{ node: BluePrintTool, elRef: HTMLDivElement }> = [];
   moveSelectStart: Pointer = { x: -1, y: -1 };
+  isDrawingArrow = false;
 
   constructor(private detailsDialog: MatDialog) {  }
 
@@ -77,7 +78,7 @@ export class BuilderComponent implements OnInit, AfterViewInit {
     const arrToChange = [];
 
     let index = 0;
-    console.log(this.multiselect);
+    // console.log(this.multiselect);
     this.multiselect.subscribe(result => {
       this.isMultiselect = result;
       if (!result) {
@@ -609,6 +610,8 @@ export class BuilderComponent implements OnInit, AfterViewInit {
           this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
         });
         dot1.style.transform = `translate3d(${poiterStart.x}px, ${poiterStart.y}px, 0px)`;
+        document.querySelector(`#node-${this.selectedArrow.start.nodeId}`).classList.add('has-selected-arrow');
+        document.querySelector(`#node-${this.selectedArrow.end.nodeId}`).classList.add('has-selected-arrow');
       } else {
         // console.log(`#node-${this.selectedArrow.start.nodeId} .pointers>.pointer-${this.selectedArrow.start.pos}`);
       }
@@ -659,6 +662,7 @@ export class BuilderComponent implements OnInit, AfterViewInit {
   public handleClickOnWorkspace() {
     if (this.activeArrow) {
       if (!this.activeArrow.relesed) {
+        this.isDrawingArrow = false;
         if (this.activeArrow.end.nodeId &&
           !document.querySelector(`path#${this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId}`)) {
           const Arrow = {
@@ -776,6 +780,7 @@ export class BuilderComponent implements OnInit, AfterViewInit {
       this.activeArrow.end.pos = pos;
       this.activeArrow.end.elRef = evt.target;
       this.arrowHelper.updateExistedArrow(this.activeArrow);
+      // this.isDrawingArrow = false;
     }
     /*if ( this.selectArrow && this.dotForDrag) {
       const position = this.dotForDrag.dataset.position;
@@ -797,6 +802,7 @@ export class BuilderComponent implements OnInit, AfterViewInit {
     if (!this.activeArrow) {
       const target = evt.target;
       const container = this.stackWorkFlow.nativeElement;
+      this.isDrawingArrow = true;
       /* */
       this.activeArrow = this.arrowHelper.culcStartPosition(target, container, node, direction);
     }
@@ -1104,6 +1110,10 @@ export class BuilderComponent implements OnInit, AfterViewInit {
       return start || end;
     });
     this.connectedLines = lines;
+  }
+
+  ngOnDestroy() {
+
   }
 
 }
