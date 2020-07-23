@@ -319,13 +319,37 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   public parsePrice(price: number): string {
-    if (price >= 1000) {
+    let strPrice = price.toString();
+    let dotText = '';
+    /*if (price >= 1000) {
       const tPrice = Math.floor(price / 1000);
 
       return (tPrice ? (tPrice + ', ') : ' ') + (price - tPrice * 1000);
     } else {
       return price.toString();
+    }*/
+    if (strPrice.indexOf('.')) {
+      const temp = strPrice.split('.');
+      dotText = temp[1];
+      strPrice = temp[0];
     }
+    if (strPrice.length > 3) {
+      const lastSymbol = strPrice.length;
+      const endComa = lastSymbol - 3;
+      const sub1 = strPrice.substring(endComa, lastSymbol);
+      let sub2 = strPrice.substring(0, endComa);
+      // console.log(sub2);
+      if (sub2.length > 3) {
+        const tempLast = sub2.length;
+        const tempSpace = tempLast - 3;
+        const temp1 = sub2.substring(tempSpace, tempLast);
+        const temp2 = sub2.substring(0, tempSpace);
+        sub2 = temp2 + ' ' + temp1;
+      }
+      return sub2 + ', ' + sub1 + (dotText ? '.' + dotText : '');
+    }
+
+    return strPrice + (dotText ? '.' + dotText : '');
   }
 
   private verifyOrderToHide(categories) {
