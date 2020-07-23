@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy, HostListener } from '@angular/core';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
 import { SocialShareService } from '../../../../core/services/social-share.service';
 import { UploadImagesService } from '../../../../core/services/upload-images.service';
@@ -13,11 +13,12 @@ import { InfoPopupDialogComponent } from '../../components/info-popup-dialog/inf
 import { AddNewToolDialogComponent } from '../../components/add-new-tool-dialog/add-new-tool-dialog.component';
 import { InviteDialogComponent } from '../../components/invite-dialog/invite-dialog.component';
 import { CreateCustomToolDialogComponent } from '../../components/create-custom-tool-dialog/create-custom-tool-dialog.component';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Observable, BehaviorSubject, Subscription } from 'rxjs';
+import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { forbiddenTags, hiddenCategories } from '../../../../core/config';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SignupSigninPopupComponent } from '../../../../shared/components/signup-signin-popup/signup-signin-popup.component';
+import { ComponentCanDeactivate } from '../../../../core/guards/component-can-deactivate.guard';
 import html2canvas from 'html2canvas';
 import * as d3 from 'd3';
 import { environment } from 'src/environments/environment';
@@ -30,7 +31,7 @@ import { DrawArrow } from 'src/app/shared/models/draws-item';
   templateUrl: './build-stack.component.html',
   styleUrls: ['./build-stack.component.scss']
 })
-export class BuildStackComponent implements OnInit {
+export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeactivate {
   @ViewChild('categoriesList') categoriesList: ElementRef;
   id: string | null = null;
   blueprint: BluePrint;
@@ -54,6 +55,17 @@ export class BuildStackComponent implements OnInit {
   errMessage = 'Something went wrong plaese check domain and try again';
   isMultiSelectActive = false;
   authUser: User;
+  // subscriptions
+  private stackRequest: Subscription;
+  @HostListener('window:beforeunload', ['$event']) unloadHandler(event: Event) {
+    if (!this.authUser) {
+      const dialogText = 'Save Your Stack Before You Go';
+      // console.log(this.authUser);
+      event.returnValue = true;
+      this.showPopupFoSignUp();
+      return dialogText;
+    }
+  }
 
 
   constructor(
@@ -77,18 +89,36 @@ export class BuildStackComponent implements OnInit {
       // console.log(params);
       window['dataLayer'] = window['dataLayer'] || [];
       this.authUser = this.auth.getCurrentUser();
-      console.log(this.authUser);
+      // console.log(this.authUser);
     });
+  }
+
+  canDeactivate(): boolean {
+    if (!this.authUser) {
+      if (confirm('Save Your Stack Before You Go')) {
+        this.showPopupFoSignUp();
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return true;
+    }
   }
 
   ngOnInit(): void {
     if (this.domain) {
-      this.service.getDomainTools(this.domain).subscribe((data) => {
-        this.proceedBluePrintData(data);
-        // console.log(this.nodes, this.nodes.length);
-      }, err => this.isError = true );
+      if (this.authUser) {
+        this.stackRequest = this.service.postDomainTools(this.domain).subscribe((data) => {
+          this.proceedBluePrintData(data);
+        }, err => this.isError = true );
+      } else {
+        this.stackRequest = this.service.getDomainTools(this.domain).subscribe((data) => {
+          this.proceedBluePrintData(data);
+        }, err => this.isError = true );
+      }
     } else if (this.id) {
-      this.service.getBlueprint(this.id).subscribe((data) => {
+      this.stackRequest = this.service.getBlueprint(this.id).subscribe((data) => {
         this.proceedBluePrintData(data);
       }, err => this.isError = true );
     } else {
@@ -716,6 +746,12 @@ export class BuildStackComponent implements OnInit {
 
   public handleGroupMove(data: { nodeIds: string[], diff: Pointer }) {
     this.history.addAction(this.blueprint.id, { name: 'groupMove', data  });
+  }
+
+  ngOnDestroy() {
+    if (this.stackRequest) {
+      this.stackRequest.unsubscribe();
+    }
   }
 
 }

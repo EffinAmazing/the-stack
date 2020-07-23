@@ -20,6 +20,7 @@ class BluePrints {
 
     getDomainTools(req, res, next) {
         const user = req.user;
+        console.log(' ************* getDomainTools ************* ');
         // 
         let domain = req.query.domain || req.body.domain
         async.waterfall([
@@ -33,6 +34,7 @@ class BluePrints {
             },
             (cb) => {
                 // 1. get blueprint of domain
+                console.log(user);
                 if (user) {
                     this._bluePrints.getByDomain(domain, user._id).then((result) => { cb(null, result); }).catch((err)=>{ cb(err, null); });
                 } else {

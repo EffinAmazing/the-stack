@@ -142,7 +142,7 @@ export class BuilderComponent implements OnInit, AfterViewInit {
         });
 
         this.nodes = data.nodes;
-        console.log(data)
+        // console.log(data);
         if (isNewStack) {
           window['dataLayer'].push({
             event: 'stackbuilder.create',
