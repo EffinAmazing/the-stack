@@ -17,7 +17,7 @@
         <div class="stackActions" *ngIf="loaded" >
           <div class="actions-container">
             <button class="stack-button first-button" (click)="handleHideList()"> <mat-icon>view_list</mat-icon> Show or Hide Tools </button>
-            <div class="divider-buttons"></div>
+            <div class="divider-buttons"></div> 
             <button class="stack-button" (click)="handleAddNewTool()"> <mat-icon>add</mat-icon> Add Tool </button>
             <div *ngIf="!authUser" class="divider-buttons"></div>
             <button *ngIf="!authUser" class="stack-button" color="primary" (click)="showPopupFoSignUp()"> <mat-icon>save</mat-icon> Save your stack </button>
@@ -30,8 +30,8 @@
             <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
             <button class="stack-button delete-arrow-action" *ngIf="selectedArrow" (click)="handleRemoveArrow()"> <mat-icon>clear</mat-icon>  Delete Arrow </button>
             <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
-            <button [ngClass]="{'stack-button': true, 'icon-button': true, 'active-selection': isMultiSelectActive}" (click)="multiSelectHandler()"> <mat-icon>select_all</mat-icon> Multi Select {{isMultiSelectActive?'ON':'OFF'}} </button>
-            <div class="divider-buttons" ></div>
+            <!-- <button [ngClass]="{'stack-button': true, 'icon-button': true, 'active-selection': isMultiSelectActive}" (click)="multiSelectHandler()"> <mat-icon>select_all</mat-icon> Multi Select {{isMultiSelectActive?'ON':'OFF'}} </button>
+            <div class="divider-buttons" ></div> -->
             <button class="stack-button icon-button" 
                 [disabled]="history.isActivePrev(blueprint.id)"
                 (click)="handlePrevAction()"> <mat-icon><img [src]="getAssetsFolder() + 'assets/images/undo.svg'" /></mat-icon> </button>

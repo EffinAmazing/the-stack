@@ -5,7 +5,7 @@ import { DrawArrow } from '../../../../shared/models/draws-item';
 import { MatDialog } from '@angular/material/dialog';
 import { NodeDetailsComponent } from '../node-details/node-details.component';
 import { ArrowsHelper } from '../../../../shared/helper/arrows-draw.helper';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import * as d3 from 'd3';
 
@@ -24,15 +24,16 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('selectMany') selectMany: ElementRef<HTMLDivElement>;
   @ViewChild('selectorArea') selectorArea: ElementRef<HTMLDivElement>;
   @ViewChild('moveSelectedArea') moveSelectedArea: ElementRef<HTMLDivElement>;
+  @ViewChild('svgPaint') svgPaint: ElementRef<HTMLElement>;
   @Output() positionNodeChanged: EventEmitter<{
     nodeId: string,
     position: Pointer,
-    disableHistory?: Boolean
+    disableHistory?: boolean
   }> = new EventEmitter();
   @Output() updatedNodeData: EventEmitter<any> = new EventEmitter();
   @Output() arrowAdded: EventEmitter<DrawArrow> = new EventEmitter();
-  @Output() arrowUpdated: EventEmitter<{ newData?: DrawArrow, oldData?: DrawArrow, disableHistory?: Boolean}> = new EventEmitter();
-  @Output() hideNode: EventEmitter<{ item: BluePrintTool, disableHistory?: Boolean }> = new EventEmitter();
+  @Output() arrowUpdated: EventEmitter<{ newData?: DrawArrow, oldData?: DrawArrow, disableHistory?: boolean}> = new EventEmitter();
+  @Output() hideNode: EventEmitter<{ item: BluePrintTool, disableHistory?: boolean }> = new EventEmitter();
   @Output() removeArrows: EventEmitter<string[]> = new EventEmitter();
   @Output() selectArrow: EventEmitter<any> = new EventEmitter();
   @Output() callEditNode: EventEmitter<string> = new EventEmitter();
@@ -66,6 +67,12 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedNodes: Array<{ node: BluePrintTool, elRef: HTMLDivElement }> = [];
   moveSelectStart: Pointer = { x: -1, y: -1 };
   isDrawingArrow = false;
+  // subscriptions
+  nodesSubscription: Subscription;
+  arrowSubscription: Subscription;
+  addedNewNodeSubcription: Subscription;
+  historySubscription: Subscription;
+  updateNodeDataSubscription: Subscription;
 
   constructor(private detailsDialog: MatDialog) {  }
 
@@ -79,7 +86,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let index = 0;
     // console.log(this.multiselect);
-    this.multiselect.subscribe(result => {
+    /* this.multiselect.subscribe(result => {
       this.isMultiselect = result;
       if (!result) {
         if ( this.selectedNodes.length > 0 ) {
@@ -90,9 +97,9 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.moveSelectedArea.nativeElement.style.display = 'none';
         }
       }
-    });
+    });*/
 
-    this.loadedNodes.subscribe((data) => {
+    this.nodesSubscription = this.loadedNodes.subscribe((data) => {
       this.showNodes = [];
       console.log(' *** loadedNodes ****');
       /*  */
@@ -177,7 +184,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    this.loadedArrows.subscribe((list) => {
+    this.arrowSubscription = this.loadedArrows.subscribe((list) => {
       list.forEach((item) => {
         if ( document.querySelector(`path#${item.lineId}`) ) { } else {
           if (typeof item.start.offset === 'undefined') {
@@ -221,7 +228,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    this.historyEmit.subscribe((result) => {
+    this.historySubscription = this.historyEmit.subscribe((result) => {
       // console.log(result);
       if (result) {
         const container = this.stackWorkFlow.nativeElement;
@@ -356,7 +363,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    this.addedNewNode.subscribe(res => {
+    this.addedNewNodeSubcription = this.addedNewNode.subscribe(res => {
       const start = 10;
       if (res) {
         res.forEach((item, index) => {
@@ -381,7 +388,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    this.updatedOutNodeData.subscribe((node) => {
+    this.updateNodeDataSubscription = this.updatedOutNodeData.subscribe((node) => {
       if (node) {
         const indexNode = this.showNodes.findIndex(item => item.id === node.id);
 
@@ -543,8 +550,10 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     } else {
     /*  */
+      console.log(' update position ', data.source._dragRef._activeTransform);
+      const theNode = this.showNodes.find((item) => item.id === node.id );
       this.positionNodeChanged.emit({ nodeId: node.id, position: data.source._dragRef._activeTransform  });
-      this.nodes[node.id].position = data.source._dragRef._activeTransform;
+      this.nodes[node.id].position = theNode.position = data.source._dragRef._activeTransform;
 
       const updatedLines = this.connectedLines.map(async (item) => {
         return this.arrowUpdated.emit({ newData: item, disableHistory: true });
@@ -911,6 +920,35 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     const container = this.stackWorkFlow.nativeElement;
+    this.svgPaint.nativeElement.addEventListener('mousedown', (evt) => {
+      // console.log(evt.target, evt.currentTarget);
+      if (evt.target === evt.currentTarget) {
+        // console.log(evt.target, evt.currentTarget);
+        this.isMultiselect = true;
+
+        this.startSelecting = true;
+        this.selectorArea.nativeElement.style.display = 'block';
+        this.selectorArea.nativeElement.style.visibility = 'hidden';
+        const offsetParent = this.stackWorkFlow.nativeElement.offsetParent as HTMLDivElement;
+        this.selectOffsetData = { x: offsetParent.offsetLeft,
+          y: offsetParent.offsetTop };
+
+        this.startPointer = { x: evt.pageX - this.selectOffsetData.x, y: evt.pageY - this.selectOffsetData.y };
+        if ( this.selectedNodes.length > 0 ) {
+          this.selectedNodes.forEach(item => {
+            item.elRef.style.transform = `translate3d(${item.node.position.x}px, ${item.node.position.y}px, 0px)`;
+            item.elRef.classList.remove('selected');
+          });
+
+          this.connectedLines.forEach((itemArrow) => {
+            this.arrowHelper.updateExistedArrow(itemArrow, container);
+          });
+
+          this.selectedNodes = [];
+        }
+
+      }
+    });
 
     this.selectMany.nativeElement.addEventListener('mousedown', (evt) => {
 
@@ -930,6 +968,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.connectedLines.forEach((itemArrow) => {
           this.arrowHelper.updateExistedArrow(itemArrow, container);
         });
+
+        this.selectedNodes = [];
       }
 
     });
@@ -939,6 +979,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.startSelecting) {
         const X = evt.pageX - this.selectOffsetData.x;
         const Y = evt.pageY - this.selectOffsetData.y;
+        this.selectorArea.nativeElement.style.visibility = 'visible';
         // console.log(this.startPointer.x, this.startPointer.y, X, Y);
 
         if (this.startPointer.x > X) {
@@ -986,6 +1027,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.moveSelectedArea.nativeElement.style.display = 'none';
       }
+      console.log(this.selectedNodes);
+      this.isMultiselect = false;
     });
 
     this.selectMany.nativeElement.addEventListener('mouseout', (evt) => {
@@ -1081,8 +1124,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     const endY = area.y + area.height;
     const selectedNodes = this.showNodes.filter(item => {
       const elRef = document.querySelector(`#node-${item.id}`) as HTMLDivElement;
-      return item.position.x > area.x - elRef.offsetWidth && item.position.x < endX - containerOffset
-        && item.position.y > area.y - containerOffset && item.position.y < endY - containerOffset;
+      return item.position.x + elRef.offsetWidth > area.x - containerOffset && item.position.x < endX - containerOffset
+        && item.position.y + elRef.offsetHeight > area.y - containerOffset && item.position.y < endY - containerOffset;
     });
 
     this.moveSelectedArea.nativeElement.style.display = 'block';
@@ -1113,7 +1156,25 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    if (this.nodesSubscription) {
+      this.nodesSubscription.unsubscribe();
+    }
 
+    if (this.arrowSubscription) {
+      this.arrowSubscription.unsubscribe();
+    }
+
+    if (this.addedNewNodeSubcription) {
+      this.addedNewNodeSubcription.unsubscribe();
+    }
+
+    if (this.historySubscription) {
+      this.historySubscription.unsubscribe();
+    }
+
+    if (this.updateNodeDataSubscription) {
+      this.updateNodeDataSubscription.unsubscribe();
+    }
   }
 
 }
