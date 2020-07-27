@@ -7,6 +7,7 @@ import { NodeDetailsComponent } from '../node-details/node-details.component';
 import { ArrowsHelper } from '../../../../shared/helper/arrows-draw.helper';
 import { Observable, Subscription } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { ConfirmActionDialogComponent } from '../../../../shared/components/confirm-action-dialog/confirm-action-dialog.component';
 import * as d3 from 'd3';
 
 const containerOffset = 20;
@@ -74,7 +75,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   historySubscription: Subscription;
   updateNodeDataSubscription: Subscription;
 
-  constructor(private detailsDialog: MatDialog) {  }
+  constructor(private detailsDialog: MatDialog, private confirm: MatDialog) {  }
 
   ngOnInit(): void {
     this.svgD3 = this.arrowHelper.initSvg('svg#paint');
@@ -887,25 +888,34 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public hideNodeFormStack(node) {
+    const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
+      width: '480px',
+      data: { title: 'Hide tool',  content: 'Do you realy want to hide tool - ' + this.nodes[node.id].tool.name + '?'}
+    });
 
-    this.nodes[node.id].hide = true;
-    const index = this.showNodes.findIndex((item) => item.id === node.id);
-    if (index !== -1) {
-      this.showNodes.splice(index, 1);
-    }
-    const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 );
-    const ids = [];
-    if (arrowsToRemove.length) {
-      arrowsToRemove.forEach(element => {
-        ids.push(element.lineId);
-        const i = this.listOfArrows.findIndex(item => item.lineId ===  element.lineId );
-        this.listOfArrows.splice(i, 1);
-        this.svgD3.select('path#' + element.lineId).remove();
-      });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.nodes[node.id].hide = true;
+        const index = this.showNodes.findIndex((item) => item.id === node.id);
+        if (index !== -1) {
+          this.showNodes.splice(index, 1);
+        }
+        const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 );
+        const ids = [];
+        if (arrowsToRemove.length) {
+          arrowsToRemove.forEach(element => {
+            ids.push(element.lineId);
+            const i = this.listOfArrows.findIndex(item => item.lineId ===  element.lineId );
+            this.listOfArrows.splice(i, 1);
+            this.svgD3.select('path#' + element.lineId).remove();
+          });
 
-      setTimeout(() => { this.removeArrows.emit(ids); }, 0);
-    }
-    this.hideNode.emit({ item: node, disableHistory: false });
+          setTimeout(() => { this.removeArrows.emit(ids); }, 0);
+        }
+        this.hideNode.emit({ item: node, disableHistory: false });
+      }
+    });
+
   }
 
   public removeSingleArrow(lineId: string) {

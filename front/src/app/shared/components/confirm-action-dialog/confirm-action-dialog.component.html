@@ -1,0 +1,9 @@
+<h2 mat-dialog-title>{{data.title}}</h2>
+<mat-dialog-content>
+    {{ data.content }}
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button class="stack-button"  mat-dialog-close (click)="onNoClick()">No</button>
+    <div class="divider-buttons"></div>
+    <button class="stack-button"  [mat-dialog-close]="true" cdkFocusInitial (click)="onYesClick()">Yes</button>
+</mat-dialog-actions>
