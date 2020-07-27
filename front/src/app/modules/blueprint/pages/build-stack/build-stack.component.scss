@@ -110,6 +110,17 @@
     display: none;
 }
 
+.stack-section-container .title-block-part {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+}
+
+
+.stack-section-container .title-block-part .signin-buttons-box {
+    margin-left: 20px;
+}
+
 .share-block{
     position: relative;
     text-align: center;

@@ -3,7 +3,14 @@
     <div class="stack-section-container"> 
       <app-header *ngIf="authUser" [user]="authUser"></app-header>
       <div class="stack-builder-title">
-        <h2 > Build Your Stack </h2>  
+        <div class="title-block-part">
+          <h2> Build Your Stack </h2>  
+          <div *ngIf="!authUser" class="signin-buttons-box">
+            <button class="stack-button" (click)="showPopupFoSignUp('signin')"> Sign In </button> 
+            <span> or </span>
+            <button class="stack-button" (click)="showPopupFoSignUp()"> Sign Up </button> 
+          </div>
+        </div>
         <div class="share-block" *ngIf="loaded">
           <span class="title"> Share </span>
           <div class="waiting-process" *ngIf="isWaiting"> <mat-spinner [diameter]="25"></mat-spinner> </div>

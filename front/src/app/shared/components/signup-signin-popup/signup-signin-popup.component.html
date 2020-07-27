@@ -85,13 +85,13 @@
 </div>
 <div mat-dialog-actions class="mat-dialog-actions" direction="right">
     <div *ngIf="formActive !== 'signup'" class="form-actions">
-        <button class="stack-button" color="primary" type="button" (click)="handleSubmitSiginIn()">Submit</button>
+        <button class="stack-button" color="primary" type="button" (click)="handleSubmitSiginIn()">Sign In</button>
         <span> or </span>
         <button class="stack-button" type="button" (click)="toggleForms()">Sign Up</button>
     </div>
 
     <div *ngIf="formActive === 'signup'" class="form-actions">
-        <button class="stack-button" color="primary" (click)="handleSubmitSignUp()">Submit</button>
+        <button class="stack-button" color="primary" (click)="handleSubmitSignUp()">Sign Up</button>
         <span> or </span>
         <button class="stack-button" type="button" (click)="toggleForms()">Sign In</button>
     </div>

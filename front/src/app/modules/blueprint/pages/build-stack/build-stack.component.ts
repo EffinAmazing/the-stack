@@ -58,11 +58,11 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   // subscriptions
   private stackRequest: Subscription;
   @HostListener('window:beforeunload', ['$event']) unloadHandler(event: Event) {
-    if (!this.authUser) {
+    if (!this.authUser && !window['requestToSignIn']) {
       const dialogText = 'Save Your Stack Before You Go';
       // console.log(this.authUser);
       event.returnValue = true;
-      this.showPopupFoSignUp();
+      setTimeout(() => { this.showPopupFoSignUp(); }, 300);
       return dialogText;
     }
   }
@@ -94,7 +94,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   canDeactivate(): boolean {
-    if (!this.authUser) {
+    if (!this.authUser && !window['requestToSignIn']) {
       if (confirm('Save Your Stack Before You Go')) {
         this.showPopupFoSignUp();
         return false;
@@ -223,10 +223,11 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     this.history.prevAction(this.blueprint.id);
   }
 
-  showPopupFoSignUp() {
+  showPopupFoSignUp(form = 'signup') {
+    console.log(form);
     const dialogRef = this.showRegisterDialog.open(SignupSigninPopupComponent, {
       width: '640px',
-      data: { blueprint: this.blueprint }
+      data: { blueprint: this.blueprint, form }
     });
 
     dialogRef.afterClosed().subscribe(result => {

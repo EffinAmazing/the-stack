@@ -27,7 +27,9 @@ export class SignupSigninPopupComponent {
     private router: Router,
     private stackService: BlueprintsService
   ) {
-    this.formActive = 'signup';
+    console.log('dialogRef', this.data);
+    this.formActive = this.data.form && this.data.form === 'signin' ? 'signin' : 'signup';
+    console.log('this.formActive', this.formActive);
     this.signUpFormGroup = new FormGroup({
       email: new FormControl('', [Validators.email, Validators.required]),
       firstName: new FormControl('', Validators.required),
@@ -73,6 +75,8 @@ export class SignupSigninPopupComponent {
   }
 
   loginIn(data) {
+    window['requestToSignIn'] = true;
+
     this.auth.login(data.email, data.password).toPromise().then(res => {
       this.isLoading = false;
       if (res === 'Error') {
@@ -96,8 +100,8 @@ export class SignupSigninPopupComponent {
   }
 
   handleSubmitSiginIn() {
-    this.isLoading = true;
     if (!this.signInFormGroup.invalid) {
+      this.isLoading = true;
       const data = this.signInFormGroup.value;
       this.loginIn(data);
     }
