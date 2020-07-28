@@ -5,6 +5,13 @@
         <div class="for-svg-bg"></div>
         <svg #svgPaint id="paint"  width="1190" height="640">
           <defs>
+            <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="gray" stroke-width="0.5"/>
+            </pattern>
+            <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+              <rect width="100" height="100" fill="url(#smallGrid)"/>
+              <path d="M 100 0 L 0 0 0 100" fill="none" stroke="gray" stroke-width="1"/>
+            </pattern>
             <marker 
               id="arrow-marker" 
               markerWidth="8" 
@@ -15,7 +22,7 @@
               markerUnits="userSpaceOnUse">
                 <path d="M2,0 L8,6 L2,12 L0,10 L4,6 L0,2 z" style="stroke-width: 1;z-index: 5;"></path>
               </marker>
-            </defs>
+          </defs>
         </svg>
         <div *ngFor="let node of showNodes" [cdkDragDisabled]="disableTillDrawLine"  [ngClass]="{'toolNode': true, 'domain-tool': node.tool.tag === 'domain'}" [id]="'node-' + node.id"
           cdkDrag 

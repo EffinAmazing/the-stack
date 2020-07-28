@@ -10,7 +10,7 @@ import { environment } from '../../../../../environments/environment';
 import { ConfirmActionDialogComponent } from '../../../../shared/components/confirm-action-dialog/confirm-action-dialog.component';
 import * as d3 from 'd3';
 
-const containerOffset = 20;
+const containerOffset = 0;
 const dotRadius = 9;
 const lineGenerator = d3.line().curve(d3.curveCardinal);
 const host = environment.serverURI;
@@ -32,9 +32,9 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     disableHistory?: boolean
   }> = new EventEmitter();
   @Output() updatedNodeData: EventEmitter<any> = new EventEmitter();
-  @Output() arrowAdded: EventEmitter<DrawArrow> = new EventEmitter();
+  @Output() arrowAdded: EventEmitter<{ arrow: DrawArrow, disableHystory: boolean }> = new EventEmitter();
   @Output() arrowUpdated: EventEmitter<{ newData?: DrawArrow, oldData?: DrawArrow, disableHistory?: boolean}> = new EventEmitter();
-  @Output() hideNode: EventEmitter<{ item: BluePrintTool, disableHistory?: boolean }> = new EventEmitter();
+  @Output() hideNode: EventEmitter<{ item: BluePrintTool, arrows?: Array<DrawArrow>, disableHistory?: boolean }> = new EventEmitter();
   @Output() removeArrows: EventEmitter<string[]> = new EventEmitter();
   @Output() selectArrow: EventEmitter<any> = new EventEmitter();
   @Output() callEditNode: EventEmitter<string> = new EventEmitter();
@@ -45,6 +45,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() addedNewNode: Observable<any>;
   @Input() updatedOutNodeData: Observable<any>;
   @Input() multiselect: Observable<boolean>;
+  @Input() showGrid: Observable<boolean>;
+  @Input() snapGrid: Observable<boolean>;
   isMultiselect = false;
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
@@ -68,12 +70,15 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedNodes: Array<{ node: BluePrintTool, elRef: HTMLDivElement }> = [];
   moveSelectStart: Pointer = { x: -1, y: -1 };
   isDrawingArrow = false;
+  useSnapGrid = false;
   // subscriptions
   nodesSubscription: Subscription;
   arrowSubscription: Subscription;
   addedNewNodeSubcription: Subscription;
   historySubscription: Subscription;
   updateNodeDataSubscription: Subscription;
+  gridSubscription: Subscription;
+  snapSubscription: Subscription;
 
   constructor(private detailsDialog: MatDialog, private confirm: MatDialog) {  }
 
@@ -99,10 +104,25 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });*/
+    this.snapSubscription = this.snapGrid.subscribe(use => {
+      this.useSnapGrid = use;
+    });
+
+    this.gridSubscription = this.showGrid.subscribe((show) => {
+      if (show) {
+        this.svgD3.append('rect')
+          .attr('id', 'builder_grid_rect')
+          .attr('width', '100%')
+          .attr('height', '100%')
+          .attr('fill', 'url(#grid)');
+      } else {
+        this.svgD3.select('rect#builder_grid_rect').remove();
+      }
+    });
 
     this.nodesSubscription = this.loadedNodes.subscribe((data) => {
       this.showNodes = [];
-      console.log(' *** loadedNodes ****');
+      // console.log(' *** loadedNodes ****');
       /*  */
       if (data.list) {
         let isNewStack = true;
@@ -209,19 +229,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           }
 
-          this.listOfArrows.push(item);
-          this.svgD3.append('path')
-          .attr('id', item.lineId)
-          .attr('class', 'line')
-          .attr('d', lineGenerator(this.arrowHelper.genrateDots(
-            [item.start.x, item.start.y],
-            [item.end.x, item.end.y], item.start.pos, item.end.pos)))
-          .attr('stroke', '#1c57a4')
-          .attr('stroke-width', 2)
-          .attr('fill', 'transparent')
-          .attr('marker-end', 'url(#arrow-marker)');
-
-          this.addHandleSelectArrow(item.lineId);
+          this.addNewArrow(item);
         }
 
         setTimeout(() => { this.redrawArrows(); }, 100);
@@ -256,13 +264,25 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             break;
 
           case 'hideNode':
-            const j = this.showNodes.findIndex((item) => item.id === result.action.data.nodeId);
+            const j = this.showNodes.findIndex((item) => item.id === result.action.data.item.nodeId);
+            // console.log( result.action.data );
+            const nodeHide = result.action.data.item;
             if (result.undo) {
               if (j === -1) {
-                this.showNodes.push(result.action.data);
+                nodeHide.hide = false;
+                this.nodes[nodeHide.id].hide = false;
+                this.doHideNode(nodeHide, true);
+                this.showNodes.push(nodeHide);
+                result.action.data.arrows.forEach(theArrow => {
+                  this.restoreArrow(theArrow);
+                });
               }
             } else {
+              nodeHide.hide = true;
+              this.nodes[nodeHide.id].hide = true;
+              // console.log(nodeHide, this.nodes[nodeHide.id]);
               this.showNodes.splice(j, 1);
+              this.doHideNode(nodeHide, true);
             }
             break;
           case 'addArrow':
@@ -347,7 +367,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             });
 
             Promise.all(promises).then(() => {
-              console.log('position updated');
+              // console.log('position updated');
             }).catch((err) => {
               console.log(err);
             });
@@ -357,7 +377,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
                 return this.arrowUpdated.emit({ newData: item, disableHistory: true });
               });
 
-              Promise.all(updatedLines).then(() => { console.log('completed update'); }).catch(err => console.log(err));
+              Promise.all(updatedLines).then(() => { /*console.log('completed update');*/ }).catch(err => console.log(err));
             }
             break;
         }
@@ -413,6 +433,29 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });
+  }
+
+  private restoreArrow(item) {
+    this.addNewArrow(item);
+    this.arrowAdded.emit({ arrow: item, disableHystory: true });
+  }
+
+  private addNewArrow(item) {
+    this.listOfArrows.push(item);
+    this.svgD3.append('path')
+    .attr('id', item.lineId)
+    .attr('class', 'line')
+    .attr('d', lineGenerator(this.arrowHelper.genrateDots(
+      [item.start.x, item.start.y],
+      [item.end.x, item.end.y], item.start.pos, item.end.pos)))
+    .attr('stroke', '#1c57a4')
+    .attr('stroke-width', 2)
+    .attr('fill', 'transparent')
+    .attr('marker-end', 'url(#arrow-marker)');
+
+    setTimeout(() => {
+      this.addHandleSelectArrow(item.lineId);
+    }, 100);
   }
 
   public processImageSrc(link) {
@@ -551,16 +594,25 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     } else {
     /*  */
-      console.log(' update position ', data.source._dragRef._activeTransform);
+      // console.log(' update position ', data.source._dragRef._activeTransform);
       const theNode = this.showNodes.find((item) => item.id === node.id );
       this.positionNodeChanged.emit({ nodeId: node.id, position: data.source._dragRef._activeTransform  });
-      this.nodes[node.id].position = theNode.position = data.source._dragRef._activeTransform;
-
+      let position = data.source._dragRef._activeTransform;
+      if (this.useSnapGrid) {
+        const X = position.x;
+        const Y = position.y;
+        position = { x: Math.floor(X / 10) * 10, y: Math.floor(Y / 10) * 10 };
+      }
+      this.nodes[node.id].position = theNode.position = position;
+      // console.log(position);
+      if (this.useSnapGrid) {
+        // console.log(data.source.element.nativeElement);
+      }
       const updatedLines = this.connectedLines.map(async (item) => {
         return this.arrowUpdated.emit({ newData: item, disableHistory: true });
       });
 
-      Promise.all(updatedLines).then(() => { console.log('completed update'); }).catch(err => console.log(err));
+      Promise.all(updatedLines).then(() => { /* console.log('completed update');*/ }).catch(err => console.log(err));
 
       this.connectedLines = [];
     // }
@@ -585,12 +637,14 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.addHandleSelectArrow(Arrow.lineId);
     }, 100);
 
-    this.arrowAdded.emit(Arrow);
+    this.arrowAdded.emit({arrow: Arrow, disableHystory: false});
   }
 
   public addHandleSelectArrow(ArrowId: string): void {
     const line = document.querySelector(`path#${ArrowId}`);
+
     line.addEventListener('click', () => {
+      // console.log(' ***** click ***** ');
       const container = this.stackWorkFlow.nativeElement;
       if (this.selectedArrow) {
         this.svgD3.select('path#' + this.selectedArrow.lineId).attr('stroke-width', 2);
@@ -619,7 +673,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.dotForDrag = null;
           this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
         });
-        dot1.style.transform = `translate3d(${poiterStart.x}px, ${poiterStart.y}px, 0px)`;
+        dot1.style.transform = `translate3d(${poiterStart.x - 20}px, ${poiterStart.y - 20}px, 0px)`;
         document.querySelector(`#node-${this.selectedArrow.start.nodeId}`).classList.add('has-selected-arrow');
         document.querySelector(`#node-${this.selectedArrow.end.nodeId}`).classList.add('has-selected-arrow');
       } else {
@@ -643,7 +697,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.dotForDrag = null;
           this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
         });
-        dot2.style.transform = `translate3d(${poiterEnd.x}px, ${poiterEnd.y}px, 0px)`;
+        dot2.style.transform = `translate3d(${poiterEnd.x - 20}px, ${poiterEnd.y - 20}px, 0px)`;
 
         this.selectArrow.emit(this.selectedArrow);
         line.setAttribute('stroke-width', '4');
@@ -693,7 +747,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
           };
 
           this.listOfArrows.push(Arrow);
-          this.arrowAdded.emit(Arrow);
+          this.arrowAdded.emit({arrow: Arrow, disableHystory: false });
 
           const lineId = this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId;
           this.svgD3.select('path#' + this.activeArrow.lineId)
@@ -754,7 +808,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.arrowHelper.updateExistedArrow(item, container);
         if (dot && dot.dataset.line === item.lineId) {
           const pos = dot.dataset.position;
-          dot.style.transform = `translate3d(${item[pos].x}px, ${item[pos].y}px, 0px)`;
+          dot.style.transform = `translate3d(${item[pos].x - 20}px, ${item[pos].y - 20}px, 0px)`;
         }
         /* */
       });
@@ -860,7 +914,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.selectedArrow[position].pos = result.pos;
       this.selectedArrow[position].offset = data.offset;
       this.arrowHelper.updateExistedArrow(this.selectedArrow);
-      this.dotForDrag.style.transform = `translate3d(${data.pointer.x}px, ${data.pointer.y}px, 0px)`;
+      this.dotForDrag.style.transform = `translate3d(${data.pointer.x - 20}px, ${data.pointer.y - 20}px, 0px)`;
     }
   }
 
@@ -887,7 +941,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     return { el: El, pos };
   }
 
-  public hideNodeFormStack(node) {
+  public hideNodeFormStack(node: BluePrintTool) {
     const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
       width: '480px',
       data: { title: 'Hide tool',  content: 'Do you realy want to hide tool - ' + this.nodes[node.id].tool.name + '?'}
@@ -895,26 +949,32 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        node.hide = true;
         this.nodes[node.id].hide = true;
-        const index = this.showNodes.findIndex((item) => item.id === node.id);
-        if (index !== -1) {
-          this.showNodes.splice(index, 1);
-        }
-        const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 );
-        const ids = [];
-        if (arrowsToRemove.length) {
-          arrowsToRemove.forEach(element => {
-            ids.push(element.lineId);
-            const i = this.listOfArrows.findIndex(item => item.lineId ===  element.lineId );
-            this.listOfArrows.splice(i, 1);
-            this.svgD3.select('path#' + element.lineId).remove();
-          });
-
-          setTimeout(() => { this.removeArrows.emit(ids); }, 0);
-        }
-        this.hideNode.emit({ item: node, disableHistory: false });
+        this.doHideNode(node, false);
       }
     });
+
+  }
+
+  doHideNode(node: BluePrintTool, disableHistory: boolean) {
+    const index = this.showNodes.findIndex((item) => item.id === node.id);
+    if (index !== -1) {
+      this.showNodes.splice(index, 1);
+    }
+    const arrowsToRemove = node.hide ? this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 ) : [];
+    const ids = [];
+    if (arrowsToRemove.length) {
+      arrowsToRemove.forEach(element => {
+        ids.push(element.lineId);
+        const i = this.listOfArrows.findIndex(item => item.lineId ===  element.lineId );
+        this.listOfArrows.splice(i, 1);
+        this.svgD3.select('path#' + element.lineId).remove();
+      });
+
+      setTimeout(() => { this.removeArrows.emit(ids); }, 0);
+    }
+    this.hideNode.emit({ item: node, arrows: arrowsToRemove, disableHistory });
 
   }
 
@@ -931,8 +991,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     const container = this.stackWorkFlow.nativeElement;
     this.svgPaint.nativeElement.addEventListener('mousedown', (evt) => {
-      // console.log(evt.target, evt.currentTarget);
-      if (evt.target === evt.currentTarget) {
+      // console.log(evt.target['id']);
+      if ((evt.target === evt.currentTarget) || evt.target['id'] === 'builder_grid_rect') {
         // console.log(evt.target, evt.currentTarget);
         this.isMultiselect = true;
 
@@ -1037,7 +1097,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.moveSelectedArea.nativeElement.style.display = 'none';
       }
-      console.log(this.selectedNodes);
+      // console.log(this.selectedNodes);
       this.isMultiselect = false;
     });
 
@@ -1049,7 +1109,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.moveSelectedArea.nativeElement.addEventListener('mousedown', (evt) => {
-      this.moveSelectStart = { x: evt.pageX - this.selectOffsetData.x - containerOffset, 
+      this.moveSelectStart = { x: evt.pageX - this.selectOffsetData.x - containerOffset,
         y: evt.pageY - this.selectOffsetData.y - containerOffset };
       this.starMoveSelected = true;
     });
@@ -1100,8 +1160,18 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.selectedNodes.length > 0) {
       const nodeIds: string[] = [];
       const toUpdate = this.selectedNodes.map(item => {
-        nodeIds.push(item.node.id);
-        item.node.position = { x: item.node.position.x + different.x, y: item.node.position.y + different.y };
+        // nodeIds.push(item.node.id);
+        let positionX: number;
+        let positionY: number;
+        if (this.useSnapGrid) {
+          positionX = Math.floor((item.node.position.x + different.x) / 10) * 10;
+          positionY = Math.floor((item.node.position.y + different.y) / 10) * 10;
+        } else {
+          positionX = item.node.position.x + different.x;
+          positionY = item.node.position.y + different.y;
+        }
+
+        item.node.position = { x: positionX, y: positionY };
         return { nodeId: item.node.id, position: item.node.position };
       });
 
@@ -1112,7 +1182,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
       Promise.all(promises).then((result) => {
-        console.log('position updated');
+        // console.log('position updated');
       }).catch((err) => {
         console.log(err);
       });
@@ -1122,7 +1192,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
           return this.arrowUpdated.emit({ newData: item, disableHistory: true });
         });
 
-        Promise.all(updatedLines).then(() => { console.log('completed update'); }).catch(err => console.log(err));
+        Promise.all(updatedLines).then(() => { /*console.log('completed update');*/ }).catch(err => console.log(err));
       }
 
       this.groupMoveCompleted.emit({ nodeIds, diff: different });
@@ -1184,6 +1254,14 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.updateNodeDataSubscription) {
       this.updateNodeDataSubscription.unsubscribe();
+    }
+
+    if (this.gridSubscription) {
+      this.gridSubscription.unsubscribe();
+    }
+
+    if (this.snapSubscription) {
+      this.snapSubscription.unsubscribe();
     }
   }
 

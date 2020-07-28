@@ -45,6 +45,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   changeNodeData$: BehaviorSubject<BluePrintTool | null> = new BehaviorSubject(null);
   addedNewNode$: BehaviorSubject<BluePrintTool[] | null> = new BehaviorSubject(null);
   toggleMultiSelect$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  toggleShowGrid$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  toggleSnapGrid$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   nodesForUpdate: any = [];
   selectedArrow: DrawArrow;
   hideList = true;
@@ -54,6 +56,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   isWaiting = false;
   errMessage = 'Something went wrong plaese check domain and try again';
   isMultiSelectActive = false;
+  showGrid =  false;
+  snapGrid = false;
   authUser: User;
   // subscriptions
   private stackRequest: Subscription;
@@ -221,6 +225,16 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
   public handlePrevAction() {
     this.history.prevAction(this.blueprint.id);
+  }
+
+  public toggleShowGrid() {
+    this.showGrid = !this.showGrid;
+    this.toggleShowGrid$.next(this.showGrid);
+  }
+
+  public toggleSnapGrid() {
+    this.snapGrid = !this.snapGrid;
+    this.toggleSnapGrid$.next(this.snapGrid);
   }
 
   showPopupFoSignUp(form = 'signup') {
@@ -689,6 +703,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       });
     }
 
+    console.log(' handleHideNodeItem - ', data);
     if (!data.disableHistory) {  this.history.addAction(this.blueprint.id, { name: 'hideNode', data }); }
 
     this.service.updateNodeTool(data.item.id, { hide: data.item.hide }, this.blueprint.id).subscribe((res) => {
@@ -700,14 +715,16 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
   public handleAddArrow(data) {
     // console.log(data);
-    this.history.addAction(this.blueprint.id, { name: 'addArrow', data });
-    window['dataLayer'].push({
-      event: 'stackbuilder.node.connected',
-      parentTool: this.nodes[data.start.nodeId].tool,
-      childTool: this.nodes[data.end.nodeId].tool,
-      stack: this.blueprint
-    });
-    this.service.addArrow(this.blueprint.id, data).toPromise().then((result) => {
+    if (!data.disableHystory) {
+      this.history.addAction(this.blueprint.id, { name: 'addArrow', data: data.arrow });
+      window['dataLayer'].push({
+        event: 'stackbuilder.node.connected',
+        parentTool: this.nodes[data.arrow.start.nodeId].tool,
+        childTool: this.nodes[data.arrow.end.nodeId].tool,
+        stack: this.blueprint
+      });
+    }
+    this.service.addArrow(this.blueprint.id, data.arrow).toPromise().then((result) => {
       // console.log(result);
     }).catch(err => console.log(err));
   }
@@ -724,8 +741,11 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       tool: data.item.tool,
       stack: this.blueprint
     });
-    this.history.addAction(this.blueprint.id, { name: 'hideNode', data: data.item });
-    this.service.updateNodeTool(data.item.id, { hide: true }, this.blueprint.id).subscribe((res) => {
+    if (!data.disableHistory) {
+      this.history.addAction(this.blueprint.id, { name: 'hideNode', data });
+    }
+    console.log(' handleHideNode - ', data);
+    this.service.updateNodeTool(data.item.id, { hide: data.item.hide }, this.blueprint.id).subscribe((res) => {
       res.tool = this.nodes[data.item.id].tool;
       this.nodes[data.item.id] = res;
     });

@@ -7,7 +7,7 @@ import { BluePrintTool } from '../../shared/models/tool';
 import { Container } from '@angular/compiler/src/i18n/i18n_ast';
 // const lineGenerator = d3.line().curve(d3.curveCardinal);
 const dotRadius = 5;
-const offsetContainer = 20;
+const offsetContainer = 0;
 
 export class ArrowsHelper {
     private SVG: any;

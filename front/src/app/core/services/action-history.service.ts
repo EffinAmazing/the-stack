@@ -40,6 +40,7 @@ export class ActionHistoryService {
   }
 
   addAction(id: string, data: HistoryAction) {
+    console.log(' addAction - ', data);
     if (!this.emiters[id]) {
       this.emiters[id] = new BehaviorSubject(null);
     }
