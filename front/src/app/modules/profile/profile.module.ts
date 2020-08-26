@@ -19,6 +19,8 @@ import { ConfirmActionComponent } from './components/confirm-action/confirm-acti
 import { UpdateUserFormComponent } from './components/update-user-form/update-user-form.component';
 import { InvitedUsersComponent } from './components/invited-users/invited-users.component';
 import { InviteToStackComponent } from './components/invite-to-stack/invite-to-stack.component';
+import { ResetPasswordSendComponent } from './pages/reset-password-send/reset-password-send.component';
+import { ResetPasswordFormComponent } from './pages/reset-password-form/reset-password-form.component';
 
 
 @NgModule({
@@ -32,7 +34,9 @@ import { InviteToStackComponent } from './components/invite-to-stack/invite-to-s
     ConfirmActionComponent,
     UpdateUserFormComponent,
     InvitedUsersComponent,
-    InviteToStackComponent
+    InviteToStackComponent,
+    ResetPasswordSendComponent,
+    ResetPasswordFormComponent
   ],
   imports: [
     CommonModule,

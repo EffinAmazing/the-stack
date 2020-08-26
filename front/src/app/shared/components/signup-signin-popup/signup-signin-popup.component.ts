@@ -18,6 +18,7 @@ export class SignupSigninPopupComponent {
   isLoading: boolean;
   isError: boolean;
   errorMessage: string;
+  allowResetPassword = false;
 
   constructor(
     public dialogRef: MatDialogRef<SignupSigninPopupComponent>,
@@ -58,6 +59,10 @@ export class SignupSigninPopupComponent {
     } else {
       this.formActive = 'signup';
     }
+  }
+
+  onClose() {
+    this.dialogRef.close();
   }
 
   addUserToStack() {
@@ -124,7 +129,12 @@ export class SignupSigninPopupComponent {
       }).catch((err) => {
         this.isLoading = false;
         this.isError = true;
-        this.errorMessage = 'Fail to sign up User, try again';
+        let message = '';
+        if (err.error.type === 'EmailDuplication') {
+          message = ' User with this email is already created';
+          this.allowResetPassword = true;
+        }
+        this.errorMessage = 'Fail to sign up User. ' + message;
         console.log(err, err.data);
       });
     }

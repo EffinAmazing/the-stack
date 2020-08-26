@@ -46,7 +46,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   addedNewNode$: BehaviorSubject<BluePrintTool[] | null> = new BehaviorSubject(null);
   toggleMultiSelect$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   toggleShowGrid$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  toggleSnapGrid$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  toggleSnapGrid$: BehaviorSubject<boolean> = new BehaviorSubject(true);
   nodesForUpdate: any = [];
   selectedArrow: DrawArrow;
   hideList = true;
@@ -57,7 +57,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   errMessage = 'Something went wrong plaese check domain and try again';
   isMultiSelectActive = false;
   showGrid =  false;
-  snapGrid = false;
+  snapGrid = true;
   authUser: User;
   // subscriptions
   private stackRequest: Subscription;

@@ -4,6 +4,7 @@
             <div class="signup-from-container">
                 <mat-card *ngIf="!isLoading">
                     <div class="notice error-notice" *ngIf="isError"> {{errorMessage}} </div>
+                    <p class="notice" *ngIf="allowResetPassword" > You can try to <a [routerLink]="'/profile/resetPassword'"> Reset Password </a> </p>
                     <app-signup-form [user]="userData" [verification]="!!code" (submitForm)="handleSubmit($event)"></app-signup-form>
                 </mat-card>
                 <div class="loading-data-section" *ngIf="isLoading">

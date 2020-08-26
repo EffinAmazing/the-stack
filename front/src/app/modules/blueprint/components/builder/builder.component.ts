@@ -70,7 +70,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedNodes: Array<{ node: BluePrintTool, elRef: HTMLDivElement }> = [];
   moveSelectStart: Pointer = { x: -1, y: -1 };
   isDrawingArrow = false;
-  useSnapGrid = false;
+  useSnapGrid = true;
   // subscriptions
   nodesSubscription: Subscription;
   arrowSubscription: Subscription;
@@ -105,6 +105,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });*/
     this.snapSubscription = this.snapGrid.subscribe(use => {
+      console.log(' * snapSubscription * ', use);
       this.useSnapGrid = use;
     });
 
@@ -942,19 +943,24 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public hideNodeFormStack(node: BluePrintTool) {
-    const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
-      width: '480px',
-      data: { title: 'Hide tool',  content: 'Do you realy want to hide tool - ' + this.nodes[node.id].tool.name + '?'}
-    });
+    const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 );
+    console.log(arrowsToRemove);
+    if (arrowsToRemove.length > 0) {
+      const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
+        width: '480px',
+        data: { title: 'Hide tool',  content: 'Do you realy want to hide tool - ' + this.nodes[node.id].tool.name + '?'}
+      });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        node.hide = true;
-        this.nodes[node.id].hide = true;
-        this.doHideNode(node, false);
-      }
-    });
-
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          node.hide = true;
+          this.nodes[node.id].hide = true;
+          this.doHideNode(node, false);
+        }
+      });
+    } else {
+      this.doHideNode(node, false);
+    }
   }
 
   doHideNode(node: BluePrintTool, disableHistory: boolean) {

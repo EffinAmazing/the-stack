@@ -27,8 +27,9 @@ export class AuthService {
   getCurrentUser() {
     const str = localStorage.getItem("session_user");
     const user = JSON.parse( decodeURI(str) );
-    if (user && this.first) {
+    if (user && this.first && !window['authCompleted']) {
       this.first = false;
+      window['authCompleted'] = true;
       window['dataLayer'].push({
         event: 'stackbuilder.auth',
         user: {
@@ -43,8 +44,9 @@ export class AuthService {
 
   setSession(authResult) {
     const userStr = encodeURI( JSON.stringify(authResult.user) );
-    if (authResult.user && this.first) {
+    if (authResult.user && this.first && !window['authCompleted']) {
       this.first = false;
+      window['authCompleted'] = true;
       window['dataLayer'].push({
         event: 'stackbuilder.auth',
         user: {

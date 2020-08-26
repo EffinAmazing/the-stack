@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  domain = new FormControl('', [Validators.pattern(/^([a-z.\-]+(\.)[a-z]{2,3})$/i)]);
+  domain = new FormControl('', [Validators.pattern(/^([a-z.0-9\-]+(\.)[a-z]{2,3})$/i)]);
   outsideData: {
     title: string,
     subtitle: string,
@@ -19,11 +19,12 @@ export class HomeComponent implements OnInit {
   hasError = false;
 
   constructor(private router: Router) {
-    console.log(' test ');
+    // console.log(' test ');
+    window['dataLayer'] =  window['dataLayer'] || [];
     if (window['outsideData']) {
       this.outsideData = window['outsideData'];
 
-      console.log(' *** this.defaultRepeater *** ', this.defaultRepeater);
+      // console.log(' *** this.defaultRepeater *** ', this.defaultRepeater);
     }
 
     this.defaultRepeater.push({

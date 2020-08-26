@@ -49,4 +49,12 @@ export class UsersService {
   getBluePrintByUsers(provider, userId): Observable<any> {
     return this.mapper.mapResponse(this.http.get(`${this.serverURI}users/${provider}/blueprints?userId=${userId}`));
   }
+
+  forgotPassword(email, url) {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}users/forgotpassword`, { email, url }));
+  }
+
+  resetPassword(code, password) {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}users/resetpassowrd`, { code, password }));
+  }
 }

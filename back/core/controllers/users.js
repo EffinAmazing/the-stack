@@ -54,6 +54,7 @@ class Users {
                 console.log(err);
                 res.status(500).json({
                     result: 'Error',
+                    type: err.type ? err.type : 'ServerError',
                     message: 'Someting went wrong'
                 })
             });
@@ -225,6 +226,58 @@ class Users {
                 result: "Error",
                 message: 'bad request'
             })
+        }
+    }
+
+    sendResetPass(req, res, next) {
+        const { email, url } = req.body;
+
+        if (email && url) {
+            this.model.sendResetPass(email, url).then(result => {
+                res.json({
+                    result: result
+                })
+            }).catch(err => {
+                console.log(' send ');
+                console.log(err, err.response.body);
+                res.status(500).json({
+                    result: 'Error',
+                    type: err.type ? err.type : 'ServerError',
+                    message: err.message
+                });
+            })
+        } else {
+            res.status(400).json({
+                result: "Error",
+                type: 'BadRequest',
+                message: 'bad request'
+            });
+        }
+    }
+
+    resetPassword(req, res, next) {
+        const { password, code } = req.body;
+
+        if (password && code) {
+            this.model.resetPassword(code, password).then(result => {
+                res.json({
+                    result: 'Ok'
+                })
+            }).catch(err => {
+                console.log(' send ');
+                console.log(err, err.response);
+                res.status(500).json({
+                    result: 'Error',
+                    type: err.type ? err.type : 'ServerError',
+                    message: err.message
+                });
+            })
+        } else {
+            res.status(400).json({
+                result: "Error",
+                type: 'BadRequest',
+                message: 'bad request'
+            });
         }
     }
 

@@ -5,6 +5,7 @@
 <div mat-dialog-content class="dialog-content">
     <p class="form-message"> At first, to invite users or update node data you will need to signup or sign in </p>
     <div class="notice error-notice" *ngIf="!isLoading && isError"> {{errorMessage}} </div>
+    <p align="center" class="notice" *ngIf="allowResetPassword" > You can try to <a [routerLink]="'/profile/resetPassword'"> Reset Password </a> </p>
     <div *ngIf="!isLoading">
         <div *ngIf="formActive === 'signup'; then signUpForm else signInForm"></div>
         <ng-template #signUpForm >
@@ -73,6 +74,9 @@
                         </div>
                     </div>
                     
+                    <div class="forget-password">
+                        <a [routerLink]="'/profile/forgot-password'" (click)="onClose()"> Lost your password? </a>
+                    </div>
                 </form>
             </div>
         </ng-template>

@@ -29,6 +29,13 @@
     flex-wrap: wrap;
     justify-content: center;
 }
+.forget-password {
+    text-align: center;
+
+    a {
+        color: #ff4100;
+    }
+}
 .form-field-contianer .mat-form-field{
     width: 100%;
 }

@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const uniqid = require('uniqid');
 const BluePrintAccess = require('./BlueprintAccess');
 const emailService = require('../../services/email');
+const { UserModelError } = require('../../services/custom-errors');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const async = require('async');
 
@@ -103,7 +104,7 @@ class UserModel extends AbstaractModel{
             user = super.create(data, []);
             return user;
         } else {
-            throw new Error(" User with this email is already registerred ");
+            throw new UserModelError(" User with this email is already registerred ", { data, type: 'EmailDuplication' });
         }
     }
 
@@ -116,6 +117,28 @@ class UserModel extends AbstaractModel{
        data['verified'] = true;
        let ok = await this.modelDB.updateOne({ _id: id, verified: false,  validationCode: code }, data).exec();
        return ok;
+    }
+
+    async sendResetPass(email, frontUrl) {
+        let user = await this.modelDB.findOne({$or:[{email: email}, { username: email}]}).exec();
+        if (user) {
+            let validationCode = uniqid.time().substr(-4);
+            await this.modelDB.updateOne({ _id: user._id }, { validationCode }).exec();
+            await emailService.sendResetPassword(email, user, frontUrl, validationCode);
+            return true;
+        } else {
+            throw new UserModelError('User with this email is not found!', { type: 'UserNotFound' });
+        }
+    }
+
+    async resetPassword(code, password) {
+        let user = await this.modelDB.findOne({ verified: true,  validationCode: code });
+        if (user) {
+            await this.modelDB.updateOne({ _id: user._id }, { password: password, validationCode: '' }).exec();
+            return true;
+        } else {
+            throw new UserModelError('User with this email is not found!', { type: 'UserNotFound' });
+        }
     }
 
     async verifyListBluePrintConnection( emails, blueprintId, providerId ) {

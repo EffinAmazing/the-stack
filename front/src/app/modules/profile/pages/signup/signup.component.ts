@@ -13,10 +13,12 @@ import { BehaviorSubject } from 'rxjs';
 export class SignupComponent implements OnInit {
   isLoading = false;
   isError = false;
-  errorMessage = 'Failed signup, please try again!';
+  errorMessage = 'Failed signup. ';
+  isDupError = false;
   code: string;
   userData: BehaviorSubject<any> = new BehaviorSubject(null);
   id: string | null = null;
+  allowResetPassword = false;
 
   constructor(private service: UsersService, private router: Router, private route: ActivatedRoute, private auth: AuthService) {
     this.code = route.snapshot.params['code'];
@@ -89,6 +91,12 @@ export class SignupComponent implements OnInit {
       }).catch(err => {
         this.isLoading = false;
         this.isError = true;
+        let message = '';
+        if (err.error.type === 'EmailDuplication') {
+          message = ' User with this email is already created';
+          this.allowResetPassword = true;
+        }
+        this.errorMessage += message;
         console.log(err);
       });
     }
