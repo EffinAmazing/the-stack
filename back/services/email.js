@@ -50,7 +50,7 @@ module.exports.sendResetPassword = async function(email, user, frontPath, code){
     const msg = {
         to: email,
         from: 'no-reply@mcgaw.io',
-        subject: 'Reset password!',
+        subject: 'Password reset for McGaw.io Marketing Stack Builder',
         text: textMail,
         html: textHTML
     }

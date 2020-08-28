@@ -58,6 +58,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   isMultiSelectActive = false;
   showGrid =  false;
   snapGrid = true;
+  toolsLoaded = false;
   authUser: User;
   // subscriptions
   private stackRequest: Subscription;
@@ -114,16 +115,25 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     if (this.domain) {
       if (this.authUser) {
         this.stackRequest = this.service.postDomainTools(this.domain).subscribe((data) => {
-          this.proceedBluePrintData(data);
+          if (!this.toolsLoaded) {
+            this.proceedBluePrintData(data);
+            this.toolsLoaded = true;
+          }
         }, err => this.isError = true );
       } else {
         this.stackRequest = this.service.getDomainTools(this.domain).subscribe((data) => {
-          this.proceedBluePrintData(data);
+          if (!this.toolsLoaded) {
+            this.proceedBluePrintData(data);
+            this.toolsLoaded = true;
+          }
         }, err => this.isError = true );
       }
     } else if (this.id) {
       this.stackRequest = this.service.getBlueprint(this.id).subscribe((data) => {
-        this.proceedBluePrintData(data);
+        if (!this.toolsLoaded) {
+          this.proceedBluePrintData(data);
+          this.toolsLoaded = true;
+        }
       }, err => this.isError = true );
     } else {
       this.isError = true;
