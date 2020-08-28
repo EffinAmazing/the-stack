@@ -86,10 +86,10 @@ class BluePrintModel extends AbstaractModel{
     }
 
     async sendInviteUserToBluePrint( list, path, blueprintId) {
+        const blueprint = await this.one(blueprintId);
         await async.each(list, (item, cb)=>{
-            emailService.sendInviteForUser(item.email, item.user, path, blueprintId)
+            emailService.sendInviteForUser(item.email, item.user, path, blueprint)
             .then(res => {
-                
                 cb(null);
             })
             .catch(err => {

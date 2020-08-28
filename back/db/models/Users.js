@@ -90,7 +90,11 @@ class UserModel extends AbstaractModel{
         if (user) {
             let isMatch = await user.comparePassword(password);
             console.log('checkCredantial -> isMatch', isMatch);
-            return user;
+            if (isMatch) {
+                return user;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
