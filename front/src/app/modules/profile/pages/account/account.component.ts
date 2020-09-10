@@ -24,6 +24,7 @@ export class AccountComponent implements OnInit {
   sharedBluePrints: BluePrint[] = [];
   modeName: ProgressBarMode = 'indeterminate';
   showAddStackForm = false;
+  submitingDomain = false;
 
   constructor(
     private auth: AuthService,
@@ -73,10 +74,13 @@ export class AccountComponent implements OnInit {
   submitDomain() {
     if (!this.domain.invalid) {
       // this.router.navigateByUrl('/blueprints/build?domain=' + this.domain.value);
+      this.submitingDomain = true;
       this.blueprints.postDomainTools(this.domain.value).toPromise().then((result) => {
         this.router.navigateByUrl('/blueprints/build/' + result.blueprint.id);
+        this.submitingDomain = false;
       }).catch((err) => {
         console.log(err);
+        this.submitingDomain = false;
       });
     }
   }

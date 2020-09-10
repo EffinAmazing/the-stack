@@ -34,15 +34,30 @@ class ToolsNodesModel extends AbstaractModel {
     }
 
     async createNodesForTools(blueprintId, tools){
+        let arrIds = [];
         let dataList = await async.map(tools, (item, cb)=>{ 
             let data = {
                 blueprintId: blueprintId,
                 toolId: item.id
             }
+            arrIds.push(item.id);
             if(item.start) data['start'] = new Date(item.start);
             if(item.end) data['end'] = new Date(item.end);
             cb(null, data);
         });
+
+        
+        let list = await this.modelDB.find({ blueprintId: blueprintId, toolId: { $in: arrIds } });
+        // console.log(list);
+        if (list.length > 0) {
+            dataList = await async.filter(dataList, (item, cb)=>{
+                let index = list.findIndex((ulI) =>{
+                    return ulI.toolId === item.toolId;
+                });
+                
+                return index === -1;
+            })
+        }
 
         let docs = await this.modelDB.create(dataList);
         let mappedDocs = await async.map(docs, (item, cb)=>{ cb( null, this.mapDocument(item) ); });

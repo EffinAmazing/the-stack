@@ -22,18 +22,18 @@
             <div *ngIf="!loadingBluePrints && ( !listBluePrints.length  || showAddStackForm )">
               <div *ngIf="!listBluePrints.length && !sharedBluePrints.length" class="notice notice-message"> You haven't had created stacks yet. use form below, for creating one </div>
               <div class="form-domain">
-
+                <mat-progress-bar *ngIf="submitingDomain" mode="indeterminate"></mat-progress-bar>
                 <h3> Input Domain </h3>
                 <div class="form-full-width-field">
                     <mat-form-field class="input-domain">
                         <mat-label>Domain name:</mat-label>
-                        <input matInput placeholder="" [formControl]="domain" required (input)="handleInput($event)" (keyup.enter)="submitDomain()">
+                        <input matInput placeholder="" [formControl]="domain" [disabled]="submitingDomain" required (input)="handleInput($event)" (keyup.enter)="submitDomain()">
                         <mat-error *ngIf="domain.invalid"> Please enter a valid domain </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="submit-domain">
-                    <button  class="stack-button" (click)="hideFormAddStack()">  <mat-icon>clear</mat-icon> Cancel  </button>
-                    <button class="stack-button" color="primary" (click)="submitDomain()"> <mat-icon>add</mat-icon>  Submit</button>
+                    <button  class="stack-button" (click)="hideFormAddStack()" [disabled]="submitingDomain">  <mat-icon>clear</mat-icon> Cancel  </button>
+                    <button class="stack-button" color="primary" (click)="submitDomain()" [disabled]="submitingDomain"> <mat-icon>add</mat-icon>  Submit</button>
                 </div>
               </div>
             </div>
