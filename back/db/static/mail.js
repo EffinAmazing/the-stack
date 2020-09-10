@@ -4,10 +4,10 @@ module.exports.mailHeader = function(frontUrl) {
     <tbody class="mail-container">
         <tr>
             <td class="mail-header" align="center"
-            style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';  box-sizing: border-box; padding: 25px 0; text-align: center; background-color: #1c57a4;"> <a href="${frontUrl}" style="color: #ffffff; font-size: 24px; font-weight: bold; text-decoration: none;">Marketing Tool Stack Builder</a> </td>
+            style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';  box-sizing: border-box; padding: 25px 0; text-align: center; background-color: #24282d;"> <a href="${frontUrl}" style="color: #ffffff; font-size: 24px; font-weight: bold; text-decoration: none;">Marketing Tool Stack Builder</a> </td>
         </tr>
         <tr>
-            <td class="content-cell" align="center" style="color: #3d4852;font-size: 16px; line-height: 1.5em;">
+            <td class="content-cell" align="center" style="color: #3d4852; font-size: 16px; line-height: 1.5em;">
                 <table style="max-width: 540px; width: 100%; margin: auto; border: 0;"><tbody><tr><td>`;
 }
 
