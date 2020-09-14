@@ -20,7 +20,7 @@ module.exports.sendInviteForUser = async function (email, user, frontPath, bluep
     const textConfirmationMail = 'Hi, ' + user.firstName + ' ' + user.lastName + ' \n You have been added to a new stack, \n you can view it by link: <' + linkBluePrint + '> \n\n Thanks! \n McGaw.io Team';
     const htmlConfirmationMail = staticMail.mailStyle + staticMail.mailHeader(frontPath + '#/')  + 
     '<p> &nbsp; </p><div ' + staticMail.mailPStyles + '> Hi, <b> ' + user.firstName + ' ' + user.lastName + ' </b> </div>' + 
-    '<div ' + staticMail.mailPStyles + '> <p ' + staticMail.mailPStyles + '> You have been added to a new stack, <br/> you can view it by link: </div> ' +
+    '<div ' + staticMail.mailPStyles + '> <p ' + staticMail.mailPStyles + '> You have been added to a new stack, you can view it by link: </div> ' +
     '<p style="text-align: center;"> <img src="' + config.SERVER_URI + '/domain-logos/' + blueprint.domain + '.png" /> <br /> <b style="font-size: 18px;">' + blueprint.domain + '</b> </p>' +
     '<p style="text-align: center;"> <a ' + staticMail.mailButtonStyles + ' href="' + linkBluePrint + '"> Visit the Stack </a> </p><p> &nbsp; </p>'
     +  staticMail.mailFooter;
