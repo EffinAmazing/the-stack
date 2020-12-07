@@ -26,20 +26,31 @@
     }
 
     .page-title{
-        font-size: 34px;
-        line-height: 1.5em;
+        font-size: 36px;
+        line-height: 43px;
         margin-bottom: 34px;
         color: #ffffff;
         font-family: "proxima-nova", sans-serif;
         white-space: pre-line;
+        font-weight: normal;
+        
+        @media screen and (max-width: 768px){
+            font-size: 28px;
+            line-height: 33px;
+        }
     }
 
     .page-subtitle {
         font-size: 20px;
-        line-height: 1.8em;
+        line-height: 30px;
         margin-bottom: 30px !important;
         font-family: "proxima-nova", sans-serif;
         margin-bottom: 34px;        
+
+        @media screen and (max-width: 768px){
+            font-size: 14px;
+            line-height: 28px;
+        }
     }
 
     .hero-image-box {
@@ -47,11 +58,11 @@
     }
 }
 .field-domain-input{
-    width: 420px;
+    width: 380px;
     max-width: 100%;
     font-size: 20px;
     padding: 12px 20px;
-    border-radius: 5px;
+    border-radius: 0;
     font-weight: 100;
     line-height: 1em;
     border: 0;
@@ -90,14 +101,14 @@
 }
 
 .riased-button-doamin {
-    width: 420px;
+    width: 380px;
     max-width: 100%;
     padding: 12px 24px;
     font-size: 24px;
     background-color: #f04a22;
     border: 0; 
     line-height: 1.1em;
-    border-radius: 7px;
+    border-radius: 0;
     color: #ffffff;
     cursor: pointer;
 
@@ -195,6 +206,31 @@
         text-align: center;
         font-weight: 400;
     }
+}
+.abilities-tool .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+ .footer-form-section .button.link-to-form {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 16px;
+    color: #FFFFFF;
+    background: #FF4100;
+    border-radius: 2px;
+    padding: 16px 32px;
+    text-decoration: none;
+}
+.mt-footer-content {
+    text-align: center;
+}
+.page-content {
+    font-size: 18px;
+}
+ .page-content {
+    padding-bottom: 50px;
 }
 img {
     max-width: 100%;

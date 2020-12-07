@@ -248,7 +248,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   showPopupFoSignUp(form = 'signup') {
-    console.log(form);
+    // console.log(form);
     const dialogRef = this.showRegisterDialog.open(SignupSigninPopupComponent, {
       width: '640px',
       data: { blueprint: this.blueprint, form }
@@ -684,7 +684,9 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   public moveToHome() {
-    this.router.navigateByUrl('/home');
+    var a = document.createElement('a');
+    a.href="/marketing-technology-tech-stack-builder/";
+    a.click();
   }
 
   public handleHideList() {

@@ -16,6 +16,8 @@
                             <mat-form-field >
                                 <mat-label>Email</mat-label>
                                 <input matInput type="email" formControlName="email" />
+                                <mat-error *ngIf="sfEmail.invalid && sfEmail.errors.required" > <b>Email</b> is required </mat-error>
+                                <mat-error *ngIf="sfEmail.invalid && sfEmail.errors.email" > Please enter a valid email address </mat-error>
                             </mat-form-field>
                         </div>
                         
@@ -23,6 +25,7 @@
                             <mat-form-field >
                                 <mat-label>First Name</mat-label>
                                 <input matInput formControlName="firstName" />
+                                <mat-error *ngIf="sfFirstName.invalid && sfFirstName.errors.required" > <b>First Name</b> is required </mat-error>
                             </mat-form-field>
                         </div>
                 
@@ -31,6 +34,7 @@
                             <mat-form-field >
                                 <mat-label>Last Name</mat-label>
                                 <input matInput  formControlName="lastName" />
+                                <mat-error *ngIf="sfLastName.invalid && sfLastName.errors.required" > <b>Last Name</b> is required </mat-error>
                             </mat-form-field>
                         </div>
                 
@@ -39,6 +43,7 @@
                             <mat-form-field >
                                 <mat-label>Password</mat-label>
                                 <input matInput type="password"  formControlName="password" />
+                                <mat-error *ngIf="sfPassword.invalid && sfPassword.errors.required" > <b>password</b> is required </mat-error>
                             </mat-form-field>
                         </div>
                 
@@ -47,6 +52,8 @@
                             <mat-form-field >
                                 <mat-label>Repeat Password</mat-label>
                                 <input matInput type="password" formControlName="repeatPassword" />
+                                <mat-error *ngIf="sfRepeatPassword.invalid && sfRepeatPassword.errors.required" > <b>repeatPassword</b> is required </mat-error>
+                                <mat-error *ngIf="sfRepeatPassword.invalid && sfRepeatPassword.errors.passMatch" > <b>repeatPassword</b> need to be equal <b>Password</b> </mat-error>
                             </mat-form-field>
                         </div>
                     </div>
@@ -63,6 +70,7 @@
                             <mat-form-field >
                                 <mat-label>Email</mat-label>
                                 <input matInput type="email" formControlName="email" />
+                                <mat-error *ngIf="lfEmail.invalid && lfEmail.errors.required" > <b>Email</b> is required </mat-error>
                             </mat-form-field>
                         </div>
                                 
@@ -70,6 +78,7 @@
                             <mat-form-field >
                                 <mat-label>Password</mat-label>
                                 <input matInput type="password"  formControlName="password" />
+                                <mat-error *ngIf="lfPassword.invalid && lfPassword.errors.required" > <b>Password</b> is required </mat-error>
                             </mat-form-field>
                         </div>
                     </div>

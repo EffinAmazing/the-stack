@@ -4,7 +4,7 @@
             <div class="row"> 
                 <div class="col-md-5">
                     <h2 class="page-title"> {{ outsideData ? outsideData.title : 'Build Your Perfect \n Marketing Technology Stack' }} </h2>
-                    <p class="page-subtitle"> {{ outsideData ? outsideData.subtitle : 
+                    <p  id="form_domain_send"  class="page-subtitle"> {{ outsideData ? outsideData.subtitle : 
                         'Easily visualize and find new ways to optimize your entire marketing stack all in one place' }}</p>
                     <div class="form-domain">
                         <div class="field-box">
@@ -40,24 +40,16 @@
             </div>
         </div>
     </section>
+    <div id="ng_insert_content" class="page-content">
+        
+    </div>
     <section class="footer-form-section">
         <div class="mt-section-container">
             <div class="row">
-                <div class="mt-fex">
-                    <p class="footer-title"> Access your stack for free! </p>
-                    <div class="form-domain">
-                        <div class="field-box">
-                            <input class="field-domain-input" 
-                                placeholder="Enter Domain" 
-                                [formControl]="domain" 
-                                required 
-                                (input)="handleInput($event)" 
-                                (keyup.enter)="submitDomain()">
-                                <span class="error field-error" *ngIf="hasError"> Please enter a valid domain </span>
-                        </div>
-                        <div class="button-box">
-                            <button class="riased-button-doamin" (click)="submitDomain()">Submit</button>
-                        </div>
+                <div class="mt-footer-content">
+                    <p class="footer-title"> {{ outsideData ? outsideData.footerTitle : 'Access your stack for free!' }} </p>
+                    <div class="link-box">
+                        <a href="#form_domain_send" class="button link-to-form"> {{  outsideData ? outsideData.formLinkTitle : 'Send Domain' }} </a>
                     </div>
                 </div>
             </div>

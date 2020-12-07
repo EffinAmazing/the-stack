@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { UsersService } from '../../../core/services/users.service';
 import { Router } from '@angular/router';
@@ -36,8 +36,8 @@ export class SignupSigninPopupComponent {
       firstName: new FormControl('', Validators.required),
       lastName: new FormControl('', Validators.required),
       password: new FormControl('', [Validators.min(8), Validators.required]),
-      repeatPassword: new FormControl('', Validators.min(8))
-    });
+      repeatPassword: new FormControl('', [Validators.min(8), this.matchPassValidator, Validators.required])
+    } );
 
     this.signInFormGroup = new FormGroup({
       email: new FormControl('', [Validators.email, Validators.required]),
@@ -113,6 +113,7 @@ export class SignupSigninPopupComponent {
   }
 
   handleSubmitSignUp() {
+    // this.signUpFormGroup.che
     if (!this.signUpFormGroup.invalid) {
       const data = this.signUpFormGroup.value;
 
@@ -137,6 +138,36 @@ export class SignupSigninPopupComponent {
         this.errorMessage = 'Fail to sign up User. ' + message;
         console.log(err, err.data);
       });
+    } else {
+      this.sfEmail.markAsTouched();
+      this.sfFirstName.markAsTouched();
+      this.sfLastName.markAsTouched();
+      this.sfPassword.markAsTouched();
+      this.sfRepeatPassword.markAsTouched();
     }
   }
+
+  matchPassValidator(control: AbstractControl) : { passMatch: boolean } | null {
+    if (control.parent) { 
+      console.log(control, control.parent);
+      let sfPassword = control.parent.get('password');
+      let password = sfPassword.value;
+      if (control.value !== password) {
+        return { passMatch: true };
+      }
+    }
+
+    return null;
+  }
+
+  // Sign Up form gorup fields
+  get sfEmail():AbstractControl { return this.signUpFormGroup.get('email'); }
+  get sfFirstName():AbstractControl { return this.signUpFormGroup.get('firstName'); }
+  get sfLastName():AbstractControl { return this.signUpFormGroup.get('lastName'); }
+  get sfPassword():AbstractControl { return this.signUpFormGroup.get('password'); }
+  get sfRepeatPassword(): AbstractControl { return this.signUpFormGroup.get('repeatPassword'); }
+
+  // Sign In form group fields
+  get lfEmail():AbstractControl {  return this.signInFormGroup.get('email'); }
+  get lfPassword():AbstractControl {  return this.signInFormGroup.get('password'); }
 }

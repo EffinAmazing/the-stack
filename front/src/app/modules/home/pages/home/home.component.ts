@@ -8,12 +8,14 @@ import { Router } from '@angular/router';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  domain = new FormControl('', [Validators.pattern(/^([a-z.0-9\-]+(\.)[a-z]{2,3})$/i)]);
+  domain = new FormControl('', [Validators.pattern(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/i)]);
   outsideData: {
     title: string,
     subtitle: string,
     heroImage: string,
     abilities: Array<{ title: string, icon: string, description: string }>
+    footerTitle: string,
+    formLinkTitle: string
   } | null = null;
   defaultRepeater: Array<{ title: string, icon: string, description: string }> = [];
   hasError = false;
@@ -61,7 +63,14 @@ export class HomeComponent implements OnInit {
 
   }
 
-  ngOnInit(): void {  }
+  ngOnInit(): void { 
+    let content = document.querySelector('#content_hidden_for_replace') as HTMLDivElement;
+
+    if ( content ) {
+      content.style.display = 'block';
+      document.querySelector('#ng_insert_content').append(content);
+    }
+  }
 
   submitDomain() {
     if (!this.domain.invalid) {

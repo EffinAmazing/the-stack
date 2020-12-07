@@ -125,3 +125,156 @@ html, body{
     margin-top: 50px;
     margin-bottom: 60px;
 }
+
+.services-section {
+    padding-top: 70px;
+    padding-bottom: 70px;
+}
+.services-section .row {
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+.services-section .row:last-child {
+    padding-bottom: 0;
+}
+.services-section .row:first-child {
+    padding-top: 0;
+}
+.services-section .service-item .service-title {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 34px;
+    line-height: 41px;
+    color: #333333;
+}
+.services-section .service-item .service-description, .advantages-services .advantages-item .service-description{
+    font-style: normal;
+    font-weight: normal;
+    font-size: 18px;
+    line-height: 26px;
+    color: #000000;
+}
+.advantages-services {
+    padding-top: 40px;
+    padding-bottom: 60px;
+}
+.advantages-services .full-with-image img{
+    width: 100%;
+}
+.advantages-services .advantages-text {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 18px;
+    line-height: 26px;
+    margin-top: 60px;
+}
+.advantages-services .advantages-item {
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+.how_to_build-section {
+    background: #EFF4FA;
+    padding-top: 70px;
+    padding-bottom: 70px;
+}
+.how_to_build-section h2 {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 42px;
+    line-height: 51px;
+    color: #333333;
+    text-align: center;
+    margin-bottom: 40px;
+}
+.how_to_build-section .how_to_build-message {
+    margin-top: 40px;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 20px;
+    text-align: center;
+    color: #333333;
+}
+@media screen and (max-width: 768px) {
+    .field-domain-input {
+        width: 300px;
+    }
+
+    .riased-button-doamin {
+        width: 300px;
+    }
+
+    .footer-form-section .riased-button-doamin {
+        width: 300px;
+    }
+
+    .row {
+        margin: 0;
+    }
+
+    .hero-section .form-domain {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .footer-form-section .form-domain {
+        text-align: center;
+    }
+
+    .footer-form-section .footer-title {
+        font-size: 28px;
+    }
+     .hero-section {
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
+    .hero-section .page-title {
+        font-size: 28px;
+        line-height: 33px;
+        text-align: center;
+    }
+    .hero-section .page-subtitle {
+        font-style: normal;
+        font-weight: normal;
+        font-size: 14px;
+        line-height: 28px;
+        text-align: center;
+    }
+    .how_to_build-section, .abilities-tool, .services-section, .advantages-services {
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
+    .how_to_build-section h2 {
+        font-size: 24px;
+        line-height: 28px;
+        text-align: center;
+    }
+    .services-section .service-item img, .advantages-services .advantages-item img{
+        max-width: 140px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 20px;
+    }
+    .services-section .service-item .service-title, .advantages-services .advantages-item .service-title {
+        font-size: 23px;
+        line-height: 23px;
+        text-align: center;
+    }
+    .services-section .service-item .service-description, .advantages-services .advantages-item .service-description {
+        font-style: normal;
+        font-weight: normal;
+        font-size: 18px;
+        line-height: 26px;
+        text-align: center;
+    }
+    .footer-form-section .mt-section-container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .page-template-template-march-tool-landing-page .footer-form-section .footer-title {
+        font-weight: normal;
+        font-size: 24px;
+        line-height: 28px;
+    }
+}
