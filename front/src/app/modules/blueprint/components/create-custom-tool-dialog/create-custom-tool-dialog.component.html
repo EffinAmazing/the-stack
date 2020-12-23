@@ -37,7 +37,7 @@
                     <mat-form-field >
                         <mat-label>Category</mat-label>
                         <input matInput placeholder="Category" type="text" [(ngModel)]="categoriesTemp" [ngModelOptions]="{standalone: true}"  [matAutocomplete]="auto" (ngModelChange)="getCatList($event)">
-                        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                        <mat-autocomplete #auto="matAutocomplete" >
                             <mat-option *ngFor="let option of filteredOptions | async" [value]="option.name">
                                {{option.name}}
                             </mat-option>

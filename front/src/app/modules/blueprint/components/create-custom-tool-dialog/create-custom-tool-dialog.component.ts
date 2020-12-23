@@ -62,7 +62,7 @@ export class CreateCustomToolDialogComponent {
         console.log(value);
         return this.service.getCategories(value)
       }));*/
-      this.filteredOptions = this.service.getCategories('').pipe();
+      this.filteredOptions = this.service.getCategories(this.categoriesTemp).pipe();
       // this.categoriesTemp
       //this.getCatList('');
     });
@@ -307,12 +307,14 @@ export class CreateCustomToolDialogComponent {
     let limit = 20;
     console.log(text)
     this.filteredOptions = this.service.getCategories(text).pipe();
+    
     // this.filteredOptions = this.toolForm.get('categories').valueChanges.pipe(startWith(''), switchMap(value => this.service.getCategories(value)));
   }
 
-  displayFn(item) {
+  /*displayFn(item) {
+    console.log(item);
     return item && item.name ? item.name : '';
-  }
+  }*/
 
   onNoClick(): void {
     if (this.nodeResult) {
