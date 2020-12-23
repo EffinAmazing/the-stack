@@ -1,10 +1,12 @@
 import { Component, Inject, ViewChild, ElementRef } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
 import { environment } from '../../../../../environments/environment';
 import { ToolIconCropperComponent } from '../tool-icon-cropper/tool-icon-cropper.component';
+import {Observable} from 'rxjs';
+import {map, startWith, switchMap} from 'rxjs/operators';
 
 const host = environment.serverURI;
 
@@ -21,6 +23,8 @@ export class CreateCustomToolDialogComponent {
   imageUpdated = false;
   isProcced = false;
   nodeResult = null;
+  catOptions = [];
+  filteredOptions: Observable<string[]> = new Observable();
   @ViewChild('iconImage') iconImage: ElementRef<HTMLImageElement>;
   @ViewChild('canvasForIcon') canvasForIcon: ElementRef<HTMLCanvasElement>;
   @ViewChild('cancelButton') cancelButton: ElementRef<HTMLButtonElement>;
@@ -41,6 +45,8 @@ export class CreateCustomToolDialogComponent {
       trainedOn: new FormControl(data.node && data.node.trainedOn ? data.node.trainedOn : '')
     });
 
+    
+
     this.dialogRef.afterOpened().subscribe(() => {
       this.iconImage.nativeElement.addEventListener('load', (result) => {
         const ctx = this.canvasForIcon.nativeElement.getContext('2d');
@@ -51,6 +57,14 @@ export class CreateCustomToolDialogComponent {
         const ctx = this.canvasForIcon.nativeElement.getContext('2d');
         ctx.drawImage(this.iconImage.nativeElement, 0, 0, 73, 73);
       }
+
+      /*this.filteredOptions = this.toolForm.get('categories').valueChanges.pipe(startWith(''), switchMap(value =>{
+        console.log(value);
+        return this.service.getCategories(value)
+      }));*/
+      this.filteredOptions = this.service.getCategories('').pipe();
+      // this.categoriesTemp
+      //this.getCatList('');
     });
   }
 
@@ -286,6 +300,18 @@ export class CreateCustomToolDialogComponent {
         this.imageUpdated = true;
       }
     });
+  }
+
+  public getCatList(text) {
+    let offset = 0;
+    let limit = 20;
+    console.log(text)
+    this.filteredOptions = this.service.getCategories(text).pipe();
+    // this.filteredOptions = this.toolForm.get('categories').valueChanges.pipe(startWith(''), switchMap(value => this.service.getCategories(value)));
+  }
+
+  displayFn(item) {
+    return item && item.name ? item.name : '';
   }
 
   onNoClick(): void {

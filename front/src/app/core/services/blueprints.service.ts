@@ -89,4 +89,8 @@ export class BlueprintsService {
   updateCustom(nodeId: string, data: FormData): Observable<BluePrintTool> {
     return this.mapper.mapResponse(this.http.put(`${this.serverURI}toolsnodes/custom/${nodeId}`, data));
   }
+
+  getCategories(name): Observable<any> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}tools/categories?name=${name}`));
+  }
 }

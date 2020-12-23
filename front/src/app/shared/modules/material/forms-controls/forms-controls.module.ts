@@ -5,7 +5,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSelectModule } from '@angular/material/select';
-
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 
 @NgModule({
@@ -16,7 +16,8 @@ import { MatSelectModule } from '@angular/material/select';
     MatCheckboxModule,
     MatSlideToggleModule,
     MatDatepickerModule,
-    MatSelectModule
+    MatSelectModule,
+    MatAutocompleteModule
   ],
   exports: [
     MatInputModule,
@@ -24,7 +25,8 @@ import { MatSelectModule } from '@angular/material/select';
     MatCheckboxModule,
     MatSlideToggleModule,
     MatDatepickerModule,
-    MatSelectModule
+    MatSelectModule,
+    MatAutocompleteModule
   ],
   providers: [
     MatDatepickerModule,

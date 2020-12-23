@@ -5,7 +5,7 @@ const emailService = require('../../services/email');
 const AccessModel = require('./BlueprintAccess');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
-class BluePrintModel extends AbstaractModel{
+class BluePrintModel extends AbstaractModel {
     constructor(){
         super('blueprints');
         this.schema = mongoose.Schema({

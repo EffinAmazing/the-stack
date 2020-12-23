@@ -4,9 +4,10 @@ const async = require('async');
 const techservice = require('../../services/sitetechonlogies');
 const files = require('../../services/download');
 const AbstaractModel = require('./_abstract');
+const CategoriesModel = require('./Categories');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
-class ToolsModel extends AbstaractModel{
+class ToolsModel extends AbstaractModel {
     constructor(){
         super('tools');
 
@@ -60,6 +61,7 @@ class ToolsModel extends AbstaractModel{
 
     async proceedTools(tools){
         let needLoadImage = [];
+        let catModel = new CategoriesModel();
         let createItem = async (item)=> {
             let start = item.start;
             let end = item.end;
@@ -70,7 +72,9 @@ class ToolsModel extends AbstaractModel{
             mapped['start'] = start;
             mapped['end'] = end;
             needLoadImage.push(mapped);
-
+            if (dbItem.categories && dbItem.length) {
+                catModel.proceedList(dbItem.categories)
+            }
             return mapped;
         }
     

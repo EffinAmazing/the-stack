@@ -3,6 +3,7 @@ const ToolsNodesModel = require('../../db/models/ToolsNodes');
 const ToolsModels = require('../../db/models/Tools');
 const UserModel = require('../../db/models/Users');
 const BluePrintModel = require('../../db/models/Blueprints');
+const CategoriesModel = require('../../db/models/Categories');
 const async = require('async');
 
 class ToolsNodes {
@@ -11,6 +12,7 @@ class ToolsNodes {
         this.tools = new ToolsModels();
         this.users = new UserModel();
         this.blueprints = new BluePrintModel();
+        this.categories = new CategoriesModel();
     }
 
     update(req, res, next){
@@ -277,6 +279,31 @@ class ToolsNodes {
                 }
             })
 
+        } else {
+            res.status(400).json({
+                result: "Error",
+                message: "incorrect data"
+            });
+        }
+    }
+
+    getListOfCategories( req, res, next ) {
+        const name = req.query.name;
+        let limit = req.query.limit;
+        let offset = req.query.offset;
+        if ( name || name === '' ) {
+            this.categories.getList(name, offset, limit)
+            .then( r => {
+                res.json({
+                    result: r
+                })
+            })
+            .catch(err=>{
+                res.status(500).json({
+                    result: "Error",
+                    message: err.message
+                });
+            });
         } else {
             res.status(400).json({
                 result: "Error",

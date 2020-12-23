@@ -23,6 +23,7 @@
                     <mat-form-field class="full-width">
                         <mat-label>Tool Name</mat-label>
                         <input matInput placeholder="Tool" type="text" formControlName="name" cdkFocusInitial>
+                        
                     </mat-form-field>
                 </div>
             </div>
@@ -35,7 +36,12 @@
                         <mat-icon class="icon-item-owners" (click)="removeCategory(item)">cancel</mat-icon></span></div>
                     <mat-form-field >
                         <mat-label>Category</mat-label>
-                        <input matInput placeholder="Category" type="text" [(ngModel)]="categoriesTemp" [ngModelOptions]="{standalone: true}">
+                        <input matInput placeholder="Category" type="text" [(ngModel)]="categoriesTemp" [ngModelOptions]="{standalone: true}"  [matAutocomplete]="auto" (ngModelChange)="getCatList($event)">
+                        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                            <mat-option *ngFor="let option of filteredOptions | async" [value]="option.name">
+                               {{option.name}}
+                            </mat-option>
+                        </mat-autocomplete>
                     </mat-form-field>
                     <button mat-icon-button class="add-button-owner" (click)="handleAddCategory()"> <mat-icon>add</mat-icon> </button>
                 </div>

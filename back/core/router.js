@@ -47,6 +47,7 @@ router.post("/toolsunhide/", toolsNodes.unhideList.bind(toolsNodes));
 router.get('/tools/search', toolsNodes.getListOfTools.bind(toolsNodes));
 router.post('/toolsnodes/custom', toolsNodes.createCustom.bind(toolsNodes));
 router.put('/toolsnodes/custom/:id', toolsNodes.updateCustom.bind(toolsNodes));
+router.get('/tools/categories', toolsNodes.getListOfCategories.bind(toolsNodes));
 
 router.post("/arrows/", arrows.add.bind(arrows));
 router.get("/arrows/", arrows.list.bind(arrows));
