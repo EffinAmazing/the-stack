@@ -41,6 +41,7 @@ router.get('/blueprints/:id/invited', passport.authenticate('jwt', { session: fa
 
 router.put("/toolsnodes/:id", servicePassport.optionalAthentication , toolsNodes.update.bind(toolsNodes));
 router.post("/toolsnodes/", toolsNodes.add.bind(toolsNodes));
+router.post("/toolsnodes/domain", toolsNodes.addDomainTool.bind(toolsNodes));
 router.post("/toolsnodes/list", toolsNodes.addList.bind(toolsNodes));
 router.post("/toolshide/", toolsNodes.hidelist.bind(toolsNodes));
 router.post("/toolsunhide/", toolsNodes.unhideList.bind(toolsNodes));

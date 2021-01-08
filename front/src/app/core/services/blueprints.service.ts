@@ -93,4 +93,8 @@ export class BlueprintsService {
   getCategories(name): Observable<any> {
     return this.mapper.mapResponse(this.http.get(`${this.serverURI}tools/categories?name=${name}`));
   }
+
+  addDomainTool(domain, blueprintId): Observable<BluePrintTool> {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolsnodes/domain`, { domain, blueprintId }));
+  }
 }

@@ -9,6 +9,7 @@ import { Pointer } from '../../../../shared/models/general';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteStackDialogComponent } from '../../components/delete-stack-dialog/delete-stack-dialog.component';
 import { CreateNewStackDialogComponent } from '../../components/create-new-stack-dialog/create-new-stack-dialog.component';
+import { AdditionalDomainComponent } from '../../components/additional-domain/additional-domain.component';
 import { InfoPopupDialogComponent } from '../../components/info-popup-dialog/info-popup-dialog.component';
 import { AddNewToolDialogComponent } from '../../components/add-new-tool-dialog/add-new-tool-dialog.component';
 import { InviteDialogComponent } from '../../components/invite-dialog/invite-dialog.component';
@@ -739,6 +740,31 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     this.service.addArrow(this.blueprint.id, data.arrow).toPromise().then((result) => {
       // console.log(result);
     }).catch(err => console.log(err));
+  }
+
+  public handleAddAdditionalDomain() {
+    const dialogRef = this.deleteDialog.open(AdditionalDomainComponent, {
+      width: '570px',
+      data: { blueprint: this.blueprint }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.nodes[result.id] = result;
+        this.addedNewNode$.next([ result ]);
+        window['dataLayer'].push({
+          event: 'stackbuilder.node.loaded',
+          node: result,
+          tool: result.tool,
+        });
+        window['dataLayer'].push({
+          event: 'stackbuilder.node.added',
+          node: result,
+          tool: result.tool,
+          stack: this.blueprint
+        });
+      }
+    });
   }
 
   public handleUpdateArrow(data) {

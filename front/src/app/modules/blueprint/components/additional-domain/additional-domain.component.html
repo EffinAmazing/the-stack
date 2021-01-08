@@ -1,0 +1,12 @@
+<h1 mat-dialog-title> Add Domain  <button mat-icon-button class="close-button" [mat-dialog-close]><mat-icon>clear</mat-icon></button> </h1>
+<div mat-dialog-content>
+    <mat-form-field  class="input-full-width">
+        <mat-label>Domain name:</mat-label>
+        <input matInput (input)="handleInput($event)" cdkFocusInitial [disabled]="isProcced" />
+    </mat-form-field>
+</div>
+<div mat-dialog-actions direction="right">
+    <button #cancelButton class="stack-button" (click)="onNoClick()"> <mat-icon>clear</mat-icon> Cancel</button> 
+    <div class="divider-buttons"></div>
+    <button class="stack-button" color="primary" (click)="proccedAddTool()" [disabled]="isProcced"> <mat-icon>add</mat-icon> Add Domain </button>
+</div>

@@ -4,6 +4,7 @@ const ToolsModels = require('../../db/models/Tools');
 const UserModel = require('../../db/models/Users');
 const BluePrintModel = require('../../db/models/Blueprints');
 const CategoriesModel = require('../../db/models/Categories');
+const ToolsServices = require('../../services/sitetechonlogies');
 const async = require('async');
 
 class ToolsNodes {
@@ -308,9 +309,54 @@ class ToolsNodes {
             res.status(400).json({
                 result: "Error",
                 message: "incorrect data"
-            })
+            });
         }
     }
+
+    addDomainTool(req, res, next) {
+        const domain = req.body.domain;
+        const blueprintId = req.body.blueprintId;
+
+        if (domain || blueprintId) {
+            ToolsServices.getDomainTool(domain)
+            .then((result)=>{
+                this.tools.proceedTools([result]).then(atool => {
+                    let _tool = atool[0];
+                    this.model.createNodesForTool(blueprintId, _tool).then(node => {
+                        console.log(_tool, node);
+                        node.tool = _tool;
+                        res.json({
+                            result: node
+                        })
+                    }).catch(err =>{
+                        console.log(err);
+                        res.status(500).json({
+                            result: "Error",
+                            message: err.message
+                        });
+
+                    })
+                }).catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        result: "Error",
+                        message: err.message
+                    }); 
+                });
+            }).catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    result: "Error",
+                    message: err.message
+                });
+            });
+        } else {
+            res.status(400).json({
+                result: "Error",
+                message: "incorrect data"
+            });
+        }
+    }   
 }
 
 module.exports = ToolsNodes;

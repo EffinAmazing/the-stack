@@ -22,6 +22,7 @@
   </div>
 </div>
 <div mat-dialog-actions direction="right">
+  <button class="stack-button position-left" color="primary" (click)="handleCreateNewTool()"> Create New Tool <mat-icon>add</mat-icon> </button> 
   <button class="stack-button" (click)="onNoClick()"> <mat-icon>clear</mat-icon> Cancel</button> 
   <div class="divider-buttons"></div>
   <button class="stack-button" color="primary" [mat-dialog-close]="selected" [disabled]="!isSelectedAnyTool()"> <mat-icon>add</mat-icon> Add Tool </button>

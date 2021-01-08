@@ -26,6 +26,8 @@
             <button class="stack-button first-button" (click)="handleHideList()"> <mat-icon>view_list</mat-icon> Show or Hide Tools </button>
             <div class="divider-buttons"></div> 
             <button class="stack-button" (click)="handleAddNewTool()"> <mat-icon>add</mat-icon> Add Tool </button>
+            <div class="divider-buttons"></div> 
+            <button class="stack-button" (click)="handleAddAdditionalDomain()"> <mat-icon>add</mat-icon> Add Additional Domain </button>
             <div *ngIf="!authUser" class="divider-buttons"></div>
             <button *ngIf="!authUser" class="stack-button" color="primary" (click)="showPopupFoSignUp()"> <mat-icon>save</mat-icon> Save your stack </button>
           </div>

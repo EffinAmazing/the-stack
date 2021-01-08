@@ -26,6 +26,7 @@ import { SubdomainDetectComponent } from './components/subdomain-detect/subdomai
 import { InviteDialogComponent } from './components/invite-dialog/invite-dialog.component';
 import { CreateCustomToolDialogComponent } from './components/create-custom-tool-dialog/create-custom-tool-dialog.component';
 import { ToolIconCropperComponent } from './components/tool-icon-cropper/tool-icon-cropper.component';
+import { AdditionalDomainComponent } from './components/additional-domain/additional-domain.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { ToolIconCropperComponent } from './components/tool-icon-cropper/tool-ic
     SubdomainDetectComponent,
     InviteDialogComponent,
     CreateCustomToolDialogComponent,
-    ToolIconCropperComponent
+    ToolIconCropperComponent,
+    AdditionalDomainComponent
   ],
   imports: [
     CommonModule,
