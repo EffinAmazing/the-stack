@@ -68,7 +68,7 @@
                 </div>
             </div>
             <div  class="info-paragraph"> 
-                <div class="title"> people who are trained on it: </div>
+                <div class="title"> People who are trained on it: </div>
                 <div class="data">
                     <input type="hidden" formControlName="trainedOn"  />
                     <div class="list-owners"><span *ngFor="let item of getTrainedOn()" class="item-owners" > {{item}}  &nbsp; 
@@ -78,6 +78,18 @@
                         <input matInput placeholder="Trained On" type="email" [(ngModel)]="trainOnTemp" [ngModelOptions]="{standalone: true}">
                     </mat-form-field>
                     <button mat-icon-button class="add-button-owner" (click)="handleAddTrainedOn()"> <mat-icon>add</mat-icon> </button>
+                </div>
+            </div>
+
+            <div class="info-paragraph">
+                <div class="title"> From domain: </div>
+                <div class="data">
+                    <mat-form-field class="full-width">
+                        <mat-label>Domain</mat-label>
+                        <mat-select formControlName="domain">
+                            <mat-option *ngFor="let item of getDomains()" [value]="item">{{item}}</mat-option>
+                        </mat-select >
+                    </mat-form-field>
                 </div>
             </div>
         </form>

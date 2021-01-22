@@ -42,7 +42,8 @@ export class CreateCustomToolDialogComponent {
       end: new FormControl(data.node && data.node.end ? data.node.end : '', []),
       owner: new FormControl(data.node && data.node.owner ? data.node.owner : ''),
       cost: new FormControl(data.node && data.node.cost ? data.node.cost : ''),
-      trainedOn: new FormControl(data.node && data.node.trainedOn ? data.node.trainedOn : '')
+      trainedOn: new FormControl(data.node && data.node.trainedOn ? data.node.trainedOn : ''),
+      domain: new FormControl(data.node && data.node.domain ? data.node.domain : '')
     });
 
     

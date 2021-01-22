@@ -50,6 +50,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   toggleSnapGrid$: BehaviorSubject<boolean> = new BehaviorSubject(true);
   nodesForUpdate: any = [];
   selectedArrow: DrawArrow;
+  domainsList: String[] = [];
   hideList = true;
   loaded = false;
   domain = '';
@@ -152,6 +153,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       if (item.toolId) {
         const tool = data.tools.find((atool) =>  atool.id === item.toolId );
         item.tool = tool;
+        if (tool.tag && tool.tag === 'domain') {
+           // console.log(tool);
+           this.domainsList.push(tool.name);
+        }
         this.nodes[item.id] = item;
         this.nodesList.push(item.id);
         if (item.hide ) { hidden++; }
@@ -750,9 +755,25 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.nodes[result.id] = result;
-        this.addedNewNode$.next([ result ]);
-        window['dataLayer'].push({
+        result.forEach(nodeItem => {
+          this.nodes[nodeItem.id] = nodeItem;
+          window['dataLayer'].push({
+            event: 'stackbuilder.node.loaded',
+            node: nodeItem,
+            tool: nodeItem.tool,
+          });
+          window['dataLayer'].push({
+            event: 'stackbuilder.node.added',
+            node: result,
+            tool: result.tool,
+            stack: this.blueprint
+          });
+
+        });
+        
+        this.addedNewNode$.next(result);
+        
+        /*window['dataLayer'].push({
           event: 'stackbuilder.node.loaded',
           node: result,
           tool: result.tool,
@@ -762,7 +783,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
           node: result,
           tool: result.tool,
           stack: this.blueprint
-        });
+        });*/
       }
     });
   }

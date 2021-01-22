@@ -21,7 +21,8 @@ class ToolsNodesModel extends AbstaractModel {
                 input: { type: String, enum: [ 'Left', 'Right', 'LeftTop', 'RightTop', 'MiddleTop', 'LeftBottom', 'RightBottom', 'MiddleBottom' ] },
                 itemId: ObjectId,
                 direction: { type: String, enum: [ "Inner", "Outer"] }
-            } ]
+            } ],
+            domain: String
         });
 
         this.initModel();
@@ -52,7 +53,7 @@ class ToolsNodesModel extends AbstaractModel {
 
     }
 
-    async createNodesForTools(blueprintId, tools){
+    async createNodesForTools(blueprintId, tools, domain = '') {
         let arrIds = [];
         let dataList = await async.map(tools, (item, cb)=>{ 
             let data = {
@@ -60,6 +61,9 @@ class ToolsNodesModel extends AbstaractModel {
                 toolId: item.id
             }
             arrIds.push(item.id);
+            if (domain) {
+                data['domain'] = domain;
+            }
             if(item.start) data['start'] = new Date(item.start);
             if(item.end) data['end'] = new Date(item.end);
             cb(null, data);
@@ -81,6 +85,61 @@ class ToolsNodesModel extends AbstaractModel {
         let docs = await this.modelDB.create(dataList);
         let mappedDocs = await async.map(docs, (item, cb)=>{ cb( null, this.mapDocument(item) ); });
         return mappedDocs;
+    }
+
+    async filterToolsByNodes(blueprintId, tools, domain = '') {
+        let filteredTools = [];
+        let filteredNodes = [];
+        const self = this;
+        let dataList = await async.map(tools, (item, cb)=>{ 
+            self.modelDB.find({ blueprintId: blueprintId, toolId: item.id }).then((docs) => {
+                // console.log('find node for tool: ' + item.name, doc );
+                if (docs.length > 0) {
+                    cb(null, docs);
+                } else {
+                    let data = {
+                        blueprintId: blueprintId,
+                        toolId: item.id
+                    }
+                   // console.log(' find error ', err);
+                    if(domain) data['domain'] = domain;
+                    if(item.start) data['start'] = new Date(item.start);
+                    if(item.end) data['end'] = new Date(item.end);
+                    self.modelDB.create(data).then((docN) => {
+                        let node = self.mapDocument(docN);
+                        console.log(' create node ' + docN._id + ' for tool: ' + item.name);
+                        console.log(docN);
+                        node.tool = item;
+                        filteredNodes.push( node );
+                        cb(null, docN);
+                    }).catch(error => {
+                        console.log(' create error ', error );
+                        cb(error, null);
+                    });
+                }
+            }).catch(err => {
+                let data = {
+                    blueprintId: blueprintId,
+                    toolId: item.id
+                }
+               // console.log(' find error ', err);
+                
+                if(item.start) data['start'] = new Date(item.start);
+                if(item.end) data['end'] = new Date(item.end);
+                self.modelDB.create(data).then((docN) => {
+                    let node = self.mapDocument(docN);
+                    console.log(' create node ' + docN._id + ' for tool: ' + item.name);
+                    console.log(docN);
+                    node.tool = item;
+                    filteredNodes.push( node );
+                }).catch(error => {
+                    console.log(' create error ', error );
+                    cb(error, null);
+                });
+            })
+        });
+
+        return filteredNodes;
     }
 
     async updateOne(id, data){

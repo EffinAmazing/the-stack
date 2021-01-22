@@ -1,4 +1,4 @@
-import {Component, Inject} from '@angular/core';
+import {Component, Inject, Input} from '@angular/core';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import { BluePrintTool } from '../../../../shared/models/tool';
@@ -20,14 +20,15 @@ export class NodeDetailsComponent  {
 
   constructor(
     public dialogRef: MatDialogRef<NodeDetailsComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { node: BluePrintTool, blueprintId: string }) {
+    @Inject(MAT_DIALOG_DATA) public data: { node: BluePrintTool, blueprintId: string, domainsList: string[] }) {
       // console.log(data);
       this.nodeForm = new FormGroup({
         start: new FormControl(data.node.start),
         end: new FormControl(data.node.end),
         owner: new FormControl(data.node.owner ? data.node.owner : ''),
         cost: new FormControl(data.node.cost ? data.node.cost : ''),
-        trainedOn: new FormControl(data.node.trainedOn ? data.node.trainedOn : '')
+        trainedOn: new FormControl(data.node.trainedOn ? data.node.trainedOn : ''),
+        domain: new FormControl(data.node.domain ? data.node.domain : '')
       });
 
     }
@@ -48,6 +49,10 @@ export class NodeDetailsComponent  {
     } else {
       return owners.split(',');
     }
+  }
+
+  public getDomains(): string[] {
+    return this.data.domainsList;
   }
 
   public getTrainedOn(): string[] {

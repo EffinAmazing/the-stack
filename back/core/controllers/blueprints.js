@@ -69,7 +69,7 @@ class BluePrints {
                    
                 } else {
                     // 2. get tools of domain
-                    ToolsServices.getToolsOfDomain(domain).then((result)=>{
+                    ToolsServices.getToolsOfDomain(domain).then((result) => {
                         const list = result.tech;
                         data.blueprint['spend'] = result.spend;
                         console.log(data.blueprint);
@@ -106,7 +106,7 @@ class BluePrints {
             },
             (data, cb)=>{
                 if( !data.nodes.length ) {
-                    this._toolsNodes.createNodesForTools(data.blueprint.id, data.tools).then((result)=>{
+                    this._toolsNodes.createNodesForTools( data.blueprint.id, data.tools, data.blueprint.domain ).then((result)=>{
                         console.log("res");
                         data.nodes = result;
                         cb(null, data);

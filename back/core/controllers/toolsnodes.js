@@ -318,7 +318,55 @@ class ToolsNodes {
         const blueprintId = req.body.blueprintId;
 
         if (domain || blueprintId) {
-            ToolsServices.getDomainTool(domain)
+            async.waterfall([
+                (cb)=>{
+                    ToolsServices.getDomainTool(domain)
+                        .then((result)=>{  
+                            cb(null, result);
+                        })
+                        .catch((err) => {
+                            cb(err, null);
+                        })
+                }, (atool, cb) =>{
+                    // console.log(atool);
+                    ToolsServices.getToolsOfDomain(domain).then((result) => {
+                        const list = result.tech;
+                        list.push(atool);
+                        cb(null, list);
+                    }).catch((err) => {
+                        cb(null, [atool]);
+                    })
+                }, 
+                (toolsList, cb) => {
+                    this.tools.proceedTools(toolsList).then(pTools => {
+                        cb(null, pTools);
+                    }).catch(err => {
+                        cb(err, null);
+                    });
+                },
+                (toolsList, cb) => {
+                    // console.log( toolsList );
+                    this.model.filterToolsByNodes(blueprintId, toolsList).then(data=>{
+                        cb(null, data);
+                    }).catch(err=>{ cb(err, null); });
+                }
+            ], function(err, fulldata){
+                // 5. return data
+                if(err) {
+                    console.log(err);
+                    res.json({
+                        result: "Error",
+                        message: err.message
+                    });
+                } else {
+                    res.json({
+                        result: fulldata,
+                    });
+    
+                }
+            });
+
+            /*ToolsServices.getDomainTool(domain)
             .then((result)=>{
                 this.tools.proceedTools([result]).then(atool => {
                     let _tool = atool[0];
@@ -349,7 +397,7 @@ class ToolsNodes {
                     result: "Error",
                     message: err.message
                 });
-            });
+            });*/
         } else {
             res.status(400).json({
                 result: "Error",

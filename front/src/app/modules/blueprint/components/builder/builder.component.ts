@@ -47,6 +47,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() multiselect: Observable<boolean>;
   @Input() showGrid: Observable<boolean>;
   @Input() snapGrid: Observable<boolean>;
+  @Input() domainsList: String[];
   isMultiselect = false;
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
@@ -495,7 +496,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const dialogRef = this.detailsDialog.open(NodeDetailsComponent, {
       width: '620px',
-      data: { node }
+      data: { node, domainsList: this.domainsList }
     });
 
     window['dataLayer'].push({
@@ -959,6 +960,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
     } else {
+      node.hide = true;
       this.doHideNode(node, false);
     }
   }

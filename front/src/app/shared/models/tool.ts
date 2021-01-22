@@ -28,6 +28,7 @@ export interface BluePrintTool {
         itemId: string,
         direction: string
     } >;
+    domain: string;
 }
 
 export interface BluePrint {
