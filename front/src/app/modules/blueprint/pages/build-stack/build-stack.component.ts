@@ -25,6 +25,7 @@ import * as d3 from 'd3';
 import { environment } from 'src/environments/environment';
 import { DrawArrow } from 'src/app/shared/models/draws-item';
 
+const maxNewVisibleItems = 40;
 
 
 @Component({
@@ -755,24 +756,62 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        // result 
+        let listToHide = [];
+        let newItems = 0;
+
         result.forEach(nodeItem => {
+          let oldTool = false;
+          if (nodeItem.end) {
+            const endDate = new Date(nodeItem.end);
+            const diff = Date.now() - endDate.getTime();
+            if (diff > 7776000000) {
+              oldTool = true;
+            }
+          }
+
+          if (nodeItem.tool.tag && nodeItem.tool.tag === 'domain') {
+            this.domainsList.push(nodeItem.tool.name);
+            window['dataLayer'].push({
+              event: 'stackbuilder.domain.add',
+              node: nodeItem,
+              tool: nodeItem.tool,
+            });
+          }
+          console.log(this.verifyOrderToHide(nodeItem.tool.categories), forbiddenTags.includes(nodeItem.tool.tag), oldTool, newItems >= maxNewVisibleItems);
+          if (( this.verifyOrderToHide(nodeItem.tool.categories) || forbiddenTags.includes(nodeItem.tool.tag) ) || 
+              newItems >= maxNewVisibleItems ) {
+            nodeItem.hide = true;
+            listToHide.push( nodeItem.id );
+          } else {
+            newItems++;
+          }
+
           this.nodes[nodeItem.id] = nodeItem;
           window['dataLayer'].push({
             event: 'stackbuilder.node.loaded',
             node: nodeItem,
             tool: nodeItem.tool,
           });
-          window['dataLayer'].push({
-            event: 'stackbuilder.node.added',
-            node: result,
-            tool: result.tool,
-            stack: this.blueprint
-          });
 
+          if (!nodeItem.hide) {
+            window['dataLayer'].push({
+              event: 'stackbuilder.node.added',
+              node: result,
+              tool: result.tool,
+              stack: this.blueprint
+            });
+          }
         });
         
         this.addedNewNode$.next(result);
-        
+        if (listToHide.length) {
+          this.service.hideNodes(listToHide).subscribe((data) => {
+            /* this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain });
+            this.changedCategories$.next( this.categories );
+            this.getArrowsList(); */
+          });
+        }
         /*window['dataLayer'].push({
           event: 'stackbuilder.node.loaded',
           node: result,

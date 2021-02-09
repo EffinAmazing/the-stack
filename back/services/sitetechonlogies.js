@@ -11,9 +11,10 @@ async function getTestDataFromFile(domain){
     let url = `https://api.builtwith.com/v14/api.json?KEY=${API_KEY}&LOOKUP=${domain}`;
 
     if (process.env.NODE_ENV !== "prod") {
-        url = `http://localhost:9000/cashed/effinamazing.com.json`;
+        // url = `http://localhost:9000/cashed/effinamazing.com.json`;
         // url = `http://localhost:9000/cashed/forum.xda-developers.com-error.json`;
         // url = `http://localhost:9000/cashed/zulily.com.json`;
+        url = `http://localhost:9000/cashed/bitbucket.org.json`;
     }
     // let pathURI = path.resolve("../test-data/", 'effinamazing.com.json');
     let response = await axios({

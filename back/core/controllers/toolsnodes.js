@@ -346,7 +346,7 @@ class ToolsNodes {
                 },
                 (toolsList, cb) => {
                     // console.log( toolsList );
-                    this.model.filterToolsByNodes(blueprintId, toolsList).then(data=>{
+                    this.model.filterToolsByNodes(blueprintId, toolsList, domain).then(data=>{
                         cb(null, data);
                     }).catch(err=>{ cb(err, null); });
                 }

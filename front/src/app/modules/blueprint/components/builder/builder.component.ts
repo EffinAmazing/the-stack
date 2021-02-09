@@ -73,6 +73,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   isDrawingArrow = false;
   useSnapGrid = true;
   // subscriptions
+  indexNode = 0;
   nodesSubscription: Subscription;
   arrowSubscription: Subscription;
   addedNewNodeSubcription: Subscription;
@@ -138,8 +139,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
                 item.position.y = 0;
                 item.position.x = Math.floor(maxItems / 2) * offsetX;
               } else {
-                const yIndex = Math.floor(index / maxItems);
-                const xIndex = (index - yIndex * maxItems);
+                const yIndex = Math.floor(this.indexNode / maxItems);
+                const xIndex = (this.indexNode - yIndex * maxItems);
                 item.position.y = (yIndex + 1) * offsetY + Math.floor(offsetY * 0.5);
                 item.position.x = xIndex * offsetX;
                 window['dataLayer'].push({
@@ -149,7 +150,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
                 });
               }
               arrToChange.push({nodeId: item.id, position: item.position});
-              index++;
+              this.indexNode++;
             } else {
               isNewStack = false;
             }
@@ -391,20 +392,26 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (res) {
         res.forEach((item, index) => {
           const existNode = this.showNodes.find(node => node.id === item.id);
+          if (item.hasOwnProperty('hide') && item.hide ) {
+            return true;
+          }
+          console.log(item);
           if (!existNode) {
             item.hide = false;
             if (typeof item.position.x !== 'number') {
               item.position.y = 0;
-              const yIndex = Math.floor(index / maxItems);
-              let xIndex = (index - yIndex * maxItems);
+              const yIndex = Math.floor(this.indexNode / maxItems);
+              let xIndex = (this.indexNode - yIndex * maxItems);
               if (xIndex === Math.floor(maxItems / 2) && yIndex === 0) {
                 xIndex++;
               }
               item.position.y = (start - yIndex) * offsetY + Math.floor(offsetY * 0.5);
               item.position.x = xIndex * offsetX;
+              console.log(yIndex, xIndex);
             }
 
             this.showNodes.push(item);
+            this.indexNode++;
           }
         });
         /* */
