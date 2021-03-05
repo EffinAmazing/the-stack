@@ -4,6 +4,7 @@
         <mat-label>Domain name:</mat-label>
         <input matInput (input)="handleInput($event)" cdkFocusInitial [disabled]="isProcced" />
     </mat-form-field>
+    <mat-spinner *ngIf="isProcced" [diameter]="60"></mat-spinner>
 </div>
 <div mat-dialog-actions direction="right">
     <button #cancelButton class="stack-button" (click)="onNoClick()"> <mat-icon>clear</mat-icon> Cancel</button> 

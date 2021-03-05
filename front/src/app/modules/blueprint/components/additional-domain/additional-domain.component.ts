@@ -29,13 +29,15 @@ export class AdditionalDomainComponent {
   }
 
   proccedAddTool(){
-    this.isProcced = true;
-    this.service.addDomainTool(this.domain, this.data.blueprint.id).toPromise().then(res => {
-      this.dialogRef.close(res);
-    }).catch(err => {
-      console.log(err);
-      this.dialogRef.close();
-    })
+    if (!this.isProcced) {
+      this.isProcced = true;
+      this.service.addDomainTool(this.domain, this.data.blueprint.id).toPromise().then(res => {
+        this.dialogRef.close(res);
+      }).catch(err => {
+        console.log(err);
+        this.dialogRef.close();
+      });
+    }
   }
   
   onNoClick(): void {

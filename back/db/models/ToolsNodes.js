@@ -3,6 +3,103 @@ var async = require('async');
 var AbstaractModel = require('./_abstract');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
+const BlockedCategories = [
+    'Copyright',
+    'CSS Media Queries',
+    'Document Encoding',
+    'Browser Specific',
+    'Compatibility',
+    'CSS',
+    'Design Framework',
+    'DocType Declaration',
+    'Meta Tags',
+    'Mobile Specific',
+    'SSL Seals',
+    'Domain Parking',
+    'Application',
+    'Controls',
+    'Magento Theme',
+    'Node.js',
+    'NodeJS',
+    'PHP Theme',
+    'Plugin',
+    'Programming Language',
+    'Schema',
+    'Theme',
+    'Web App',
+    'WordPress Theme',
+    'AJAX',
+    'Animation',
+    'Charting',
+    'Compatibility',
+    'Cookie Management',
+    'Error Tracking',
+    'Fingerprint',
+    'fingerprinting',
+    'Forms and Surveys',
+    'Framework',
+    'Image Library',
+    'JavaScript Library',
+    'jQuery Plugin',
+    'Lightbox',
+    'Media',
+    'Slider',
+    'UI',
+    'Language',
+    'DDoS Protection',
+    'Enterprise DNS',
+    'SaaS DNS',
+    'Module',
+    'Operating System',
+    'Protocol',
+    'Robots.txt',
+    'SEO Header Tag',
+    'SEO Meta Tag',
+    'SEO Title Tag',
+    'Shipping Providers',
+    'Extended Validation',
+    'Multi Domain',
+    'Not Trusted',
+    'Root Authority',
+    'Server Gated Cryptography',
+    'Wildcard',
+    'Syndication Techniques',
+    'Edge Delivery Network',
+    'Advertising',
+    'Bookings',
+    'Homepage Link',
+    'Web Master Registration',
+    'Application Server',
+    'Caching Proxy',
+    'Linux Web Server',
+    'Windows Web Server',
+    'WordPress Plugins',
+    'Video Players',
+    'Standard',
+    'Fonts',
+    'Digital Video Ads',
+    'Audience Targetg',
+    'Facebook Exchange',
+    'Data Management Platform',
+    'Demand-side Platform',
+    'Ad network',
+    'Ad Exchange',
+    'Multi-channel',
+    'Payment Currency',
+    'Open source',
+    'Plug in / Module',
+    'Transaction email',
+    'Ad server',
+    'Application Performance',
+    'Site Search',
+    'Social Sharing',
+    'Business Email Hosting',
+    'Fraud Prevention',
+    'Transactional Email',
+    'Login',
+    'Visitor Count Tracking'
+]
+
 class ToolsNodesModel extends AbstaractModel {
     constructor(){
         super('blueprints_tools');
@@ -87,56 +184,80 @@ class ToolsNodesModel extends AbstaractModel {
         return mappedDocs;
     }
 
+    async isBlockedCat(categories) {
+        let isInArray = false;
+        if (!categories) return true;
+        if ( categories && categories.length === 0 )  return true;
+
+        for await (const cat of BlockedCategories) {
+            if (categories.includes(cat)) {
+                isInArray = true;
+                break;
+            }
+        }
+
+        return isInArray;
+    }
+
     async filterToolsByNodes(blueprintId, tools, domain = '') {
         let filteredTools = [];
         let filteredNodes = [];
         const self = this;
+        let counter = 0;
         let dataList = await async.map(tools, (item, cb)=>{ 
             self.modelDB.find({ blueprintId: blueprintId, toolId: item.id }).then((docs) => {
                 // console.log('find node for tool: ' + item.name, doc );
                 if (docs.length > 0) {
                     cb(null, docs);
                 } else {
-                    let data = {
-                        blueprintId: blueprintId,
-                        toolId: item.id
-                    }
-                   // console.log(' find error ', err);
-                    if(domain) data['domain'] = domain;
-                    if(item.start) data['start'] = new Date(item.start);
-                    if(item.end) data['end'] = new Date(item.end);
-                    self.modelDB.create(data).then((docN) => {
-                        let node = self.mapDocument(docN);
-                        console.log(' create node ' + docN._id + ' for tool: ' + item.name);
-                        console.log(docN);
-                        node.tool = item;
-                        filteredNodes.push( node );
-                        cb(null, docN);
-                    }).catch(error => {
-                        console.log(' create error ', error );
-                        cb(error, null);
-                    });
+                    
+                    self.isBlockedCat(item.categories).then(isInArray =>{
+                        let data = {
+                            blueprintId: blueprintId,
+                            toolId: item.id,
+                            hide: isInArray
+                        }
+                        console.log(' -------------- save  ------------- ', counter);
+                        if(domain) data['domain'] = domain;
+                        if(item.start) data['start'] = new Date(item.start);
+                        if(item.end) data['end'] = new Date(item.end);
+                        self.modelDB.create(data).then((docN) => {
+                            let node = self.mapDocument(docN);
+                            console.log(' create node ' + docN._id + ' for tool: ' + item.name);
+                            // console.log(docN);
+                            node.tool = item;
+                            filteredNodes.push( node );
+                            cb(null, docN);
+                        }).catch(error => {
+                            console.log(' create error ', error );
+                            cb(error, null);
+                        });
+                    }).catch(err=>{
+                        console.log(' create error ', err );
+                        cb(err, null);
+                    })
                 }
             }).catch(err => {
                 let data = {
                     blueprintId: blueprintId,
                     toolId: item.id
                 }
-               // console.log(' find error ', err);
+                console.log(' find error ', err, counter);
                 
                 if(item.start) data['start'] = new Date(item.start);
                 if(item.end) data['end'] = new Date(item.end);
                 self.modelDB.create(data).then((docN) => {
                     let node = self.mapDocument(docN);
                     console.log(' create node ' + docN._id + ' for tool: ' + item.name);
-                    console.log(docN);
+                    // console.log(docN);
                     node.tool = item;
                     filteredNodes.push( node );
                 }).catch(error => {
                     console.log(' create error ', error );
                     cb(error, null);
                 });
-            })
+            });
+            counter++;
         });
 
         return filteredNodes;

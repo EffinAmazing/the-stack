@@ -778,7 +778,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
               tool: nodeItem.tool,
             });
           }
-          console.log(this.verifyOrderToHide(nodeItem.tool.categories), forbiddenTags.includes(nodeItem.tool.tag), oldTool, newItems >= maxNewVisibleItems);
+          // console.log(this.verifyOrderToHide(nodeItem.tool.categories), forbiddenTags.includes(nodeItem.tool.tag), oldTool, newItems >= maxNewVisibleItems);
           if (( this.verifyOrderToHide(nodeItem.tool.categories) || forbiddenTags.includes(nodeItem.tool.tag) ) || 
               newItems >= maxNewVisibleItems ) {
             nodeItem.hide = true;

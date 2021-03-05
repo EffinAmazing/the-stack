@@ -22,7 +22,7 @@ class BluePrints {
         const user = req.user;
         console.log(' ************* getDomainTools ************* ');
         // 
-        let domain = req.query.domain || req.body.domain
+        let domain = req.query.domain || req.body.domain;
         async.waterfall([
             (cb)=>{
                 // 0. check domain

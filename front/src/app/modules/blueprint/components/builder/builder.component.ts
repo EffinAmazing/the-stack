@@ -389,6 +389,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.addedNewNodeSubcription = this.addedNewNode.subscribe(res => {
       const start = 10;
+
+      let arrToChange = [];
       if (res) {
         res.forEach((item, index) => {
           const existNode = this.showNodes.find(node => node.id === item.id);
@@ -407,13 +409,29 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
               }
               item.position.y = (start - yIndex) * offsetY + Math.floor(offsetY * 0.5);
               item.position.x = xIndex * offsetX;
-              console.log(yIndex, xIndex);
+              
+              arrToChange.push({nodeId: item.id, position: item.position});
+              // console.log(yIndex, xIndex);
             }
 
             this.showNodes.push(item);
             this.indexNode++;
           }
         });
+
+        if (arrToChange.length) {
+
+          const promises = arrToChange.map(async (props) => {
+            props.disableHistory = true;
+            props.disableGTM = true;
+            this.positionNodeChanged.emit(props);
+            return props;
+          });
+
+          Promise.all(promises).then((result) => { }).catch((err) => {
+            console.log(err);
+          });
+        }
         /* */
       }
     });
