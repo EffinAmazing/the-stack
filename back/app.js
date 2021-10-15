@@ -24,7 +24,7 @@ let optionsSSL = {
     cert: fs.readFileSync('cert.pem')
 }
 
-if(process.env.NODE_ENV === 'prod') {
+if(process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'prod') {
     // Certificate
     const privateKey = fs.readFileSync('/etc/letsencrypt/live/mtsb-api.mcgaw.io/privkey.pem', 'utf8');
     const certificate = fs.readFileSync('/etc/letsencrypt/live/mtsb-api.mcgaw.io/cert.pem', 'utf8');
