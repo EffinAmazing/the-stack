@@ -52,12 +52,28 @@ export class AddNewToolDialogComponent {
         this.runedTimeout = false;
         console.log(this.toolSearchName);
         this.service.getToolsList(this.toolSearchName, this.data.blueprintId).toPromise().then((result) => {
-          this.tools = result;
+          this.tools = this.parseResults(result);
+          console.log(this.tools);
           this.toolsDataLoaded = true;
         }).catch(err => {
           console.log(err);
         });
       }
+    }
+    
+    private parseResults(results) {
+      //we do not want to load WebSite category tools here
+      let parsedResults = [];
+      
+      for (let i = 0; i < results.length; i++) {
+        if (results[i].categories && results[i].categories.includes('WebSite')) {
+          //exclude
+        } else {
+          parsedResults.push(results[i]);
+        }
+      }
+
+      return parsedResults;
     }
 
     public handleCreateNewTool() {
