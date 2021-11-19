@@ -57,7 +57,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   domain = '';
   isError = false;
   isWaiting = false;
-  errMessage = 'Something went wrong plaese check domain and try again';
+  errMessage = 'Something went wrong, please check domain and try again.';
+  errMessageReturned = '';
   isMultiSelectActive = false;
   showGrid =  false;
   snapGrid = true;
@@ -117,7 +118,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   ngOnInit(): void {
     if (this.domain) {
       if (this.authUser) {
-        this.stackRequest = this.service.postDomainTools(this.domain).subscribe((data) => {
+        this.stackRequest = this.service.postDomainTools(this.domain).subscribe((data) => {   
+          if (typeof data === 'string' && String(data).includes('Error: ')) {
+            this.errMessageReturned = data;
+          }                
           if (!this.toolsLoaded) {
             this.proceedBluePrintData(data);
             this.toolsLoaded = true;
@@ -125,6 +129,9 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
         }, err => this.isError = true );
       } else {
         this.stackRequest = this.service.getDomainTools(this.domain).subscribe((data) => {
+          if (typeof data === 'string' && String(data).includes('Error: ')) {
+            this.errMessageReturned = data;
+          }
           if (!this.toolsLoaded) {
             this.proceedBluePrintData(data);
             this.toolsLoaded = true;
@@ -133,6 +140,9 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       }
     } else if (this.id) {
       this.stackRequest = this.service.getBlueprint(this.id).subscribe((data) => {
+        if (typeof data === 'string' && String(data).includes('Error: ')) {
+          this.errMessageReturned = data;
+        }
         if (!this.toolsLoaded) {
           this.proceedBluePrintData(data);
           this.toolsLoaded = true;
@@ -147,7 +157,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     if (typeof data === 'string') {
       return this.isError = true;
     }
-    // console.log(data);
+   
+    //console.log(data);
     let hidden = 0;
     this.blueprint = data.blueprint;
     data.nodes.forEach((item) => {
