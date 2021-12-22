@@ -36,11 +36,9 @@ sudo apt-get install certbot
 ```
 **Second**, you will generate an SSL certificate with certbot:
 ```sh
-certbot certonly --manual
+certbot -d mtsb-api.mcgaw.io --manual --preferred-challenges dns certonly
 ```
-following by instruction in terminal it will create verification code ([cerbotCode] in follow) and filname of file which need to include this code ([filename] in follow), then create this file by path _/back/public/.well-known/acme-challenge/[filename]_
-and then complete verification 
-it will genarate SSL keys, you will need path to three files 
+following by instruction in terminal it will create verification code that you will need to include as a DNS TXT record in the backend domain. After doing so, it will genarate SSL keys, you will need path to three files 
 1. _[pathKeys]/[domainame]/privkey.pem_
 2. _[pathKeys]/[domainame]/cert.pem_
 3. _[pathKeys]/[domainame]/chain.pem_
