@@ -11,7 +11,7 @@ async function getTestDataFromFile(domain){
     let url = `https://api.builtwith.com/v14/api.json?KEY=${API_KEY}&LOOKUP=${domain}`;
 
    if (process.env.NODE_ENV !== "production") {
-        url = `http://localhost:9000/cashed/effinamazing.com.json`;
+        //url = `http://localhost:9000/cashed/effinamazing.com.json`;
         // url = `http://localhost:9000/cashed/forum.xda-developers.com-error.json`;
         // url = `http://localhost:9000/cashed/zulily.com.json`;
         // url = `http://localhost:9000/cashed/bitbucket.org.json`;
@@ -26,7 +26,13 @@ async function getTestDataFromFile(domain){
 
   
     let A = response.data;
+
+    //TODO
+    //error handling here
     let Technologies = A.Results[0].Result.Paths[0].Technologies;
+
+    console.log('API Response');
+    console.log(response);
     
     const results = await async.map(Technologies, (item, cb)=>{
         cb(null, { 

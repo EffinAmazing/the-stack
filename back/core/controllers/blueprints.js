@@ -26,27 +26,36 @@ class BluePrints {
         async.waterfall([
             (cb)=>{
                 // 0. check domain
+
                 axios.get('http://' + domain).then((data) => {
                     cb(null)
                 }).catch((err)=>{
-                    //TODO
-                    //improve error handling here, specifically, improve error message if axios fails
-                    if (err.response) {
+                    
+                    console.log('err');console.log(err);
+
+                    //lets expose errors clientside so we can 
+                    //get better feedback
+                    let returnErrMessage = "Website Not Found";
+  
+                    if (err.response) {                        
                         // The request was made and the server responded with a status code
                         // that falls out of the range of 2xx
                         console.log(err.response.data);
                         console.log(err.response.status);
                         console.log(err.response.headers);
-                      } else if (err.request) {
+                        returnErrMessage += ': '+err.response.status+' '+err.response.statusText;
+                      } else if (err.request) {                        
                         // The request was made but no response was received
                         // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
                         // http.ClientRequest in node.js
-                        console.log(err.request);
-                      } else if (err.message) {
+                        console.log('Err: The request was made but no response was received');
+                        returnErrMessage += ': The request was made but no response was received.';
+                      } else if (err.message) {                        
                         // Something happened in setting up the request that triggered an Error
                         console.log('Error', err.message);
-                      }
-                    cb(new Error("Website Is Not Found"));
+                        returnErrMessage += ': '+err.message;
+                      } 
+                    cb(new Error(returnErrMessage));
                 })
                 // cb(null);
             },

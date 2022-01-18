@@ -583,6 +583,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     });
 
     dialogRef.afterClosed().subscribe(result => {
+      console.log(result);
       const listToCreate = [];
       const listToUnhide = [];
       if (result) {
@@ -646,8 +647,31 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   async proceedAddNewNodes(listToCreate, listToUnhide, tools) {
+    console.log(listToCreate, listToUnhide, tools);
     let nodes = [];
     let unhideNodes = [];
+
+    //TODO
+    //check if any node in this list is already unhidden. if so, remove it from listToUnhide and add to listToCreate
+    /*if (listToUnhide.length) {       
+      let processingArray = [];
+      listToUnhide.forEach(tool_id => {
+        if (this.nodes[tool_id] && !this.nodes[tool_id].hide) {
+          console.log('tool exists and unhidden');
+          console.log(this.nodes[tool_id]);
+          let clonedTool = this.nodes[tool_id];
+          clonedTool.position.x = 0;
+          clonedTool.position.y = 600;
+          listToCreate.push(clonedTool);
+        } else if (this.nodes[tool_id] && this.nodes[tool_id].hide) {
+          console.log('tool exists and hidden');
+          processingArray.push(tool_id);
+        }
+      });
+
+      listToUnhide = [...processingArray];      
+    }*/
+
     if (listToCreate.length) {
       nodes = await this.service.addNewNodeItems(listToCreate).toPromise();
       // console.log(nodes);
@@ -669,7 +693,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       this.nodesList = [...this.nodesList, ...nodesIds];
     }
 
-    if (listToUnhide.length) {
+    if (listToUnhide.length) {      
       const res = await this.service.unhideNodes(listToUnhide).toPromise();
       unhideNodes = listToUnhide.map((nodeId) => {
         this.nodes[nodeId].hide = false;
