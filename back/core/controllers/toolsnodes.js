@@ -8,7 +8,7 @@ const ToolsServices = require('../../services/sitetechonlogies');
 const async = require('async');
 
 class ToolsNodes {
-    constructor(){
+    constructor() {
         this.model = new ToolsNodesModel();
         this.tools = new ToolsModels();
         this.users = new UserModel();
@@ -16,19 +16,20 @@ class ToolsNodes {
         this.categories = new CategoriesModel();
     }
 
-    update(req, res, next){
+    update(req, res, next) {
         let data = req.body.data;
         let blueprintId = req.body.blueprintId;
         const referer = req.headers.referer;
         let id = req.params.id;
         const blueprints = this.blueprints;
         const user = req.user;
-        if( data && id ){
-            this.model.updateOne(id, data).then((result)=>{
+        if (data && id) {
+
+            this.model.updateOne(id, data).then((result) => {
                 let owners = [];
                 let trainedOns = [];
-                if ( (data.owner || data.trainedOn) && user ) {
-                    if (data.owner) {   
+                if ((data.owner || data.trainedOn) && user) {
+                    if (data.owner) {
                         owners = data.owner.split(",");
                     }
                     if (data.trainedOn) {
@@ -36,14 +37,14 @@ class ToolsNodes {
                     }
                     let emails = owners.concat(trainedOns);
                     this.users.verifyListBluePrintConnection(emails, blueprintId, user._id)
-                        .then((list)=>{
+                        .then((list) => {
                             console.log(result);
                             async.filter(list, (item, callback) => {
                                 callback(null, item.needSendInvite)
-                            }, function(err, filtered) {
+                            }, function (err, filtered) {
                                 blueprints.sendInviteUserToBluePrint(filtered, referer, blueprintId)
-                                .then(result=>{  console.log(result); })
-                                .catch(err=> { console.log(err); });
+                                    .then(result => { console.log(result); })
+                                    .catch(err => { console.log(err); });
                             });
                         })
                         .catch(err => {
@@ -52,45 +53,46 @@ class ToolsNodes {
                 }
                 //
                 res.json({
-                    result: result
+                    result: result,
+                    abc: 'checking data',
                 })
-            }).catch((err)=>{
-                res.json({ 
+            }).catch((err) => {
+                res.json({
                     result: "Error",
                     message: err.message
                 })
             })
         } else {
-            res.json({ 
+            res.json({
                 result: "Error",
                 message: "incorrect data"
             })
         }
     }
 
-    hidelist(req, res, next){
+    hidelist(req, res, next) {
         let ids = req.body.ids;
-        
+
         if (ids) {
             this.model.hideList(ids).then((result) => {
                 res.json({
                     result: result
                 })
-            }).catch((err)=>{
-                res.json({ 
+            }).catch((err) => {
+                res.json({
                     result: "Error",
                     message: err.message
                 })
             })
         } else {
-            res.status(400).json({ 
+            res.status(400).json({
                 result: "Error",
                 message: "incorrect data"
             })
         }
     }
 
-    unhideList(req, res, next ){
+    unhideList(req, res, next) {
         let ids = req.body.ids;
 
         if (ids) {
@@ -98,14 +100,14 @@ class ToolsNodes {
                 res.json({
                     result: result
                 })
-            }).catch((err)=>{
-                res.json({ 
+            }).catch((err) => {
+                res.json({
                     result: "Error",
                     message: err.message
                 })
             })
         } else {
-            res.status(400).json({ 
+            res.status(400).json({
                 result: "Error",
                 message: "incorrect data"
             })
@@ -116,11 +118,11 @@ class ToolsNodes {
         let data = req.body.data;
 
         if (data) {
-            this.model.addOne(data).then((result)=>{
+            this.model.addOne(data).then((result) => {
                 res.json({
                     result: result
                 })
-            }).catch(err=>{
+            }).catch(err => {
                 res.status(500).json({
                     result: "Error",
                     message: err.message
@@ -138,11 +140,11 @@ class ToolsNodes {
         let dataList = req.body.data;
 
         if (dataList) {
-            this.model.addListNodes(dataList).then((result)=>{
+            this.model.addListNodes(dataList).then((result) => {
                 res.json({
                     result: result
                 })
-            }).catch(err=>{
+            }).catch(err => {
                 res.status(500).json({
                     result: "Error",
                     message: err.message
@@ -165,16 +167,16 @@ class ToolsNodes {
             // console.log(node, tool, icon);
             async.waterfall([
                 (cb) => {
-                    this.tools.createOne(toolData, icon).then((res) =>{ cb(null, res) }).catch(err => { cb(err, null) });
+                    this.tools.createOne(toolData, icon).then((res) => { cb(null, res) }).catch(err => { cb(err, null) });
                 },
-                (toolDoc, cb) =>{
+                (toolDoc, cb) => {
                     nodeData['toolId'] = toolDoc.id;
                     this.model.addOne(nodeData).then(theNode => {
                         theNode['tool'] = toolDoc;
                         cb(null, theNode)
                     }).catch(err => { cb(err, null) })
                 }
-            ], function(err, result) {
+            ], function (err, result) {
                 if (err) {
                     res.status(500).json({
                         result: "Error",
@@ -186,7 +188,7 @@ class ToolsNodes {
                     })
                 }
             })
-            
+
         } else {
             res.status(400).json({
                 result: "Error",
@@ -195,14 +197,14 @@ class ToolsNodes {
         }
     }
 
-    updateCustom (req, res, next) {
+    updateCustom(req, res, next) {
         const nodeData = req.body.node;
         const toolData = req.body.tool;
         const toolId = req.body.toolId;
         const ID = req.params.id
         const icon = req.files.icon;
 
-        if ( ID && nodeData && toolData && toolId ) {
+        if (ID && nodeData && toolData && toolId) {
             async.waterfall([
                 (cb) => {
                     this.model.updateOne(ID, nodeData).then(doc => { cb(null, doc) }).catch(err => { cb(err, null) });
@@ -211,7 +213,7 @@ class ToolsNodes {
                     this.tools.updateTool(toolId, toolData).then(toolDoc => {
                         nodeDoc['tool'] = toolDoc;
                         cb(null, nodeDoc);
-                    }).catch(err => { console.log(err);  cb(err, null) });
+                    }).catch(err => { console.log(err); cb(err, null) });
                 },
                 (nodeDoc, cb) => {
                     if (icon) {
@@ -223,7 +225,7 @@ class ToolsNodes {
                         cb(null, nodeDoc);
                     }
                 }
-            ], function(err, result) {
+            ], function (err, result) {
                 if (err) {
                     res.status(500).json({
                         result: "Error",
@@ -243,7 +245,7 @@ class ToolsNodes {
         }
     }
 
-    getListOfTools( req, res, next  ){
+    getListOfTools(req, res, next) {
         const name = req.query.name;
         const blueprintId = req.query.blueprint;
         let limit = req.query.limit;
@@ -251,11 +253,11 @@ class ToolsNodes {
         if (name && blueprintId) {
             async.waterfall([
                 // 1. find tools with simular name
-                (callback)=>{
+                (callback) => {
 
-                    this.tools.getByName(name, limit, offset).then(result=>{
+                    this.tools.getByName(name, limit, offset).then(result => {
                         callback(null, result);
-                    }).catch(err=>{
+                    }).catch(err => {
                         callback(err);
                     })
                 },
@@ -288,23 +290,23 @@ class ToolsNodes {
         }
     }
 
-    getListOfCategories( req, res, next ) {
+    getListOfCategories(req, res, next) {
         const name = req.query.name;
         let limit = req.query.limit;
         let offset = req.query.offset;
-        if ( name || name === '' ) {
+        if (name || name === '') {
             this.categories.getList(name, offset, limit)
-            .then( r => {
-                res.json({
-                    result: r
+                .then(r => {
+                    res.json({
+                        result: r
+                    })
                 })
-            })
-            .catch(err=>{
-                res.status(500).json({
-                    result: "Error",
-                    message: err.message
+                .catch(err => {
+                    res.status(500).json({
+                        result: "Error",
+                        message: err.message
+                    });
                 });
-            });
         } else {
             res.status(400).json({
                 result: "Error",
@@ -319,15 +321,15 @@ class ToolsNodes {
 
         if (domain || blueprintId) {
             async.waterfall([
-                (cb)=>{
+                (cb) => {
                     ToolsServices.getDomainTool(domain)
-                        .then((result)=>{  
+                        .then((result) => {
                             cb(null, result);
                         })
                         .catch((err) => {
                             cb(err, null);
                         })
-                }, (atool, cb) =>{
+                }, (atool, cb) => {
                     // console.log(atool);
                     ToolsServices.getToolsOfDomain(domain).then((result) => {
                         const list = result.tech;
@@ -336,7 +338,7 @@ class ToolsNodes {
                     }).catch((err) => {
                         cb(null, [atool]);
                     })
-                }, 
+                },
                 (toolsList, cb) => {
                     this.tools.proceedTools(toolsList).then(pTools => {
                         cb(null, pTools);
@@ -346,13 +348,13 @@ class ToolsNodes {
                 },
                 (toolsList, cb) => {
                     // console.log( toolsList );
-                    this.model.filterToolsByNodes(blueprintId, toolsList, domain).then(data=>{
+                    this.model.filterToolsByNodes(blueprintId, toolsList, domain).then(data => {
                         cb(null, data);
-                    }).catch(err=>{ cb(err, null); });
+                    }).catch(err => { cb(err, null); });
                 }
-            ], function(err, fulldata){
+            ], function (err, fulldata) {
                 // 5. return data
-                if(err) {
+                if (err) {
                     console.log(err);
                     res.json({
                         result: "Error",
@@ -362,7 +364,7 @@ class ToolsNodes {
                     res.json({
                         result: fulldata,
                     });
-    
+
                 }
             });
 
@@ -404,7 +406,7 @@ class ToolsNodes {
                 message: "incorrect data"
             });
         }
-    }   
+    }
 }
 
 module.exports = ToolsNodes;

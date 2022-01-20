@@ -1,89 +1,94 @@
-.node-icon{
-    height: 50px;
-    vertical-align: middle;
+.node-icon {
+  height: 50px;
+  vertical-align: middle;
 }
 .add-button-owner {
-    margin-left: 10px;
+  margin-left: 10px;
 }
-.item-owners{
-    display: inline-flex;
-    padding: 3px 3px 3px 15px;
-    margin: 3px;
-    background: #ccc;
-    border-radius: 20px;
+.item-owners {
+  display: inline-flex;
+  padding: 3px 3px 3px 15px;
+  margin: 3px;
+  background: #ccc;
+  border-radius: 20px;
 }
 .icon-item-owners {
-    cursor: pointer;
+  cursor: pointer;
 }
-.dialog-categories-list, .dialog-description-box{
-    margin: 0 -24px;
-    border-top: solid 1px #dcdbdc;
-    padding: 15px 25px;
-    font-size: 18px;
-    color: rgb(37, 40, 45);
-    line-height: 1.333;
+.dialog-categories-list,
+.dialog-description-box {
+  margin: 0 -24px;
+  border-top: solid 1px #dcdbdc;
+  padding: 15px 25px;
+  font-size: 18px;
+  color: rgb(37, 40, 45);
+  line-height: 1.333;
 }
-.dialog-categories-list .info-paragraph,  .dialog-description-box .info-paragraph {
-    font-size: 18px;
-    font-weight: 300;
+.dialog-categories-list .info-paragraph,
+.dialog-description-box .info-paragraph {
+  font-size: 18px;
+  font-weight: 300;
 }
 .dialog-categories-list .info-paragraph .data {
-    color: rgb(152, 160, 172);
+  color: rgb(152, 160, 172);
 }
-.list-owners{
-    padding: 5px 0;
+.list-owners {
+  padding: 5px 0;
 }
-.nodeData  {
-    .info-paragraph{
-        .title {
-            font-size: 18px;
-            color: rgb(37, 40, 45);
-            line-height: 1.333;
-        }
-
-        .data {
-            font-size: 18px;
-            position: relative;
-        }
-
-        .mat-form-field {
-            width: 100%;
-        }
-
-        .add-button-owner{
-            position: absolute;
-            right: 0;
-            bottom: 22px;
-        }
-    }
-
-}
-.info-paragraph{
-    padding: 0;
-    display: flex;
-    font-size: 14px;
-    align-items: center;
-
-    .data {
-        input{
-            padding: 0;
-            border: none;
-        }
-
-        .mat-form-field.full-width {
-            width: 100%;
-        }
-    }
-
-    .title{
-        width: 180px;
-        font-weight: 600;
+.nodeData {
+  .info-paragraph {
+    .title {
+      font-size: 18px;
+      color: rgb(37, 40, 45);
+      line-height: 1.333;
     }
 
     .data {
-        width: 90%;
+      font-size: 18px;
+      position: relative;
     }
+
+    .mat-form-field {
+      width: 100%;
+    }
+
+    .add-button-owner {
+      position: absolute;
+      right: 0;
+      bottom: 22px;
+    }
+  }
 }
-.mat-dialog-actions{
-    justify-content: flex-end;
+.info-paragraph {
+  padding: 0;
+  display: flex;
+  font-size: 14px;
+  align-items: center;
+
+  .data {
+    input {
+      padding: 0;
+      border: none;
+    }
+
+    .mat-form-field.full-width {
+      width: 100%;
+    }
+  }
+
+  .title {
+    width: 180px;
+    font-weight: 600;
+  }
+
+  .data {
+    width: 90%;
+  }
+}
+.mat-dialog-actions {
+  justify-content: flex-end;
+}
+
+.example-chip-list {
+  width: 100%;
 }
