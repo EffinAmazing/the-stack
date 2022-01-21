@@ -11,7 +11,7 @@ let data = {
     DB_NAME: 'marchtach'
 }
 
-if (process.env.NODE_ENV === "prod") {
+if (process.env.NODE_ENV === "prod" || process.env.NODE_ENV === "production") {
     data.PORT = 80;
 }
 

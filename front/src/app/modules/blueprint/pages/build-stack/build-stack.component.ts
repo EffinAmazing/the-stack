@@ -57,7 +57,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   domain = '';
   isError = false;
   isWaiting = false;
-  errMessage = 'Something went wrong plaese check domain and try again';
+  errMessage = 'Something went wrong, please check domain and try again.';
+  errMessageReturned = '';
   isMultiSelectActive = false;
   showGrid =  false;
   snapGrid = true;
@@ -117,7 +118,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   ngOnInit(): void {
     if (this.domain) {
       if (this.authUser) {
-        this.stackRequest = this.service.postDomainTools(this.domain).subscribe((data) => {
+        this.stackRequest = this.service.postDomainTools(this.domain).subscribe((data) => {   
+          if (typeof data === 'string' && String(data).includes('Error: ')) {
+            this.errMessageReturned = data;
+          }                
           if (!this.toolsLoaded) {
             this.proceedBluePrintData(data);
             this.toolsLoaded = true;
@@ -125,6 +129,9 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
         }, err => this.isError = true );
       } else {
         this.stackRequest = this.service.getDomainTools(this.domain).subscribe((data) => {
+          if (typeof data === 'string' && String(data).includes('Error: ')) {
+            this.errMessageReturned = data;
+          }
           if (!this.toolsLoaded) {
             this.proceedBluePrintData(data);
             this.toolsLoaded = true;
@@ -133,6 +140,9 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       }
     } else if (this.id) {
       this.stackRequest = this.service.getBlueprint(this.id).subscribe((data) => {
+        if (typeof data === 'string' && String(data).includes('Error: ')) {
+          this.errMessageReturned = data;
+        }
         if (!this.toolsLoaded) {
           this.proceedBluePrintData(data);
           this.toolsLoaded = true;
@@ -147,7 +157,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     if (typeof data === 'string') {
       return this.isError = true;
     }
-    // console.log(data);
+   
+    //console.log(data);
     let hidden = 0;
     this.blueprint = data.blueprint;
     data.nodes.forEach((item) => {
@@ -572,6 +583,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     });
 
     dialogRef.afterClosed().subscribe(result => {
+      console.log(result);
       const listToCreate = [];
       const listToUnhide = [];
       if (result) {
@@ -635,8 +647,31 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   async proceedAddNewNodes(listToCreate, listToUnhide, tools) {
+    console.log(listToCreate, listToUnhide, tools);
     let nodes = [];
     let unhideNodes = [];
+
+    //TODO
+    //check if any node in this list is already unhidden. if so, remove it from listToUnhide and add to listToCreate
+    /*if (listToUnhide.length) {       
+      let processingArray = [];
+      listToUnhide.forEach(tool_id => {
+        if (this.nodes[tool_id] && !this.nodes[tool_id].hide) {
+          console.log('tool exists and unhidden');
+          console.log(this.nodes[tool_id]);
+          let clonedTool = this.nodes[tool_id];
+          clonedTool.position.x = 0;
+          clonedTool.position.y = 600;
+          listToCreate.push(clonedTool);
+        } else if (this.nodes[tool_id] && this.nodes[tool_id].hide) {
+          console.log('tool exists and hidden');
+          processingArray.push(tool_id);
+        }
+      });
+
+      listToUnhide = [...processingArray];      
+    }*/
+
     if (listToCreate.length) {
       nodes = await this.service.addNewNodeItems(listToCreate).toPromise();
       // console.log(nodes);
@@ -658,7 +693,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       this.nodesList = [...this.nodesList, ...nodesIds];
     }
 
-    if (listToUnhide.length) {
+    if (listToUnhide.length) {      
       const res = await this.service.unhideNodes(listToUnhide).toPromise();
       unhideNodes = listToUnhide.map((nodeId) => {
         this.nodes[nodeId].hide = false;

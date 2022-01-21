@@ -67,6 +67,7 @@
         <div *ngIf="isError" class="error-loading-alert">
           <mat-icon color="accent">warning</mat-icon>
           <p class="error-message"> {{errMessage}} </p>
+          <p *ngIf="errMessageReturned !== ''" class="error-message"> {{errMessageReturned}} </p>
           <div class="error-message"><app-subdomain-detect [domain]="domain"></app-subdomain-detect></div>
           <p class="error-message">
             <button mat-raised-button color="primary" (click)="moveToHome()"> Try Again </button>
