@@ -76,9 +76,12 @@ export class NodeDetailsComponent {
       //return owners.split(",");
       const valuesToShow = owners.split(",");
       valuesToShow.forEach((e) => {
-        this.owners.push({ name: e });
+        if(e !== ',' && e !== '' ){
+          this.owners.push({ name: e });
+        }
       });
-      this.owners.pop();
+      this.owners;
+      debugger
     }
   }
 
@@ -98,9 +101,11 @@ export class NodeDetailsComponent {
       // return trainedOn.split(",");
       const valuesToShow = trainedOn.split(",");
       valuesToShow.forEach((e) => {
-        this.trainers.push({ name: e });
+       if(e !== ',' && e !== '' ){
+           this.trainers.push({ name: e });
+        }
       });
-      this.trainers.pop();
+      this.trainers;
     }
   }
 

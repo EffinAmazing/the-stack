@@ -1,94 +1,226 @@
 <div class="tools-list-categoreies">
-    <div class="total-stack"> Total stack cost: <span class="red"> ${{totalCost}}</span> </div>
-    <h2 > Tools </h2>
-    <div class="categories-list">
-        <mat-accordion [multi]="true" *ngIf="categoriesList.length">
-            <mat-expansion-panel *ngFor="let item of categoriesList" [expanded]="!item.needToBeCollapsed">
-                <mat-expansion-panel-header>
-                    <mat-panel-title> {{item.name}} </mat-panel-title>
-                    <div class="category-total-spand">  Category cost: <span class="red">${{item.cost?item.cost:0}}</span> </div>
-                </mat-expansion-panel-header>
-                
-                <div class="nodes-holder">
-                    <div class="node-items" *ngFor="let nodeId of item.nodes"> 
-                        <div class="tool-name">
-                            <img class="node-icon"  [src]="nodes[nodeId].tool.logo?processImageSrc(nodes[nodeId].tool.logo):getAssetsFolder() + 'assets/images/layers.png'" />
-                            {{ nodes[nodeId].tool.name }} 
-                            <button *ngIf="nodes[nodeId].tool.tag !== 'domain'" mat-button class="icon-info-button" (click)="handleClickInfo(nodes[nodeId])" ><img [src]="getAssetsFolder() + 'assets/images/info.png'" /></button>
-                            <div class="actions" (click)="toggleNodeFormStack(nodes[nodeId])"> <mat-icon class="visible" *ngIf="!nodes[nodeId].hide" >visibility</mat-icon>  <mat-icon class="hidden" *ngIf="nodes[nodeId].hide">visibility_off</mat-icon> </div>
-                        </div>
-                        <div class="tool-start-date">
-                            <b> Start:  </b> <br/> 
-                            <span *ngIf="editStates[nodeId] && !editStates[nodeId].start">{{nodes[nodeId].start | date}} 
-                                <button mat-icon-button class="edit-field-button" (click)="handleClickToEdit(nodeId, 'start')"><mat-icon >edit</mat-icon></button>
-                            </span>
-                            <div *ngIf="editStates[nodeId] && editStates[nodeId].start">
-                                <mat-form-field>
-                                    <mat-label (click)="startPicker.open()">Choose a date</mat-label>
-                                    <input matInput [matDatepicker]="startPicker" [(ngModel)]="nodes[nodeId].start" (click)="startPicker.open()" >
-                                    <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-                                    <mat-datepicker #startPicker></mat-datepicker>
-                                </mat-form-field>
-                                <div class="node-edit-actions">
-                                    <button class="edit-field-button stack-button" (click)="cancelUpdates(nodeId, 'start')"><mat-icon>clear</mat-icon></button> 
-                                    <button class="edit-field-button stack-button"  color="primary"  (click)="confirmUpdates(nodeId, 'start')"><mat-icon>done</mat-icon></button> 
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tool-end-date">
-                            <b> End: </b><br/>
-                            <span *ngIf="editStates[nodeId] && !editStates[nodeId].end">{{nodes[nodeId].end | date}}
-                                <button mat-icon-button class="edit-field-button" (click)="handleClickToEdit(nodeId, 'end')"><mat-icon >edit</mat-icon></button>
-                            </span>
-                            <div *ngIf="editStates[nodeId] && editStates[nodeId].end">
-                                <mat-form-field>
-                                    <mat-label (click)="endPicker.open()">Choose a date</mat-label>
-                                    <input matInput [matDatepicker]="endPicker" [(ngModel)]="nodes[nodeId].end" (click)="endPicker.open()" >
-                                    <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-                                    <mat-datepicker #endPicker></mat-datepicker>
-                                </mat-form-field>
-                                <div class="node-edit-actions">
-                                    <button class="edit-field-button stack-button" (click)="cancelUpdates(nodeId, 'end')"><mat-icon>clear</mat-icon></button> 
-                                    <button class="edit-field-button stack-button"  color="primary"  (click)="confirmUpdates(nodeId, 'end')"><mat-icon>done</mat-icon></button> 
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tool-cost">
-                            <b> Monthly cost:  </b><br/>
-                            <span *ngIf="editStates[nodeId] && !editStates[nodeId].cost">${{nodes[nodeId].cost}}
-                                <button mat-icon-button class="edit-field-button" (click)="handleClickToEdit(nodeId, 'cost')"><mat-icon >edit</mat-icon></button>
-                            </span>
-                            <div *ngIf="editStates[nodeId] && editStates[nodeId].cost">
-                                <mat-form-field class="full-width">
-                                    <mat-label>Cost</mat-label>
-                                    <span matPrefix>$ &nbsp;</span>
-                                    <input matInput placeholder="1.00" type="number" [(ngModel)]="nodes[nodeId].cost">
-                                </mat-form-field>
-                                <div class="node-edit-actions">
-                                    <button class="edit-field-button stack-button" (click)="cancelUpdates(nodeId, 'cost')"><mat-icon>clear</mat-icon></button> 
-                                    <button class="edit-field-button stack-button"  color="primary"  (click)="confirmUpdates(nodeId, 'cost')"><mat-icon>done</mat-icon></button> 
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tool-owner">
-                            <b> Owner: </b><br/>
-                            <span  *ngIf="editStates[nodeId] && !editStates[nodeId].owner">{{nodes[nodeId].owner}} 
-                                <button mat-icon-button class="edit-field-button" (click)="handleClickToEdit(nodeId, 'owner')"><mat-icon >edit</mat-icon></button>
-                            </span>
-                            <div *ngIf="editStates[nodeId] && editStates[nodeId].owner">
-                                <mat-form-field class="full-width">
-                                    <mat-label>Owner</mat-label>
-                                    <input matInput placeholder="owner" type="text" [(ngModel)]="nodes[nodeId].owner">
-                                </mat-form-field>
-                                <div class="node-edit-actions">
-                                    <button class="edit-field-button stack-button" (click)="cancelUpdates(nodeId, 'owner')"><mat-icon>clear</mat-icon></button> 
-                                    <button class="edit-field-button stack-button" color="primary" (click)="confirmUpdates(nodeId, 'owner')" ><mat-icon>done</mat-icon></button> 
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+  <div class="total-stack">
+    Total stack cost: <span class="red"> ${{ totalCost }}</span>
+  </div>
+  <h2>Tools</h2>
+  <div class="categories-list">
+    <mat-accordion [multi]="true" *ngIf="categoriesList.length">
+      <mat-expansion-panel
+        *ngFor="let item of categoriesList"
+        [expanded]="!item.needToBeCollapsed"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title> {{ item.name }} </mat-panel-title>
+          <div class="category-total-spand">
+            Category cost:
+            <span class="red">${{ item.cost ? item.cost : 0 }}</span>
+          </div>
+        </mat-expansion-panel-header>
+
+        <div class="nodes-holder">
+          <div class="node-items" *ngFor="let nodeId of item.nodes">
+            <div class="tool-name">
+              <img
+                class="node-icon"
+                [src]="
+                  nodes[nodeId].tool.logo
+                    ? processImageSrc(nodes[nodeId].tool.logo)
+                    : getAssetsFolder() + 'assets/images/layers.png'
+                "
+              />
+              {{ nodes[nodeId].tool.name }}
+              <button
+                *ngIf="nodes[nodeId].tool.tag !== 'domain'"
+                mat-button
+                class="icon-info-button"
+                (click)="handleClickInfo(nodes[nodeId])"
+              >
+                <img [src]="getAssetsFolder() + 'assets/images/info.png'" />
+              </button>
+              <div class="actions" (click)="toggleNodeFormStack(nodes[nodeId])">
+                <mat-icon class="visible" *ngIf="!nodes[nodeId].hide"
+                  >visibility</mat-icon
+                >
+                <mat-icon class="hidden" *ngIf="nodes[nodeId].hide"
+                  >visibility_off</mat-icon
+                >
+              </div>
+            </div>
+            <div class="tool-start-date">
+              <b> Start: </b> <br />
+              <span *ngIf="editStates[nodeId] && !editStates[nodeId].start"
+                >{{ nodes[nodeId].start | date }}
+                <button
+                  mat-icon-button
+                  class="edit-field-button"
+                  (click)="handleClickToEdit(nodeId, 'start')"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </span>
+              <div *ngIf="editStates[nodeId] && editStates[nodeId].start">
+                <mat-form-field>
+                  <mat-label (click)="startPicker.open()"
+                    >Choose a date</mat-label
+                  >
+                  <input
+                    matInput
+                    [matDatepicker]="startPicker"
+                    [(ngModel)]="nodes[nodeId].start"
+                    (click)="startPicker.open()"
+                  />
+                  <mat-datepicker-toggle
+                    matSuffix
+                    [for]="startPicker"
+                  ></mat-datepicker-toggle>
+                  <mat-datepicker #startPicker></mat-datepicker>
+                </mat-form-field>
+                <div class="node-edit-actions">
+                  <button
+                    class="edit-field-button stack-button"
+                    (click)="cancelUpdates(nodeId, 'start')"
+                  >
+                    <mat-icon>clear</mat-icon>
+                  </button>
+                  <button
+                    class="edit-field-button stack-button"
+                    color="primary"
+                    (click)="confirmUpdates(nodeId, 'start')"
+                  >
+                    <mat-icon>done</mat-icon>
+                  </button>
                 </div>
-            </mat-expansion-panel>
-        </mat-accordion>
-    </div>
+              </div>
+            </div>
+            <div class="tool-end-date">
+              <b> End: </b><br />
+              <span *ngIf="editStates[nodeId] && !editStates[nodeId].end"
+                >{{ nodes[nodeId].end | date }}
+                <button
+                  mat-icon-button
+                  class="edit-field-button"
+                  (click)="handleClickToEdit(nodeId, 'end')"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </span>
+              <div *ngIf="editStates[nodeId] && editStates[nodeId].end">
+                <mat-form-field>
+                  <mat-label (click)="endPicker.open()"
+                    >Choose a date</mat-label
+                  >
+                  <input
+                    matInput
+                    [matDatepicker]="endPicker"
+                    [(ngModel)]="nodes[nodeId].end"
+                    (click)="endPicker.open()"
+                  />
+                  <mat-datepicker-toggle
+                    matSuffix
+                    [for]="endPicker"
+                  ></mat-datepicker-toggle>
+                  <mat-datepicker #endPicker></mat-datepicker>
+                </mat-form-field>
+                <div class="node-edit-actions">
+                  <button
+                    class="edit-field-button stack-button"
+                    (click)="cancelUpdates(nodeId, 'end')"
+                  >
+                    <mat-icon>clear</mat-icon>
+                  </button>
+                  <button
+                    class="edit-field-button stack-button"
+                    color="primary"
+                    (click)="confirmUpdates(nodeId, 'end')"
+                  >
+                    <mat-icon>done</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="tool-cost">
+              <b> Monthly cost: </b><br />
+              <span *ngIf="editStates[nodeId] && !editStates[nodeId].cost"
+                >${{ nodes[nodeId].cost }}
+                <button
+                  mat-icon-button
+                  class="edit-field-button"
+                  (click)="handleClickToEdit(nodeId, 'cost')"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </span>
+              <div *ngIf="editStates[nodeId] && editStates[nodeId].cost">
+                <mat-form-field class="full-width">
+                  <mat-label>Cost</mat-label>
+                  <span matPrefix>$ &nbsp;</span>
+                  <input
+                    matInput
+                    placeholder="1.00"
+                    type="number"
+                    [(ngModel)]="nodes[nodeId].cost"
+                  />
+                </mat-form-field>
+                <div class="node-edit-actions">
+                  <button
+                    class="edit-field-button stack-button"
+                    (click)="cancelUpdates(nodeId, 'cost')"
+                  >
+                    <mat-icon>clear</mat-icon>
+                  </button>
+                  <button
+                    class="edit-field-button stack-button"
+                    color="primary"
+                    (click)="confirmUpdates(nodeId, 'cost')"
+                  >
+                    <mat-icon>done</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="tool-owner">
+              <b> Owner: </b><br />
+              <span *ngIf="editStates[nodeId] && !editStates[nodeId].owner "
+                ><span *ngIf="nodes[nodeId].owner.charAt(nodes[nodeId].owner.length - 1) === ','"> {{ nodes[nodeId].owner.slice(0,-1) }}</span>
+                <span *ngIf="nodes[nodeId].owner.charAt(nodes[nodeId].owner.length - 1) !== ','"> {{ nodes[nodeId].owner }}</span>
+                <button
+                  mat-icon-button
+                  class="edit-field-button"
+                  (click)="handleClickToEdit(nodeId, 'owner')"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </span>
+              <div *ngIf="editStates[nodeId] && editStates[nodeId].owner">
+                <mat-form-field class="full-width">
+                  <mat-label>Owner</mat-label>
+                  <input
+                    matInput
+                    placeholder="owner"
+                    type="text"
+                    [(ngModel)]="nodes[nodeId].owner"
+                  />
+                </mat-form-field>
+                <div class="node-edit-actions">
+                  <button
+                    class="edit-field-button stack-button"
+                    (click)="cancelUpdates(nodeId, 'owner')"
+                  >
+                    <mat-icon>clear</mat-icon>
+                  </button>
+                  <button
+                    class="edit-field-button stack-button"
+                    color="primary"
+                    (click)="confirmUpdates(nodeId, 'owner')"
+                  >
+                    <mat-icon>done</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
 </div>
