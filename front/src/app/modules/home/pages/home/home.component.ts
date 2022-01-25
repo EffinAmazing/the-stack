@@ -17,7 +17,7 @@ export class HomeComponent implements OnInit {
     title: string,
     subtitle: string,
     heroImage: string,
-    abilities: Array<{ title: string; icon: string; description: string }>,
+    abilities: Array<{ title: string; icon: string; description: string }>
     footerTitle: string,
     formLinkTitle: string,
   } | null = null;
