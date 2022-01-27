@@ -53,6 +53,102 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedArrow: any;
   nodes: BluePrintTool[] = [];
   // nodes: BluePrintTool[] = [];
+   hiddenCategories: Array<string> = [
+    'Copyright',
+    'CSS Media Queries',
+    'Document Encoding',
+    'Browser Specific',
+    'Compatibility',
+    'CSS',
+    'Design Framework',
+    'DocType Declaration',
+    'Meta Tags',
+    'Mobile Specific',
+    'SSL Seals',
+    'Domain Parking',
+    'Application',
+    'Controls',
+    'Magento Theme',
+    'Node.js',
+    'NodeJS',
+    'PHP Theme',
+    'Plugin',
+    'Programming Language',
+    'Schema',
+    'Theme',
+    'Web App',
+    'WordPress Theme',
+    'AJAX',
+    'Animation',
+    'Charting',
+    'Compatibility',
+    'Cookie Management',
+    'Error Tracking',
+    'Fingerprint',
+    'fingerprinting',
+    'Forms and Surveys',
+    'Framework',
+    'Image Library',
+    'JavaScript Library',
+    'jQuery Plugin',
+    'Lightbox',
+    'Media',
+    'Slider',
+    'UI',
+    'Language',
+    'DDoS Protection',
+    'Enterprise DNS',
+    'SaaS DNS',
+    'Module',
+    'Operating System',
+    'Protocol',
+    'Robots.txt',
+    'SEO Header Tag',
+    'SEO Meta Tag',
+    'SEO Title Tag',
+    'Shipping Providers',
+    'Extended Validation',
+    'Multi Domain',
+    'Not Trusted',
+    'Root Authority',
+    'Server Gated Cryptography',
+    'Wildcard',
+    'Syndication Techniques',
+    'Edge Delivery Network',
+    'Advertising',
+    'Bookings',
+    'Homepage Link',
+    'Web Master Registration',
+    'Application Server',
+    'Caching Proxy',
+    'Linux Web Server',
+    'Windows Web Server',
+    'WordPress Plugins',
+    'Video Players',
+    'Standard',
+    'Fonts',
+    'Digital Video Ads',
+    'Audience Targetg',
+    'Facebook Exchange',
+    'Data Management Platform',
+    'Demand-side Platform',
+    'Ad network',
+    'Ad Exchange',
+    'Multi-channel',
+    'Payment Currency',
+    'Open source',
+    'Plug in / Module',
+    'Transaction email',
+    'Ad server',
+    'Application Performance',
+    'Site Search',
+    'Social Sharing',
+    'Business Email Hosting',
+    'Fraud Prevention',
+    'Transactional Email',
+    'Login',
+    'Visitor Count Tracking'
+];
   showNodes: BluePrintTool[] = [];
   listOfArrows: Array<DrawArrow> = [];
   connectedLines: Array<DrawArrow> = [];
@@ -128,12 +224,11 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       // console.log(' *** loadedNodes ****');
       /*  */
       if (data.list) {
+        
         let isNewStack = true;
         data.list.forEach((nodeId) => {
           const item = data.nodes[nodeId];
-
-          //
-          if (!item.hide) {
+              if (!item.hide) {
             if (typeof item.position.x !== 'number') {
               if (item.tool.tag === 'domain') {
                 item.position.y = 0;
@@ -154,10 +249,35 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             } else {
               isNewStack = false;
             }
-            this.showNodes.push(item);
+            console.log(item,"non hidden items")
+            debugger
+           let removeSpecialCharFromHidden 
+           let arrHidden =[]
+           this.hiddenCategories.forEach(e => {
+                    removeSpecialCharFromHidden = e.replace(/[^\w]/g, '');
+                  arrHidden.push(removeSpecialCharFromHidden)
+              });
+              let toLowerHidden =arrHidden.map(name => name.toLowerCase());
+
+                if(item.tool.categories!=null){
+                  debugger
+                 item.tool.categories.forEach(e => {
+                   debugger
+                   //let b = e.toLowerCase()
+                  let removeSpecialChar= e.replace(/[^\w]/g, '');
+                 removeSpecialChar= removeSpecialChar.toLowerCase();
+                   let present = toLowerHidden.includes(removeSpecialChar);
+                   if(!present){ 
+                   this.showNodes.push(item);
+                  } 
+              });
+            }else{this.showNodes.push(item)}
+          
+           
           } else {
+
             if (this.nodes[item.id] && this.listOfArrows.length) {
-                // console.log('hidden item');
+               console.log('hidden item');
                 const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(item.id) !== -1 );
                 const ids: string[] = [];
                 if (arrowsToRemove.length) {
@@ -165,7 +285,6 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
                     ids.push(element.lineId);
                     this.svgD3.select('path#' + element.lineId).remove();
                   });
-
                   setTimeout(() => { this.removeArrows.emit(ids); }, 0);
                 }
             }
@@ -174,7 +293,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
         this.nodes = data.nodes;
-        // console.log(data);
+         console.log(data);
         if (isNewStack) {
           window['dataLayer'].push({
             event: 'stackbuilder.create',
