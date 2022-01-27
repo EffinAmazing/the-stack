@@ -181,8 +181,8 @@
             <div class="tool-owner">
               <b> Owner: </b><br />
               <span *ngIf="editStates[nodeId] && !editStates[nodeId].owner "
-                ><span *ngIf="nodes[nodeId].owner.charAt(nodes[nodeId].owner.length - 1) === ','"> {{ nodes[nodeId].owner.slice(0,-1) }}</span>
-                <span *ngIf="nodes[nodeId].owner.charAt(nodes[nodeId].owner.length - 1) !== ','"> {{ nodes[nodeId].owner }}</span>
+                ><span *ngIf="nodes[nodeId].owner?.charAt(nodes[nodeId].owner?.length - 1) === ','"> {{ nodes[nodeId].owner.slice(0,-1) }}</span>
+                <span *ngIf="nodes[nodeId].owner?.charAt(nodes[nodeId].owner?.length - 1) !== ','"> {{ nodes[nodeId].owner }}</span>
                 <button
                   mat-icon-button
                   class="edit-field-button"
