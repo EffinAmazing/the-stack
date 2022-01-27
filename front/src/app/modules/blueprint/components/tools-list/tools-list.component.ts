@@ -50,35 +50,40 @@ export class ToolsListComponent implements OnInit {
     });
 
     this.addedNewNode.subscribe((nodes) => {
+
       if (nodes) {
         nodes.forEach(item => {
-          if (this.nodes[item.id]) {
-            this.nodes.hide = false;
-          } else {
-            this.nodes[item.id] = item;
-            if (item.tool.categories && item.tool.categories.length) {
-              item.tool.categories.forEach((cat) => {
-                const index = this.categoriesList.findIndex(ctItem => ctItem.name === cat);
-                if (index !== -1) {
-                  this.categoriesList[index].nodes.push(item.id);
-                } else {
-                  this.categoriesList.push({
-                    name: cat,
-                    nodes: [item.id],
-                    cost: 0,
-                    needToBeCollapsed: false
-                  });
-                }
-              });
-            }
-            this.editStates[item.id] = { start: false, end: false, cost: false, owner: false };
+          // if (this.nodes[item.id]) {
+          //   
+          //   this.nodes.hide = false;
+          // } else {
+
+          this.nodes[item.id] = item;
+          if (item.tool.categories && item.tool.categories.length) {
+
+            item.tool.categories.forEach((cat) => {
+              const index = this.categoriesList.findIndex(ctItem => ctItem.name === cat);
+
+              if (index !== -1) {
+                this.categoriesList[index].nodes.push(item.id);
+              } else {
+                this.categoriesList.push({
+                  name: cat,
+                  nodes: [item.id],
+                  cost: 0,
+                  needToBeCollapsed: false
+                });
+              }
+            });
           }
+          this.editStates[item.id] = { start: false, end: false, cost: false, owner: false };
+          // }
         });
       }
     });
 
-    const checkIsAdded: {[key: string]: boolean} = { };
-    console.log(this.categoriesList);
+    const checkIsAdded: { [key: string]: boolean } = {};
+    console.log('categories list', this.categoriesList);
 
     this.loadedCategories.subscribe((data) => {
       const categories = Object.keys(data);
@@ -107,7 +112,7 @@ export class ToolsListComponent implements OnInit {
 
         if (lowerCase !== 'none') {
           if (!needToBeCollapsed) {
-            if ( WhitelistCategories.includes(iterator) ) {
+            if (WhitelistCategories.includes(iterator)) {
               whitelist.push(item);
             } else {
               this.categoriesList.push(item);
@@ -124,11 +129,12 @@ export class ToolsListComponent implements OnInit {
         const indexA = WhitelistCategories.indexOf(a.name);
         const indexB = WhitelistCategories.indexOf(b.name);
 
-        if (indexA < indexB) {return -1; }
-        if (indexA > indexB) {return 1; }
+        if (indexA < indexB) { return -1; }
+        if (indexA > indexB) { return 1; }
         return 0;
       });
       if (none) {
+
         this.categoriesList.push(none);
       }
 
@@ -191,12 +197,13 @@ export class ToolsListComponent implements OnInit {
   }
 
   private getAddedAndRemovedItems(prevArr: Array<number | string>, nextArr: Array<number | string>): {
-      added: Array<number | string>, removed: Array<number | string> } {
+    added: Array<number | string>, removed: Array<number | string>
+  } {
     const added = [];
     const removed = [];
 
     prevArr.forEach(item => {
-      if ( nextArr.indexOf( item ) === -1) {
+      if (nextArr.indexOf(item) === -1) {
         removed.push(item);
       }
     });
@@ -234,7 +241,7 @@ export class ToolsListComponent implements OnInit {
         } else {
           node = Object.assign({}, node, result);
 
-          console.log('result.cost', result.cost, node.cost );
+          console.log('result.cost', result.cost, node.cost);
           if (result.cost !== node.cost) {
             window['dataLayer'].push({
               event: 'stackbuilder.node.updateCost',
@@ -245,7 +252,7 @@ export class ToolsListComponent implements OnInit {
             });
           }
 
-          console.log('result.owner', result.owner, node.owner );
+          console.log('result.owner', result.owner, node.owner);
           if (result.owner !== node.owner) {
             const ownersUpdates = this.getAddedAndRemovedItems(node.owner ? node.owner.split(',') : [], result.owner.split(','));
             ownersUpdates.added.forEach(item => {
@@ -269,8 +276,8 @@ export class ToolsListComponent implements OnInit {
             });
           }
 
-          console.log('result.trainedOn', result.trainedOn, node.trainedOn );
-          if ( result.trainedOn !==  node.trainedOn) {
+          console.log('result.trainedOn', result.trainedOn, node.trainedOn);
+          if (result.trainedOn !== node.trainedOn) {
             const usersUpdates = this.getAddedAndRemovedItems(node.trainedOn ? node.trainedOn.split(',') : [],
               result.trainedOn.split(','));
             usersUpdates.added.forEach(item => {
@@ -283,7 +290,7 @@ export class ToolsListComponent implements OnInit {
             });
 
             usersUpdates.removed.forEach(item => {
-              if ( item ) {
+              if (item) {
                 window['dataLayer'].push({
                   event: 'stackbuilder.node.removedUser',
                   tool: node.tool,
@@ -344,7 +351,7 @@ export class ToolsListComponent implements OnInit {
   }
 
   public processImageSrc(link) {
-    if (link.indexOf('http://') !== -1 || link.indexOf('https://') !== -1 ) {
+    if (link.indexOf('http://') !== -1 || link.indexOf('https://') !== -1) {
       return link;
     } else {
       return host + link;
