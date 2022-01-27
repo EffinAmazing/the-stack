@@ -33,7 +33,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }> = new EventEmitter();
   @Output() updatedNodeData: EventEmitter<any> = new EventEmitter();
   @Output() arrowAdded: EventEmitter<{ arrow: DrawArrow, disableHystory: boolean }> = new EventEmitter();
-  @Output() arrowUpdated: EventEmitter<{ newData?: DrawArrow, oldData?: DrawArrow, disableHistory?: boolean}> = new EventEmitter();
+  @Output() arrowUpdated: EventEmitter<{ newData?: DrawArrow, oldData?: DrawArrow, disableHistory?: boolean }> = new EventEmitter();
   @Output() hideNode: EventEmitter<{ item: BluePrintTool, arrows?: Array<DrawArrow>, disableHistory?: boolean }> = new EventEmitter();
   @Output() removeArrows: EventEmitter<string[]> = new EventEmitter();
   @Output() selectArrow: EventEmitter<any> = new EventEmitter();
@@ -53,7 +53,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedArrow: any;
   nodes: BluePrintTool[] = [];
   // nodes: BluePrintTool[] = [];
-   hiddenCategories: Array<string> = [
+  hiddenCategories: Array<string> = [
     'Copyright',
     'CSS Media Queries',
     'Document Encoding',
@@ -148,7 +148,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     'Transactional Email',
     'Login',
     'Visitor Count Tracking'
-];
+  ];
   showNodes: BluePrintTool[] = [];
   listOfArrows: Array<DrawArrow> = [];
   connectedLines: Array<DrawArrow> = [];
@@ -178,7 +178,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   gridSubscription: Subscription;
   snapSubscription: Subscription;
 
-  constructor(private detailsDialog: MatDialog, private confirm: MatDialog) {  }
+  constructor(private detailsDialog: MatDialog, private confirm: MatDialog) { }
 
   ngOnInit(): void {
     this.svgD3 = this.arrowHelper.initSvg('svg#paint');
@@ -224,11 +224,11 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       // console.log(' *** loadedNodes ****');
       /*  */
       if (data.list) {
-        
+
         let isNewStack = true;
         data.list.forEach((nodeId) => {
           const item = data.nodes[nodeId];
-              if (!item.hide) {
+          if (!item.hide) {
             if (typeof item.position.x !== 'number') {
               if (item.tool.tag === 'domain') {
                 item.position.y = 0;
@@ -244,56 +244,52 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
                   tool: item.tool
                 });
               }
-              arrToChange.push({nodeId: item.id, position: item.position});
+              arrToChange.push({ nodeId: item.id, position: item.position });
               this.indexNode++;
             } else {
               isNewStack = false;
             }
-            console.log(item,"non hidden items")
-            debugger
-           let removeSpecialCharFromHidden 
-           let arrHidden =[]
-           this.hiddenCategories.forEach(e => {
-                    removeSpecialCharFromHidden = e.replace(/[^\w]/g, '');
-                  arrHidden.push(removeSpecialCharFromHidden)
-              });
-              let toLowerHidden =arrHidden.map(name => name.toLowerCase());
+            let removeSpecialCharFromHidden
+            let arrHidden = []
+            this.hiddenCategories.forEach(e => {
+              removeSpecialCharFromHidden = e.replace(/[^\w]/g, '');
+              arrHidden.push(removeSpecialCharFromHidden)
+            });
+            let toLowerHidden = arrHidden.map(name => name.toLowerCase());
 
-                if(item.tool.categories!=null){
-                  debugger
-                 item.tool.categories.forEach(e => {
-                   debugger
-                   //let b = e.toLowerCase()
-                  let removeSpecialChar= e.replace(/[^\w]/g, '');
-                 removeSpecialChar= removeSpecialChar.toLowerCase();
-                   let present = toLowerHidden.includes(removeSpecialChar);
-                   if(!present){ 
-                   this.showNodes.push(item);
-                  } 
+            if (item.tool.categories != null) {
+
+              item.tool.categories.forEach(e => {
+
+                //let b = e.toLowerCase()
+                let removeSpecialChar = e.replace(/[^\w]/g, '');
+                removeSpecialChar = removeSpecialChar.toLowerCase();
+                let present = toLowerHidden.includes(removeSpecialChar);
+                if (!present) {
+                  this.showNodes.push(item);
+                }
               });
-            }else{this.showNodes.push(item)}
-          
-           
+            } else {
+              this.showNodes.push(item)
+            }
           } else {
 
             if (this.nodes[item.id] && this.listOfArrows.length) {
-               console.log('hidden item');
-                const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(item.id) !== -1 );
-                const ids: string[] = [];
-                if (arrowsToRemove.length) {
-                  arrowsToRemove.forEach(element => {
-                    ids.push(element.lineId);
-                    this.svgD3.select('path#' + element.lineId).remove();
-                  });
-                  setTimeout(() => { this.removeArrows.emit(ids); }, 0);
-                }
+              const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(item.id) !== -1);
+              const ids: string[] = [];
+              if (arrowsToRemove.length) {
+                arrowsToRemove.forEach(element => {
+                  ids.push(element.lineId);
+                  this.svgD3.select('path#' + element.lineId).remove();
+                });
+                setTimeout(() => { this.removeArrows.emit(ids); }, 0);
+              }
             }
           }
 
         });
 
         this.nodes = data.nodes;
-         console.log(data);
         if (isNewStack) {
           window['dataLayer'].push({
             event: 'stackbuilder.create',
@@ -314,7 +310,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       if (data.hiddenItem) {
-        const arrowsToRemove = this.listOfArrows.filter((item) => item.lineId.indexOf(data.hiddenItem) !== -1 );
+        const arrowsToRemove = this.listOfArrows.filter((item) => item.lineId.indexOf(data.hiddenItem) !== -1);
         const ids = [];
         if (arrowsToRemove.length) {
           arrowsToRemove.forEach(element => {
@@ -329,7 +325,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.arrowSubscription = this.loadedArrows.subscribe((list) => {
       list.forEach((item) => {
-        if ( document.querySelector(`path#${item.lineId}`) ) { } else {
+        if (document.querySelector(`path#${item.lineId}`)) { } else {
           if (typeof item.start.offset === 'undefined') {
             item.start.offset = 50;
             if (item.start.pos !== 'Left' || item.start.pos !== 'Right') {
@@ -360,7 +356,6 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.historySubscription = this.historyEmit.subscribe((result) => {
-      // console.log(result);
       if (result) {
         const container = this.stackWorkFlow.nativeElement;
         switch (result.action.name) {
@@ -374,20 +369,21 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             this.showNodes.splice(i, 1);
             this.showNodes.push(this.nodes[result.action.data.nodeId]);
             const lines = this.listOfArrows.filter((item) => item.start.nodeId === result.action.data.nodeId ||
-            item.end.nodeId === result.action.data.nodeId );
+              item.end.nodeId === result.action.data.nodeId);
             setTimeout(() => {
-                lines.forEach((item) => {
-                  this.arrowHelper.updateExistedArrow(item, container);
-                });
-              }, 100);
+              lines.forEach((item) => {
+                this.arrowHelper.updateExistedArrow(item, container);
+              });
+            }, 100);
 
-            this.positionNodeChanged.emit({ nodeId: result.action.data.nodeId,
-              position: this.nodes[result.action.data.nodeId].position, disableHistory: true  });
+            this.positionNodeChanged.emit({
+              nodeId: result.action.data.nodeId,
+              position: this.nodes[result.action.data.nodeId].position, disableHistory: true
+            });
             break;
 
           case 'hideNode':
             const j = this.showNodes.findIndex((item) => item.id === result.action.data.item.nodeId);
-            // console.log( result.action.data );
             const nodeHide = result.action.data.item;
             if (result.undo) {
               if (j === -1) {
@@ -458,8 +454,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             if (result.undo) {
               if (this.moveSelectedArea) {
                 this.moveSelectedArea.nativeElement.style.transform = `translate3d(0px, 0px, 0px)`;
-                const y = parseInt( this.moveSelectedArea.nativeElement.style.top, 10 );
-                const x = parseInt( this.moveSelectedArea.nativeElement.style.left, 10 );
+                const y = parseInt(this.moveSelectedArea.nativeElement.style.top, 10);
+                const x = parseInt(this.moveSelectedArea.nativeElement.style.left, 10);
                 this.moveSelectedArea.nativeElement.style.top = (y - diff.y) + 'px';
                 this.moveSelectedArea.nativeElement.style.left = (x - diff.x) + 'px';
               }
@@ -471,8 +467,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             } else {
               if (this.moveSelectedArea) {
                 this.moveSelectedArea.nativeElement.style.transform = `translate3d(0px, 0px, 0px)`;
-                const y = parseInt( this.moveSelectedArea.nativeElement.style.top, 10 );
-                const x = parseInt( this.moveSelectedArea.nativeElement.style.left, 10 );
+                const y = parseInt(this.moveSelectedArea.nativeElement.style.top, 10);
+                const x = parseInt(this.moveSelectedArea.nativeElement.style.left, 10);
                 this.moveSelectedArea.nativeElement.style.top = (y + diff.y) + 'px';
                 this.moveSelectedArea.nativeElement.style.left = (x + diff.x) + 'px';
               }
@@ -513,7 +509,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (res) {
         res.forEach((item, index) => {
           const existNode = this.showNodes.find(node => node.id === item.id);
-          if (item.hasOwnProperty('hide') && item.hide ) {
+          if (item.hasOwnProperty('hide') && item.hide) {
             return true;
           }
           console.log(item);
@@ -528,8 +524,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
               }
               item.position.y = (start - yIndex) * offsetY + Math.floor(offsetY * 0.5);
               item.position.x = xIndex * offsetX;
-              
-              arrToChange.push({nodeId: item.id, position: item.position});
+
+              arrToChange.push({ nodeId: item.id, position: item.position });
               // console.log(yIndex, xIndex);
             }
 
@@ -589,15 +585,15 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   private addNewArrow(item) {
     this.listOfArrows.push(item);
     this.svgD3.append('path')
-    .attr('id', item.lineId)
-    .attr('class', 'line')
-    .attr('d', lineGenerator(this.arrowHelper.genrateDots(
-      [item.start.x, item.start.y],
-      [item.end.x, item.end.y], item.start.pos, item.end.pos)))
-    .attr('stroke', '#1c57a4')
-    .attr('stroke-width', 2)
-    .attr('fill', 'transparent')
-    .attr('marker-end', 'url(#arrow-marker)');
+      .attr('id', item.lineId)
+      .attr('class', 'line')
+      .attr('d', lineGenerator(this.arrowHelper.genrateDots(
+        [item.start.x, item.start.y],
+        [item.end.x, item.end.y], item.start.pos, item.end.pos)))
+      .attr('stroke', '#1c57a4')
+      .attr('stroke-width', 2)
+      .attr('fill', 'transparent')
+      .attr('marker-end', 'url(#arrow-marker)');
 
     setTimeout(() => {
       this.addHandleSelectArrow(item.lineId);
@@ -605,7 +601,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public processImageSrc(link) {
-    if (link.indexOf('http://') !== -1 || link.indexOf('https://') !== -1 ) {
+    if (link.indexOf('http://') !== -1 || link.indexOf('https://') !== -1) {
       return link;
     } else {
       return host + link;
@@ -613,13 +609,14 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getAddedAndRemovedItems(prevArr: Array<number | string>, nextArr: Array<number | string>): {
-      added: Array<number | string>, removed: Array<number | string> } {
+    added: Array<number | string>, removed: Array<number | string>
+  } {
     const added = [];
     const removed = [];
     // console.log('prevArr', prevArr, 'nextArr', nextArr);
 
     prevArr.forEach(item => {
-      if ( nextArr.indexOf( item ) === -1) {
+      if (nextArr.indexOf(item) === -1) {
         removed.push(item);
       }
     });
@@ -689,7 +686,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             });
           }
 
-          if ( result.trainedOn !==  node.trainedOn) {
+          if (result.trainedOn !== node.trainedOn) {
             const usersUpdates = this.getAddedAndRemovedItems(node.trainedOn ? node.trainedOn.split(',') : [],
               result.trainedOn.split(','));
 
@@ -704,7 +701,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             });
 
             usersUpdates.removed.forEach(item => {
-              if ( item ) {
+              if (item) {
                 window['dataLayer'].push({
                   event: 'stackbuilder.node.removedUser',
                   tool: node.tool,
@@ -719,7 +716,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
           node.position = this.nodes[node.id].position;
 
           this.nodes[node.id] = node;
-          const index = this.showNodes.findIndex((item) => item.id === node.id );
+          const index = this.showNodes.findIndex((item) => item.id === node.id);
           this.showNodes[index] = node;
 
           this.updatedNodeData.emit({ nodeId: node.id, data: result });
@@ -740,27 +737,27 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     } else {
     /*  */
-      // console.log(' update position ', data.source._dragRef._activeTransform);
-      const theNode = this.showNodes.find((item) => item.id === node.id );
-      this.positionNodeChanged.emit({ nodeId: node.id, position: data.source._dragRef._activeTransform  });
-      let position = data.source._dragRef._activeTransform;
-      if (this.useSnapGrid) {
-        const X = position.x;
-        const Y = position.y;
-        position = { x: Math.floor(X / 10) * 10, y: Math.floor(Y / 10) * 10 };
-      }
-      this.nodes[node.id].position = theNode.position = position;
-      // console.log(position);
-      if (this.useSnapGrid) {
-        // console.log(data.source.element.nativeElement);
-      }
-      const updatedLines = this.connectedLines.map(async (item) => {
-        return this.arrowUpdated.emit({ newData: item, disableHistory: true });
-      });
+    // console.log(' update position ', data.source._dragRef._activeTransform);
+    const theNode = this.showNodes.find((item) => item.id === node.id);
+    this.positionNodeChanged.emit({ nodeId: node.id, position: data.source._dragRef._activeTransform });
+    let position = data.source._dragRef._activeTransform;
+    if (this.useSnapGrid) {
+      const X = position.x;
+      const Y = position.y;
+      position = { x: Math.floor(X / 10) * 10, y: Math.floor(Y / 10) * 10 };
+    }
+    this.nodes[node.id].position = theNode.position = position;
+    // console.log(position);
+    if (this.useSnapGrid) {
+      // console.log(data.source.element.nativeElement);
+    }
+    const updatedLines = this.connectedLines.map(async (item) => {
+      return this.arrowUpdated.emit({ newData: item, disableHistory: true });
+    });
 
-      Promise.all(updatedLines).then(() => { /* console.log('completed update');*/ }).catch(err => console.log(err));
+    Promise.all(updatedLines).then(() => { /* console.log('completed update');*/ }).catch(err => console.log(err));
 
-      this.connectedLines = [];
+    this.connectedLines = [];
     // }
   }
 
@@ -768,22 +765,22 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.listOfArrows.push(Arrow);
 
     this.svgD3.append('path')
-          .attr('id', Arrow.lineId)
-          .attr('class', 'line')
-          .attr('d', lineGenerator(this.arrowHelper.genrateDots(
-            [Arrow.start.x, Arrow.start.y],
-            [Arrow.end.x, Arrow.end.y], Arrow.start.pos, Arrow.end.pos)))
-          .attr('stroke', '#1c57a4')
-          .attr('stroke-width', 2)
-          .attr('fill', 'transparent')
-          .attr('marker-end', 'url(#arrow-marker)');
+      .attr('id', Arrow.lineId)
+      .attr('class', 'line')
+      .attr('d', lineGenerator(this.arrowHelper.genrateDots(
+        [Arrow.start.x, Arrow.start.y],
+        [Arrow.end.x, Arrow.end.y], Arrow.start.pos, Arrow.end.pos)))
+      .attr('stroke', '#1c57a4')
+      .attr('stroke-width', 2)
+      .attr('fill', 'transparent')
+      .attr('marker-end', 'url(#arrow-marker)');
 
     setTimeout(() => {
       // const line = document.querySelector(`path#${Arrow.lineId}`);
       this.addHandleSelectArrow(Arrow.lineId);
     }, 100);
 
-    this.arrowAdded.emit({arrow: Arrow, disableHystory: false});
+    this.arrowAdded.emit({ arrow: Arrow, disableHystory: false });
   }
 
   public addHandleSelectArrow(ArrowId: string): void {
@@ -800,12 +797,12 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         if (adot2) { adot2.remove(); }
       }
       //
-      this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === ArrowId );
+      this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === ArrowId);
       const old = this.oldArrowData = Object.assign({}, this.selectedArrow);
       // 1. add start dot
       const refElstart = container.querySelector(
         `#node-${this.selectedArrow.start.nodeId} .pointers>.pointer-${this.selectedArrow.start.pos}`) as HTMLElement;
-      if (refElstart ) {
+      if (refElstart) {
         const poiterStart = this.arrowHelper.getArrowPointerByOffset(
           refElstart, container, this.selectedArrow.start.pos, this.selectedArrow.start.offset);
         const dot1 = document.createElement('div');
@@ -817,7 +814,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         dot1.addEventListener('mousedown', () => { this.dotForDrag = dot1; });
         dot1.addEventListener('mouseup', () => {
           this.dotForDrag = null;
-          this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
+          this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
         });
         dot1.style.transform = `translate3d(${poiterStart.x - 20}px, ${poiterStart.y - 20}px, 0px)`;
         document.querySelector(`#node-${this.selectedArrow.start.nodeId}`).classList.add('has-selected-arrow');
@@ -841,14 +838,14 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         dot2.addEventListener('mousedown', () => { this.dotForDrag = dot2; });
         dot2.addEventListener('mouseup', () => {
           this.dotForDrag = null;
-          this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
+          this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
         });
         dot2.style.transform = `translate3d(${poiterEnd.x - 20}px, ${poiterEnd.y - 20}px, 0px)`;
 
         this.selectArrow.emit(this.selectedArrow);
         line.setAttribute('stroke-width', '4');
       } else {
-       // console.log(`#node-${this.selectedArrow.end.nodeId} .pointers>.pointer-${this.selectedArrow.end.pos}`);
+        // console.log(`#node-${this.selectedArrow.end.nodeId} .pointers>.pointer-${this.selectedArrow.end.pos}`);
       }
     });
   }
@@ -881,7 +878,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
               y: this.activeArrow.start.y,
               nodeId: this.activeArrow.start.nodeId,
               pos: this.activeArrow.start.pos,
-              offset: this.activeArrow.start.offset},
+              offset: this.activeArrow.start.offset
+            },
             end: {
               x: this.activeArrow.end.x,
               y: this.activeArrow.end.y,
@@ -893,14 +891,14 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
           };
 
           this.listOfArrows.push(Arrow);
-          this.arrowAdded.emit({arrow: Arrow, disableHystory: false });
+          this.arrowAdded.emit({ arrow: Arrow, disableHystory: false });
 
           const lineId = this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId;
           this.svgD3.select('path#' + this.activeArrow.lineId)
-            .attr('id', lineId );
+            .attr('id', lineId);
 
           setTimeout(() => {
-             this.addHandleSelectArrow(lineId);
+            this.addHandleSelectArrow(lineId);
           }, 100);
 
           this.activeArrow = null;
@@ -918,12 +916,12 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   public handleMouseUp() {
     if (this.selectedArrow && this.dotForDrag) {
       this.dotForDrag = null;
-      this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: this.oldArrowData, disableHistory: false});
+      this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: this.oldArrowData, disableHistory: false });
     }
   }
 
   public handleStartDrag(data, node) {
-    const lines = this.listOfArrows.filter((item) => item.start.nodeId === node.id || item.end.nodeId === node.id );
+    const lines = this.listOfArrows.filter((item) => item.start.nodeId === node.id || item.end.nodeId === node.id);
     this.activeNode = node;
     this.startPositionNode = data.source.element.nativeElement.style.transform;
     this.connectedLines = lines;
@@ -933,8 +931,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     const match = text.match(/(translate3d\()+[0-9px,\- ]+(\))/);
     const coordinats = match[0].replace(match[1], '').replace(match[2], '').split(',');
 
-    const x = Number( coordinats[0].replace('px', '') );
-    const y = Number( coordinats[1].replace('px', '') );
+    const x = Number(coordinats[0].replace('px', ''));
+    const y = Number(coordinats[1].replace('px', ''));
     return { x, y };
   }
 
@@ -979,10 +977,10 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public handleMouseOverPointer(evt, node, pos) {
-    if ( this.activeArrow ) {
+    if (this.activeArrow) {
       // console.log(evt.x, evt.y);
       const container = this.stackWorkFlow.nativeElement;
-      const data = this.arrowHelper.getArrowPointer(evt.target, container, pos, { x: evt.x, y: evt.y});
+      const data = this.arrowHelper.getArrowPointer(evt.target, container, pos, { x: evt.x, y: evt.y });
       this.activeArrow.end.nodeId = node.id;
       this.activeArrow.end.x = data.pointer.x;
       this.activeArrow.end.y = data.pointer.y;
@@ -1035,11 +1033,11 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         //
 
         this.svgD3.select('path#' + this.activeArrow.lineId)
-          .attr('d', lineGenerator([ [this.activeArrow.start.x, this.activeArrow.start.y], [pos.x, pos.y] ]));
+          .attr('d', lineGenerator([[this.activeArrow.start.x, this.activeArrow.start.y], [pos.x, pos.y]]));
       } else {
         const container = this.stackWorkFlow.nativeElement;
         const data = this.arrowHelper.getArrowPointer(
-          this.activeArrow.end.elRef, container, this.activeArrow.end.pos, { x: evt.x, y: evt.y});
+          this.activeArrow.end.elRef, container, this.activeArrow.end.pos, { x: evt.x, y: evt.y });
         this.activeArrow.end.x = data.pointer.x;
         this.activeArrow.end.y = data.pointer.y;
         this.activeArrow.end.offset = data.offset;
@@ -1051,9 +1049,9 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       const container = this.stackWorkFlow.nativeElement;
       const position = this.dotForDrag.dataset.position;
       const nodeId = this.selectedArrow[position].nodeId;
-      const result = this.getPosOfNodeByPoint(nodeId, container, { x: evt.x, y: evt.y});
+      const result = this.getPosOfNodeByPoint(nodeId, container, { x: evt.x, y: evt.y });
       const data = this.arrowHelper.getArrowPointer(
-        result.el, container, result.pos, { x: evt.x, y: evt.y});
+        result.el, container, result.pos, { x: evt.x, y: evt.y });
 
       this.selectedArrow[position].x = data.pointer.x;
       this.selectedArrow[position].y = data.pointer.y;
@@ -1065,11 +1063,11 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getPosOfNodeByPoint(nodeId: string, container: HTMLElement, point: { x: number, y: number }): { el: HTMLElement, pos: string } {
-    const nodeElement = container.querySelector('#node-' + nodeId );
+    const nodeElement = container.querySelector('#node-' + nodeId);
     const rect = nodeElement.getBoundingClientRect();
     let pos = '';
 
-    if (point.x < rect.x ||  point.x > rect.x + rect.width ) {
+    if (point.x < rect.x || point.x > rect.x + rect.width) {
       if (point.x < rect.x) {
         pos = 'Left';
       } else {
@@ -1088,12 +1086,12 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public hideNodeFormStack(node: BluePrintTool) {
-    const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 );
+    const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1);
     console.log(arrowsToRemove);
     if (arrowsToRemove.length > 0) {
       const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
         width: '480px',
-        data: { title: 'Hide tool',  content: 'Do you realy want to hide tool - ' + this.nodes[node.id].tool.name + '?'}
+        data: { title: 'Hide tool', content: 'Do you realy want to hide tool - ' + this.nodes[node.id].tool.name + '?' }
       });
 
       dialogRef.afterClosed().subscribe(result => {
@@ -1114,12 +1112,12 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (index !== -1) {
       this.showNodes.splice(index, 1);
     }
-    const arrowsToRemove = node.hide ? this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 ) : [];
+    const arrowsToRemove = node.hide ? this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1) : [];
     const ids = [];
     if (arrowsToRemove.length) {
       arrowsToRemove.forEach(element => {
         ids.push(element.lineId);
-        const i = this.listOfArrows.findIndex(item => item.lineId ===  element.lineId );
+        const i = this.listOfArrows.findIndex(item => item.lineId === element.lineId);
         this.listOfArrows.splice(i, 1);
         this.svgD3.select('path#' + element.lineId).remove();
       });
@@ -1131,7 +1129,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public removeSingleArrow(lineId: string) {
-    const index = this.listOfArrows.findIndex((item) => item.lineId === lineId );
+    const index = this.listOfArrows.findIndex((item) => item.lineId === lineId);
 
     if (index !== -1) {
       this.svgD3.select('path#' + this.listOfArrows[index].lineId).remove();
@@ -1152,11 +1150,13 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.selectorArea.nativeElement.style.display = 'block';
         this.selectorArea.nativeElement.style.visibility = 'hidden';
         const offsetParent = this.stackWorkFlow.nativeElement.offsetParent as HTMLDivElement;
-        this.selectOffsetData = { x: offsetParent.offsetLeft,
-          y: offsetParent.offsetTop };
+        this.selectOffsetData = {
+          x: offsetParent.offsetLeft,
+          y: offsetParent.offsetTop
+        };
 
         this.startPointer = { x: evt.pageX - this.selectOffsetData.x, y: evt.pageY - this.selectOffsetData.y };
-        if ( this.selectedNodes.length > 0 ) {
+        if (this.selectedNodes.length > 0) {
           this.selectedNodes.forEach(item => {
             item.elRef.style.transform = `translate3d(${item.node.position.x}px, ${item.node.position.y}px, 0px)`;
             item.elRef.classList.remove('selected');
@@ -1177,11 +1177,13 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.startSelecting = true;
       this.selectorArea.nativeElement.style.display = 'block';
       const offsetParent = this.stackWorkFlow.nativeElement.offsetParent as HTMLDivElement;
-      this.selectOffsetData = { x: offsetParent.offsetLeft,
-        y: offsetParent.offsetTop };
+      this.selectOffsetData = {
+        x: offsetParent.offsetLeft,
+        y: offsetParent.offsetTop
+      };
 
       this.startPointer = { x: evt.pageX - this.selectOffsetData.x, y: evt.pageY - this.selectOffsetData.y };
-      if ( this.selectedNodes.length > 0 ) {
+      if (this.selectedNodes.length > 0) {
         this.selectedNodes.forEach(item => {
           item.elRef.style.transform = `translate3d(${item.node.position.x}px, ${item.node.position.y}px, 0px)`;
           item.elRef.classList.remove('selected');
@@ -1261,8 +1263,10 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.moveSelectedArea.nativeElement.addEventListener('mousedown', (evt) => {
-      this.moveSelectStart = { x: evt.pageX - this.selectOffsetData.x - containerOffset,
-        y: evt.pageY - this.selectOffsetData.y - containerOffset };
+      this.moveSelectStart = {
+        x: evt.pageX - this.selectOffsetData.x - containerOffset,
+        y: evt.pageY - this.selectOffsetData.y - containerOffset
+      };
       this.starMoveSelected = true;
     });
     this.moveSelectedArea.nativeElement.addEventListener('mousemove', (evt) => {
@@ -1304,8 +1308,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private completeGroupMove(different: Pointer): void {
     this.moveSelectedArea.nativeElement.style.transform = `translate3d(0px, 0px, 0px)`;
-    const y = parseInt( this.moveSelectedArea.nativeElement.style.top, 10 );
-    const x = parseInt( this.moveSelectedArea.nativeElement.style.left, 10 );
+    const y = parseInt(this.moveSelectedArea.nativeElement.style.top, 10);
+    const x = parseInt(this.moveSelectedArea.nativeElement.style.left, 10);
     this.moveSelectedArea.nativeElement.style.top = (y + different.y) + 'px';
     this.moveSelectedArea.nativeElement.style.left = (x + different.x) + 'px';
 
@@ -1419,106 +1423,106 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 }
 
-  /* private generatePosition( startX, endX, startY, endY ) {
-    let Xpos = 'Left';
-    let Ypos = '';
-    const radAngle = Math.atan2(endX - startX, endY - startY);
-    const degAngle = radAngle * 180 / Math.PI + 180;
-    const part = 8;
-    const diapason = 360 / part / 2;
-    if (degAngle < diapason || degAngle > 360 - diapason || degAngle > 180 - diapason && degAngle < 180 + diapason ) { Xpos = 'Middle'; }
-    if (degAngle >= diapason && degAngle <= 180 - diapason) { Xpos = 'Right'; }
-    if (degAngle >= 180 + diapason && degAngle <= 360 - diapason) { Xpos = 'Left'; }
-    if (degAngle < 90 - diapason || degAngle > 270 + diapason ) { Ypos = 'Bottom'; }
-    if (degAngle > 90 + diapason && degAngle < 270 - diapason) { Ypos = 'Top'; }
+/* private generatePosition( startX, endX, startY, endY ) {
+  let Xpos = 'Left';
+  let Ypos = '';
+  const radAngle = Math.atan2(endX - startX, endY - startY);
+  const degAngle = radAngle * 180 / Math.PI + 180;
+  const part = 8;
+  const diapason = 360 / part / 2;
+  if (degAngle < diapason || degAngle > 360 - diapason || degAngle > 180 - diapason && degAngle < 180 + diapason ) { Xpos = 'Middle'; }
+  if (degAngle >= diapason && degAngle <= 180 - diapason) { Xpos = 'Right'; }
+  if (degAngle >= 180 + diapason && degAngle <= 360 - diapason) { Xpos = 'Left'; }
+  if (degAngle < 90 - diapason || degAngle > 270 + diapason ) { Ypos = 'Bottom'; }
+  if (degAngle > 90 + diapason && degAngle < 270 - diapason) { Ypos = 'Top'; }
 
-    return { Xpos, Ypos };
-  } */
+  return { Xpos, Ypos };
+} */
 
-  /* private redrawArrow(item, container) {
-    const startBlock = container.querySelector(`#node-${item.start.nodeId}`);
-    const endBlock = container.querySelector(`#node-${item.end.nodeId}`);
+/* private redrawArrow(item, container) {
+  const startBlock = container.querySelector(`#node-${item.start.nodeId}`);
+  const endBlock = container.querySelector(`#node-${item.end.nodeId}`);
 
-    if (startBlock && endBlock) {
-      const startCoordiants = this.parseTranslate(startBlock.style.transform);
-      const startPointerItem = startBlock.querySelector('.pointer-' + item.start.pos);
-
-      const posStart = {
-        y: startCoordiants.y + startPointerItem.offsetTop,
-        x: startCoordiants.x + startPointerItem.offsetLeft
-      };
-
-      item.start.x = posStart.x;
-      item.start.y = posStart.y;
-
-      const endCoordiants = this.parseTranslate(endBlock.style.transform);
-      const endPointerItem = endBlock.querySelector('.pointer-' + item.end.pos);
-
-      const posEnd = {
-        y: endCoordiants.y + endPointerItem.offsetTop,
-        x: endCoordiants.x + endPointerItem.offsetLeft
-      };
-
-      item.end.x = posEnd.x;
-      item.end.y = posEnd.y;
-
-      this.svgD3.select('path#' + item.lineId)
-            .attr('d', lineGenerator(this.arrowHelper.genrateDots(
-              [item.start.x, item.start.y],
-              [item.end.x, item.end.y], item.start.pos, item.end.pos)));
-    }
-  }
-  */
-
-  /*private retriveNodePosition(data, node) {
-    data.source.element.nativeElement.style.transform = this.startPositionNode;
-    const coordiants = this.parseTranslate(this.startPositionNode);
-    console.log(data.source);
-    data.source.freeDragPosition = coordiants;
-
-    const container = this.stackWorkFlow.nativeElement;
-    // data.source._dragRef._activeTransform = coordiants;
-    data.source._dragRef._passiveTransform = coordiants;
-
-    const lines = this.listOfArrows.filter((item) => item.start.nodeId === node.id || item.end.nodeId === node.id );
-    lines.forEach((item) => {
-      this.redrawArrow(item, container);
-    });
-  }*/
-
-  /*private drawArrowOnDrag( nodeOne, nodeTwo ) {
-
-    const container = this.stackWorkFlow.nativeElement;
-    const startBlock = container.querySelector(`#node-${nodeOne.id}`);
-    const endBlock = container.querySelector(`#node-${nodeTwo.id}`);
-
-    const start = this.parseTranslate(startBlock.style.transform);
-    const end = this.parseTranslate(endBlock.style.transform);
-
-    const endpos = this.generatePosition( start.x, end.x, start.y, end.y );
-    const startpos = this.generatePosition( end.x, start.x, end.y, start.y );
-
-    const startPointerItem = startBlock.querySelector('.pointer-' + startpos.Xpos + startpos.Ypos);
+  if (startBlock && endBlock) {
+    const startCoordiants = this.parseTranslate(startBlock.style.transform);
+    const startPointerItem = startBlock.querySelector('.pointer-' + item.start.pos);
 
     const posStart = {
-      y: start.y + startPointerItem.offsetTop,
-      x: start.x + startPointerItem.offsetLeft
+      y: startCoordiants.y + startPointerItem.offsetTop,
+      x: startCoordiants.x + startPointerItem.offsetLeft
     };
 
-    const endPointerItem = endBlock.querySelector('.pointer-' + endpos.Xpos + endpos.Ypos);
+    item.start.x = posStart.x;
+    item.start.y = posStart.y;
+
+    const endCoordiants = this.parseTranslate(endBlock.style.transform);
+    const endPointerItem = endBlock.querySelector('.pointer-' + item.end.pos);
 
     const posEnd = {
-      y: end.y + endPointerItem.offsetTop,
-      x: end.x + endPointerItem.offsetLeft
+      y: endCoordiants.y + endPointerItem.offsetTop,
+      x: endCoordiants.x + endPointerItem.offsetLeft
     };
 
-    const Arrow: DrawArrow = {
-      start: { x: posStart.x, y: posStart.y, nodeId: nodeOne.id, pos: startpos.Xpos + startpos.Ypos },
-      end: { x: posEnd.x, y: posEnd.y, nodeId: nodeTwo.id, pos: endpos.Xpos + endpos.Ypos },
-      lineId: 'line-' + nodeOne.id + '-' + nodeTwo.id
-    };
+    item.end.x = posEnd.x;
+    item.end.y = posEnd.y;
+
+    this.svgD3.select('path#' + item.lineId)
+          .attr('d', lineGenerator(this.arrowHelper.genrateDots(
+            [item.start.x, item.start.y],
+            [item.end.x, item.end.y], item.start.pos, item.end.pos)));
+  }
+}
+*/
+
+/*private retriveNodePosition(data, node) {
+  data.source.element.nativeElement.style.transform = this.startPositionNode;
+  const coordiants = this.parseTranslate(this.startPositionNode);
+  console.log(data.source);
+  data.source.freeDragPosition = coordiants;
+
+  const container = this.stackWorkFlow.nativeElement;
+  // data.source._dragRef._activeTransform = coordiants;
+  data.source._dragRef._passiveTransform = coordiants;
+
+  const lines = this.listOfArrows.filter((item) => item.start.nodeId === node.id || item.end.nodeId === node.id );
+  lines.forEach((item) => {
+    this.redrawArrow(item, container);
+  });
+}*/
+
+/*private drawArrowOnDrag( nodeOne, nodeTwo ) {
+
+  const container = this.stackWorkFlow.nativeElement;
+  const startBlock = container.querySelector(`#node-${nodeOne.id}`);
+  const endBlock = container.querySelector(`#node-${nodeTwo.id}`);
+
+  const start = this.parseTranslate(startBlock.style.transform);
+  const end = this.parseTranslate(endBlock.style.transform);
+
+  const endpos = this.generatePosition( start.x, end.x, start.y, end.y );
+  const startpos = this.generatePosition( end.x, start.x, end.y, start.y );
+
+  const startPointerItem = startBlock.querySelector('.pointer-' + startpos.Xpos + startpos.Ypos);
+
+  const posStart = {
+    y: start.y + startPointerItem.offsetTop,
+    x: start.x + startPointerItem.offsetLeft
+  };
+
+  const endPointerItem = endBlock.querySelector('.pointer-' + endpos.Xpos + endpos.Ypos);
+
+  const posEnd = {
+    y: end.y + endPointerItem.offsetTop,
+    x: end.x + endPointerItem.offsetLeft
+  };
+
+  const Arrow: DrawArrow = {
+    start: { x: posStart.x, y: posStart.y, nodeId: nodeOne.id, pos: startpos.Xpos + startpos.Ypos },
+    end: { x: posEnd.x, y: posEnd.y, nodeId: nodeTwo.id, pos: endpos.Xpos + endpos.Ypos },
+    lineId: 'line-' + nodeOne.id + '-' + nodeTwo.id
+  };
 
 
-    this.drawArrow(Arrow);
+  this.drawArrow(Arrow);
 
-  } */
+} */
