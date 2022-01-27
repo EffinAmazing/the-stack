@@ -81,7 +81,7 @@ export class NodeDetailsComponent {
         }
       });
       this.owners;
-      debugger
+      
     }
   }
 
