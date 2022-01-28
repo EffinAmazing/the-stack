@@ -10,11 +10,11 @@ import { environment } from "../../../../../environments/environment";
 import { MatChipInputEvent } from "@angular/material/chips";
 import { COMMA, ENTER } from "@angular/cdk/keycodes";
 export interface Owners {
-  name: string;
+  name: string
 }
 
 export interface Trainers {
-  name: string;
+  name: string
 }
 
 const host = environment.serverURI;
@@ -35,11 +35,11 @@ export class NodeDetailsComponent {
     public dialogRef: MatDialogRef<NodeDetailsComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data: {
-      node: BluePrintTool;
-      blueprintId: string;
-      domainsList: string[];
-      ownerTemp: string[];
-      ownerArr: string[];
+      node: BluePrintTool,
+      blueprintId: string,
+      domainsList: string[],
+      ownerTemp: string[],
+      ownerArr: string[],
     }
   ) {
     // console.log(data);
@@ -76,12 +76,12 @@ export class NodeDetailsComponent {
       //return owners.split(",");
       const valuesToShow = owners.split(",");
       valuesToShow.forEach((e) => {
-        if(e !== ',' && e !== '' ){
+        if (e !== ',' && e !== '') {
           this.owners.push({ name: e });
         }
       });
       this.owners;
-      
+
     }
   }
 
@@ -101,8 +101,8 @@ export class NodeDetailsComponent {
       // return trainedOn.split(",");
       const valuesToShow = trainedOn.split(",");
       valuesToShow.forEach((e) => {
-       if(e !== ',' && e !== '' ){
-           this.trainers.push({ name: e });
+        if (e !== ',' && e !== '') {
+          this.trainers.push({ name: e });
         }
       });
       this.trainers;
