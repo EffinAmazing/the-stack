@@ -21,8 +21,7 @@ export class HomeComponent implements OnInit {
     footerTitle: string,
     formLinkTitle: string,
   } | null = null;
-  defaultRepeater: Array<{ title: string, icon: string, description: string }> =
-    [];
+  defaultRepeater: Array<{ title: string, icon: string, description: string }> = [];
   hasError = false;
 
   constructor(private router: Router) {
