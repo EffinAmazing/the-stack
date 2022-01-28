@@ -94,10 +94,10 @@
         </div>
       </div>
       <div class="info-paragraph">
-        <div class="title">Owner:</div>
+        <div class="title">Technical Owners:</div>
         <div class="data">
           <mat-form-field>
-            <mat-label>Owners</mat-label>
+            <mat-label>Technical Owner</mat-label>
             <mat-chip-list #chipList aria-label="Owner selection">
               <mat-chip *ngFor="let owner of owners" (removed)="remove(owner)">
                 {{ owner.name }}
@@ -116,10 +116,10 @@
         </div>
       </div>
       <div class="info-paragraph">
-        <div class="title">People who are trained on it:</div>
+        <div class="title">Business Owners:</div>
         <div class="data">
           <mat-form-field>
-            <mat-label>Trained On</mat-label>
+            <mat-label>Business Owner</mat-label>
 
             <mat-chip-list #chipList1 aria-label="Trainer selection">
               <mat-chip
