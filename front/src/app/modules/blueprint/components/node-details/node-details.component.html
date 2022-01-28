@@ -1,101 +1,171 @@
-<h1 mat-dialog-title> 
-    <img class="node-icon" crossorigin [src]="data.node.tool.logo?processImageSrc(data.node.tool.logo):getAssetsFolder() + 'assets/images/layers.png'"  />
-    {{data.node.tool.name}} 
-    <button mat-icon-button class="close-button" [mat-dialog-close]><mat-icon>clear</mat-icon></button> 
-    <button *ngIf="data.node.tool.tag === 'custom'" 
-        class="close-button" 
-        mat-icon-button 
-        (click)="clickEditNode()"> <mat-icon>edit</mat-icon> </button>
+<h1 mat-dialog-title>
+  <img
+    class="node-icon"
+    crossorigin
+    [src]="
+      data.node.tool.logo
+        ? processImageSrc(data.node.tool.logo)
+        : getAssetsFolder() + 'assets/images/layers.png'
+    "
+  />
+  {{ data.node.tool.name }}
+  <button mat-icon-button class="close-button" [mat-dialog-close]>
+    <mat-icon>clear</mat-icon>
+  </button>
+  <button
+    *ngIf="data.node.tool.tag === 'custom'"
+    class="close-button"
+    mat-icon-button
+    (click)="clickEditNode()"
+  >
+    <mat-icon>edit</mat-icon>
+  </button>
 </h1>
 <div class="dialog-categories-list" *ngIf="data.node">
-    <div class="info-paragraph"> 
-        <div class="title"> Categories: </div>
-        <div class="data"> <span *ngIf="data.node.tool.categories">{{data.node.tool.categories.join(', ') }}</span> </div>
-    </div> 
+  <div class="info-paragraph">
+    <div class="title">Categories:</div>
+    <div class="data">
+      <span *ngIf="data.node.tool.categories">{{
+        data.node.tool.categories.join(", ")
+      }}</span>
+    </div>
+  </div>
 </div>
 <div class="dialog-description-box">
-    <div class="info-paragraph">
-        <div class="data"> {{data.node.tool.description}} </div>
-    </div>
+  <div class="info-paragraph">
+    <div class="data">{{ data.node.tool.description }}</div>
+  </div>
 </div>
 <div mat-dialog-content>
-    <div class="nodeData" *ngIf="data.node">
+  <div class="nodeData" *ngIf="data.node">
+    <form [formGroup]="nodeForm">
+      <div class="info-paragraph">
+        <div class="title">Monthly cost:</div>
+        <div class="data">
+          <mat-form-field class="full-width">
+            <mat-label>Cost</mat-label>
+            <span matPrefix>$ &nbsp;</span>
+            <input
+              matInput
+              placeholder="1.00"
+              type="number"
+              formControlName="cost"
+              cdkFocusInitial
+            />
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="info-paragraph">
+        <div class="title">Start:</div>
+        <div class="data">
+          <mat-form-field>
+            <mat-label (click)="startPicker.open()">Choose a date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="startPicker"
+              formControlName="start"
+              (click)="startPicker.open()"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="startPicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="info-paragraph">
+        <div class="title">End:</div>
+        <div class="data">
+          <mat-form-field>
+            <mat-label (click)="endPicker.open()">Choose a date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="endPicker"
+              formControlName="end"
+              (click)="endPicker.open()"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="endPicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="info-paragraph">
+        <div class="title">Technical Owners:</div>
+        <div class="data">
+          <mat-form-field>
+            <mat-label>Technical Owner</mat-label>
+            <mat-chip-list #chipList aria-label="Owner selection">
+              <mat-chip *ngFor="let owner of owners" (removed)="remove(owner)">
+                {{ owner.name }}
+                <mat-icon matChipRemove>
+                  <mat-icon>cancel</mat-icon>
+                </mat-icon>
+              </mat-chip>
+              <input
+                [matChipInputFor]="chipList"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                [matChipInputAddOnBlur]="addOnBlur"
+                (matChipInputTokenEnd)="add($event)"
+              />
+            </mat-chip-list>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="info-paragraph">
+        <div class="title">Business Owners:</div>
+        <div class="data">
+          <mat-form-field>
+            <mat-label>Business Owner</mat-label>
 
-        <form [formGroup]="nodeForm">
-            <div  class="info-paragraph"> 
-                <div class="title"> Monthly cost: </div>
-                <div class="data">
-                    <mat-form-field class="full-width">
-                        <mat-label>Cost</mat-label>
-                        <span matPrefix>$ &nbsp;</span>
-                        <input matInput placeholder="1.00" type="number" formControlName="cost" cdkFocusInitial>
-                    </mat-form-field>
-                </div>
-            </div>
-            <div  class="info-paragraph"> 
-                <div class="title"> Start: </div>
-                <div class="data"> 
-                    <mat-form-field>
-                        <mat-label (click)="startPicker.open()">Choose a date</mat-label>
-                        <input matInput [matDatepicker]="startPicker" formControlName="start" (click)="startPicker.open()">
-                        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #startPicker></mat-datepicker>
-                    </mat-form-field>    
-                </div>
-            </div>
-            <div  class="info-paragraph"> 
-                <div class="title"> End: </div>
-                <div class="data"> 
-                    <mat-form-field>
-                        <mat-label (click)="endPicker.open()">Choose a date</mat-label>
-                        <input matInput [matDatepicker]="endPicker" formControlName="end" (click)="endPicker.open()">
-                        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #endPicker></mat-datepicker>
-                    </mat-form-field>  
-                </div>
-            </div>
-            <div  class="info-paragraph"> 
-                <div class="title"> Owner: </div>
-                <div class="data">
-                    <input type="hidden" formControlName="owner" />
-                    <div class="list-owners"><span *ngFor="let item of getOwners()" class="item-owners" > {{item}}  &nbsp; 
-                        <mat-icon class="icon-item-owners" (click)="removeOwner(item)">cancel</mat-icon></span></div>
-                    <mat-form-field >
-                        <mat-label>Owners</mat-label>
-                        <input matInput placeholder="owner" type="email" [(ngModel)]="ownerTemp" [ngModelOptions]="{standalone: true}">
-                    </mat-form-field>
-                    <button mat-icon-button class="add-button-owner" (click)="handleAddOwner()"> <mat-icon>add</mat-icon> </button>
-                </div>
-            </div>
-            <div  class="info-paragraph"> 
-                <div class="title"> People who are trained on it: </div>
-                <div class="data">
-                    <input type="hidden" formControlName="trainedOn"  />
-                    <div class="list-owners"><span *ngFor="let item of getTrainedOn()" class="item-owners" > {{item}}  &nbsp; 
-                        <mat-icon class="icon-item-owners" (click)="removeTrainedOn(item)">cancel</mat-icon></span></div>
-                    <mat-form-field >
-                        <mat-label>Trained On</mat-label>
-                        <input matInput placeholder="Trained On" type="email" [(ngModel)]="trainOnTemp" [ngModelOptions]="{standalone: true}">
-                    </mat-form-field>
-                    <button mat-icon-button class="add-button-owner" (click)="handleAddTrainedOn()"> <mat-icon>add</mat-icon> </button>
-                </div>
-            </div>
-
-            <div class="info-paragraph">
-                <div class="title"> From domain: </div>
-                <div class="data">
-                    <mat-form-field class="full-width">
-                        <mat-label>Domain</mat-label>
-                        <mat-select formControlName="domain">
-                            <mat-option *ngFor="let item of getDomains()" [value]="item">{{item}}</mat-option>
-                        </mat-select >
-                    </mat-form-field>
-                </div>
-            </div>
-        </form>
-    </div>
+            <mat-chip-list #chipList1 aria-label="Trainer selection">
+              <mat-chip
+                *ngFor="let trainer of trainers"
+                (removed)="removeTrainers(trainer)"
+              >
+                {{ trainer.name }}
+                <mat-icon matChipRemove>
+                  <mat-icon>cancel</mat-icon>
+                </mat-icon>
+              </mat-chip>
+              <input
+                [matChipInputFor]="chipList1"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                [matChipInputAddOnBlur]="addOnBlur"
+                (matChipInputTokenEnd)="addTrainers($event)"
+              />
+            </mat-chip-list>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="info-paragraph">
+        <div class="title">From domain:</div>
+        <div class="data">
+          <mat-form-field class="full-width">
+            <mat-label>Domain</mat-label>
+            <mat-select formControlName="domain">
+              <mat-option *ngFor="let item of getDomains()" [value]="item">{{
+                item
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 <div mat-dialog-actions direction="right">
-  <button class="stack-button" (click)="onNoClick()"> <mat-icon>clear</mat-icon> Close</button>
-  <button class="stack-button" color="primary" [mat-dialog-close]="nodeForm.value" > <mat-icon>done</mat-icon> Update</button>
+  <button class="stack-button" (click)="onNoClick()">
+    <mat-icon>clear</mat-icon> Close
+  </button>
+  <button
+    class="stack-button"
+    color="primary"
+    [mat-dialog-close]="nodeForm.value"
+  >
+    <mat-icon>done</mat-icon> Update
+  </button>
 </div>
