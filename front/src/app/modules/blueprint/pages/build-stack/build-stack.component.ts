@@ -60,7 +60,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   errMessage = 'Something went wrong, please check domain and try again.';
   errMessageReturned = '';
   isMultiSelectActive = false;
-  showGrid =  false;
+  showGrid = false;
   snapGrid = true;
   toolsLoaded = false;
   authUser: User;
@@ -78,19 +78,19 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
 
   constructor(
-      private service: BlueprintsService,
-      private route: ActivatedRoute,
-      private router: Router,
-      private social: SocialShareService,
-      private auth: AuthService,
-      public history: ActionHistoryService,
-      private upload: UploadImagesService,
-      public deleteDialog: MatDialog,
-      public toolsDialog: MatDialog,
-      public infoDialog: MatDialog,
-      public inviteDialog: MatDialog,
-      public customToolDialog: MatDialog,
-      public showRegisterDialog: MatDialog) {
+    private service: BlueprintsService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private social: SocialShareService,
+    private auth: AuthService,
+    public history: ActionHistoryService,
+    private upload: UploadImagesService,
+    public deleteDialog: MatDialog,
+    public toolsDialog: MatDialog,
+    public infoDialog: MatDialog,
+    public inviteDialog: MatDialog,
+    public customToolDialog: MatDialog,
+    public showRegisterDialog: MatDialog) {
     this.id = route.snapshot.params['id'];
     // console.log(this.id);
     this.route.queryParams.subscribe((params: any) => {
@@ -118,15 +118,15 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   ngOnInit(): void {
     if (this.domain) {
       if (this.authUser) {
-        this.stackRequest = this.service.postDomainTools(this.domain).subscribe((data) => {   
+        this.stackRequest = this.service.postDomainTools(this.domain).subscribe((data) => {
           if (typeof data === 'string' && String(data).includes('Error: ')) {
             this.errMessageReturned = data;
-          }                
+          }
           if (!this.toolsLoaded) {
             this.proceedBluePrintData(data);
             this.toolsLoaded = true;
           }
-        }, err => this.isError = true );
+        }, err => this.isError = true);
       } else {
         this.stackRequest = this.service.getDomainTools(this.domain).subscribe((data) => {
           if (typeof data === 'string' && String(data).includes('Error: ')) {
@@ -136,7 +136,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
             this.proceedBluePrintData(data);
             this.toolsLoaded = true;
           }
-        }, err => this.isError = true );
+        }, err => this.isError = true);
       }
     } else if (this.id) {
       this.stackRequest = this.service.getBlueprint(this.id).subscribe((data) => {
@@ -147,7 +147,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
           this.proceedBluePrintData(data);
           this.toolsLoaded = true;
         }
-      }, err => this.isError = true );
+      }, err => this.isError = true);
     } else {
       this.isError = true;
     }
@@ -157,27 +157,27 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     if (typeof data === 'string') {
       return this.isError = true;
     }
-   
+
     //console.log(data);
     let hidden = 0;
     this.blueprint = data.blueprint;
     data.nodes.forEach((item) => {
       if (item.toolId) {
-        const tool = data.tools.find((atool) =>  atool.id === item.toolId );
+        const tool = data.tools.find((atool) => atool.id === item.toolId);
         item.tool = tool;
         if (tool.tag && tool.tag === 'domain') {
-           // console.log(tool);
-           this.domainsList.push(tool.name);
+          // console.log(tool);
+          this.domainsList.push(tool.name);
         }
         this.nodes[item.id] = item;
         this.nodesList.push(item.id);
-        if (item.hide ) { hidden++; }
-        if ( item.tool.categories && item.tool.categories.length > 0) {
+        if (item.hide) { hidden++; }
+        if (item.tool.categories && item.tool.categories.length > 0) {
           item.tool.categories.forEach((cat) => {
             if (this.categories[cat]) {
               this.categories[cat].push(item.id);
             } else {
-              this.categories[cat] = [ item.id ];
+              this.categories[cat] = [item.id];
             }
           });
         } else {
@@ -199,7 +199,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     if (force) {
       this.nodesList.forEach((nodeId) => {
         const item = this.nodes[nodeId];
-        if (!item.hide && all - hidden > 50 ) {
+        if (!item.hide && all - hidden > 50) {
 
           if (item.tool.name !== this.domain) {
             item.hide = true;
@@ -222,8 +222,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
             oldTool = true;
           }
         }
-        if (!item.hide && ( this.verifyOrderToHide(item.tool.categories) || forbiddenTags.includes(item.tool.tag) || oldTool ) &&
-        ( item.tool.tag !== 'analytics' || oldTool) && all - hidden > 10) {
+        if (!item.hide && (this.verifyOrderToHide(item.tool.categories) || forbiddenTags.includes(item.tool.tag) || oldTool) &&
+          (item.tool.tag !== 'analytics' || oldTool) && all - hidden > 10) {
           item.hide = true;
           this.nodesForUpdate.push(item.id);
           hidden++;
@@ -283,7 +283,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       if (this.authUser) {
         window['dataLayer'].push({
           event: 'stackbuilder.node.updateInfo',
-          node:  this.nodes[result.nodeId],
+          node: this.nodes[result.nodeId],
           tool: this.nodes[result.nodeId].tool
         });
 
@@ -307,7 +307,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       data: { domain: this.blueprint.domain }
     });
 
-    dialogRef.afterClosed().subscribe(result => {  });
+    dialogRef.afterClosed().subscribe(result => { });
   }
 
   public handleShare(media) {
@@ -322,42 +322,43 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     html2canvas(document.querySelector('#stackWorkflow'), {
       backgroundColor: '#ffffff',
       logging: true,
-      allowTaint: true, useCORS: true}).then((canvas) => {
-        canvas.toBlob((blob) => {
-          const formData = new FormData();
-          formData.append('image', blob, 'filename.jpg');
-          /*  */
+      allowTaint: true, useCORS: true
+    }).then((canvas) => {
+      canvas.toBlob((blob) => {
+        const formData = new FormData();
+        formData.append('image', blob, 'filename.jpg');
+        /*  */
 
-          this.upload.uploadImgFor(this.blueprint.id, formData).toPromise().then((link) => {
+        this.upload.uploadImgFor(this.blueprint.id, formData).toPromise().then((link) => {
 
-            switch (media) {
-              case 'facebook':
-                this.social.shareInFaceBook('', environment.serverURI + link, popup);
-                break;
-              case 'twitter':
-                this.social.shareInTwitter(environment.serverURI + link, popup);
-                break;
-              case 'linkedin':
-                this.social.shareInLinkedIn(environment.serverURI + link, this.blueprint.domain + ' tools stack', popup);
-                break;
-              case 'email':
-                this.social.shareInEmail(environment.serverURI + link, popup, this.blueprint.domain);
-                break;
-              default:
-                break;
-            }
+          switch (media) {
+            case 'facebook':
+              this.social.shareInFaceBook('', environment.serverURI + link, popup);
+              break;
+            case 'twitter':
+              this.social.shareInTwitter(environment.serverURI + link, popup);
+              break;
+            case 'linkedin':
+              this.social.shareInLinkedIn(environment.serverURI + link, this.blueprint.domain + ' tools stack', popup);
+              break;
+            case 'email':
+              this.social.shareInEmail(environment.serverURI + link, popup, this.blueprint.domain);
+              break;
+            default:
+              break;
+          }
 
 
-            window['dataLayer'].push({
-              event: 'stackbuilder.shared',
-              social: media,
-              domain: this.blueprint.domain
-            });
+          window['dataLayer'].push({
+            event: 'stackbuilder.shared',
+            social: media,
+            domain: this.blueprint.domain
+          });
 
-            this.isWaiting = false;
-          }).catch(err => console.log(err));
-        }, 'image/jpeg');
-      });
+          this.isWaiting = false;
+        }).catch(err => console.log(err));
+      }, 'image/jpeg');
+    });
 
   }
 
@@ -400,9 +401,9 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       return true;
     } else {
       let hide = false;
-      if (categories.length === 0 ) { return true; }
+      if (categories.length === 0) { return true; }
       categories.forEach((cat) => {
-        if ( hiddenCategories.includes(cat) ) {
+        if (hiddenCategories.includes(cat)) {
           hide = true;
         }
       });
@@ -423,7 +424,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
       window['dataLayer'].push({
         event: 'stackbuilder.node.disconnected',
-        parentTool:  this.nodes[this.selectedArrow.start.nodeId].tool,
+        parentTool: this.nodes[this.selectedArrow.start.nodeId].tool,
         childTool: this.nodes[this.selectedArrow.end.nodeId].tool,
         stack: this.blueprint
       });
@@ -439,10 +440,12 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     const oldPosition = this.nodes[data.nodeId].position;
     if (!data.disableHistory) {
 
-      this.history.addAction(this.blueprint.id, { name: 'updatePosition', data: {
-        nodeId: data.nodeId,
-        newPosition: data.position,
-        oldPosition }
+      this.history.addAction(this.blueprint.id, {
+        name: 'updatePosition', data: {
+          nodeId: data.nodeId,
+          newPosition: data.position,
+          oldPosition
+        }
       });
 
     }
@@ -450,7 +453,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     if (!data.disableGTM) {
       window['dataLayer'].push({
         event: 'stackbuilder.node.updatePosition',
-        node:  this.nodes[data.nodeId],
+        node: this.nodes[data.nodeId],
         newPosition: data.position,
         oldPosition,
         tool: this.nodes[data.nodeId].tool
@@ -474,12 +477,12 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     if (this.nodesForUpdate.length) {
       this.service.hideNodes(this.nodesForUpdate).subscribe((data) => {
         this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain });
-        this.changedCategories$.next( this.categories );
+        this.changedCategories$.next(this.categories);
         this.getArrowsList();
       });
     } else {
       this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain });
-      this.changedCategories$.next( this.categories );
+      this.changedCategories$.next(this.categories);
       this.getArrowsList();
     }
   }
@@ -526,12 +529,12 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
             email: result.emails.join(',')
           });
           this.service.inviteUsers(result).toPromise()
-          .then(res => {
-            console.log(res);
-          })
-          .catch(err => {
-            console.log(err);
-          });
+            .then(res => {
+              console.log(res);
+            })
+            .catch(err => {
+              console.log(err);
+            });
         }
       });
     } else {
@@ -549,9 +552,9 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if ( result ) {
+      if (result) {
         if (!node) {
-          this.addedNewNode$.next([ result ]);
+          this.addedNewNode$.next([result]);
           window['dataLayer'].push({
             event: 'stackbuilder.node.loaded',
             node: result,
@@ -592,10 +595,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
             if (result.hasOwnProperty(key)) {
               if (!result[key].nodeId) {
                 listToCreate.push({
-                    blueprintId: this.blueprint.id,
-                    toolId: result[key].id,
-                    hide: false,
-                    dependencies: []
+                  blueprintId: this.blueprint.id,
+                  toolId: result[key].id,
+                  hide: false,
+                  dependencies: []
                 });
               } else {
                 listToUnhide.push(result[key].nodeId);
@@ -653,7 +656,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
     //TODO
     //check if any node in this list is already unhidden. if so, remove it from listToUnhide and add to listToCreate
-    /*if (listToUnhide.length) {       
+    if (listToUnhide.length) {
       let processingArray = [];
       listToUnhide.forEach(tool_id => {
         if (this.nodes[tool_id] && !this.nodes[tool_id].hide) {
@@ -669,8 +672,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
         }
       });
 
-      listToUnhide = [...processingArray];      
-    }*/
+      listToUnhide = [...processingArray];
+    }
 
     if (listToCreate.length) {
       nodes = await this.service.addNewNodeItems(listToCreate).toPromise();
@@ -693,7 +696,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       this.nodesList = [...this.nodesList, ...nodesIds];
     }
 
-    if (listToUnhide.length) {      
+    if (listToUnhide.length) {
       const res = await this.service.unhideNodes(listToUnhide).toPromise();
       unhideNodes = listToUnhide.map((nodeId) => {
         this.nodes[nodeId].hide = false;
@@ -711,7 +714,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     return [...nodes, ...unhideNodes];
   }
 
-  public handleRemoveArrows(ids, blockReload?: any ) {
+  public handleRemoveArrows(ids, blockReload?: any) {
     this.deleteArrowDots();
     this.selectedArrow = null;
     this.service.removeArrows(ids).toPromise().then((result) => {
@@ -727,7 +730,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
   public moveToHome() {
     var a = document.createElement('a');
-    a.href="/marketing-technology-tech-stack-builder/";
+    a.href = "/marketing-technology-tech-stack-builder/";
     a.click();
   }
 
@@ -758,12 +761,12 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     }
 
     console.log(' handleHideNodeItem - ', data);
-    if (!data.disableHistory) {  this.history.addAction(this.blueprint.id, { name: 'hideNode', data }); }
+    if (!data.disableHistory) { this.history.addAction(this.blueprint.id, { name: 'hideNode', data }); }
 
     this.service.updateNodeTool(data.item.id, { hide: data.item.hide }, this.blueprint.id).subscribe((res) => {
       res.tool = this.nodes[data.item.id].tool;
       this.nodes[data.item.id] = res;
-      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain  });
+      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain });
     });
   }
 
@@ -814,10 +817,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
             });
           }
           // console.log(this.verifyOrderToHide(nodeItem.tool.categories), forbiddenTags.includes(nodeItem.tool.tag), oldTool, newItems >= maxNewVisibleItems);
-          if (( this.verifyOrderToHide(nodeItem.tool.categories) || forbiddenTags.includes(nodeItem.tool.tag) ) || 
-              newItems >= maxNewVisibleItems ) {
+          if ((this.verifyOrderToHide(nodeItem.tool.categories) || forbiddenTags.includes(nodeItem.tool.tag)) ||
+            newItems >= maxNewVisibleItems) {
             nodeItem.hide = true;
-            listToHide.push( nodeItem.id );
+            listToHide.push(nodeItem.id);
           } else {
             newItems++;
           }
@@ -838,7 +841,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
             });
           }
         });
-        
+
         this.addedNewNode$.next(result);
         if (listToHide.length) {
           this.service.hideNodes(listToHide).subscribe((data) => {
@@ -863,7 +866,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   public handleUpdateArrow(data) {
-    if (!data.disableHistory) {  this.history.addAction(this.blueprint.id, { name: 'updateArrow', data: Object.assign({}, data) }); }
+    if (!data.disableHistory) { this.history.addAction(this.blueprint.id, { name: 'updateArrow', data: Object.assign({}, data) }); }
     this.service.updateArrow(data.newData).toPromise().then((result) => { }).catch(err => console.log(err));
   }
 
@@ -892,7 +895,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
     dialogRef.afterClosed().subscribe(result => {
 
-      if ( result ) {
+      if (result) {
         window['dataLayer'].push({
           event: 'stackbuilder.remove',
           stack: this.blueprint
@@ -926,7 +929,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   public handleGroupMove(data: { nodeIds: string[], diff: Pointer }) {
-    this.history.addAction(this.blueprint.id, { name: 'groupMove', data  });
+    this.history.addAction(this.blueprint.id, { name: 'groupMove', data });
   }
 
   ngOnDestroy() {
