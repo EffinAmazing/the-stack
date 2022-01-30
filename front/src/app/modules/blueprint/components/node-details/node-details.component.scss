@@ -55,6 +55,13 @@
             right: 0;
             bottom: 22px;
         }
+        .mat-chip-list {
+            .mat-chip {
+                .mat-icon {
+                    font-size: 18px;
+                }
+            }
+        }
     }
 
 }
