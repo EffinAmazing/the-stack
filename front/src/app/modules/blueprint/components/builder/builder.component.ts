@@ -9,9 +9,9 @@ import { Observable, Subscription } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { ConfirmActionDialogComponent } from '../../../../shared/components/confirm-action-dialog/confirm-action-dialog.component';
 import * as d3 from 'd3';
+import { hiddenCategories } from '../../../../core/config';
 
 const containerOffset = 0;
-const dotRadius = 9;
 const lineGenerator = d3.line().curve(d3.curveCardinal);
 const host = environment.serverURI;
 
@@ -52,103 +52,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
   nodes: BluePrintTool[] = [];
-  // nodes: BluePrintTool[] = [];
-  hiddenCategories: Array<string> = [
-    'Copyright',
-    'CSS Media Queries',
-    'Document Encoding',
-    'Browser Specific',
-    'Compatibility',
-    'CSS',
-    'Design Framework',
-    'DocType Declaration',
-    'Meta Tags',
-    'Mobile Specific',
-    'SSL Seals',
-    'Domain Parking',
-    'Application',
-    'Controls',
-    'Magento Theme',
-    'Node.js',
-    'NodeJS',
-    'PHP Theme',
-    'Plugin',
-    'Programming Language',
-    'Schema',
-    'Theme',
-    'Web App',
-    'WordPress Theme',
-    'AJAX',
-    'Animation',
-    'Charting',
-    'Compatibility',
-    'Cookie Management',
-    'Error Tracking',
-    'Fingerprint',
-    'fingerprinting',
-    'Forms and Surveys',
-    'Framework',
-    'Image Library',
-    'JavaScript Library',
-    'jQuery Plugin',
-    'Lightbox',
-    'Media',
-    'Slider',
-    'UI',
-    'Language',
-    'DDoS Protection',
-    'Enterprise DNS',
-    'SaaS DNS',
-    'Module',
-    'Operating System',
-    'Protocol',
-    'Robots.txt',
-    'SEO Header Tag',
-    'SEO Meta Tag',
-    'SEO Title Tag',
-    'Shipping Providers',
-    'Extended Validation',
-    'Multi Domain',
-    'Not Trusted',
-    'Root Authority',
-    'Server Gated Cryptography',
-    'Wildcard',
-    'Syndication Techniques',
-    'Edge Delivery Network',
-    'Advertising',
-    'Bookings',
-    'Homepage Link',
-    'Web Master Registration',
-    'Application Server',
-    'Caching Proxy',
-    'Linux Web Server',
-    'Windows Web Server',
-    'WordPress Plugins',
-    'Video Players',
-    'Standard',
-    'Fonts',
-    'Digital Video Ads',
-    'Audience Targetg',
-    'Facebook Exchange',
-    'Data Management Platform',
-    'Demand-side Platform',
-    'Ad network',
-    'Ad Exchange',
-    'Multi-channel',
-    'Payment Currency',
-    'Open source',
-    'Plug in / Module',
-    'Transaction email',
-    'Ad server',
-    'Application Performance',
-    'Site Search',
-    'Social Sharing',
-    'Business Email Hosting',
-    'Fraud Prevention',
-    'Transactional Email',
-    'Login',
-    'Visitor Count Tracking'
-  ];
+
   showNodes: BluePrintTool[] = [];
   listOfArrows: Array<DrawArrow> = [];
   connectedLines: Array<DrawArrow> = [];
@@ -251,7 +155,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             }
             let removeSpecialCharFromHidden
             let arrHidden = []
-            this.hiddenCategories.forEach(e => {
+            hiddenCategories.forEach(e => {
+
               removeSpecialCharFromHidden = e.replace(/[^\w]/g, '');
               arrHidden.push(removeSpecialCharFromHidden)
             });
