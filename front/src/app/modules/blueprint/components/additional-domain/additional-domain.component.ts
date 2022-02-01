@@ -1,5 +1,5 @@
 import { Component, Inject, ViewChild, ElementRef } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
 import { environment } from '../../../../../environments/environment';
 
@@ -22,13 +22,13 @@ export class AdditionalDomainComponent {
       value = value.replace('https://', '');
       value = value.replace('http://', '');
       const arr = value.split('/');
-      value = arr[0];
+      value = arr[0].toLocaleLowerCase();
       evt.target.value = value;
     }
     this.domain = value;
   }
 
-  proccedAddTool(){
+  proccedAddTool() {
     if (!this.isProcced) {
       this.isProcced = true;
       this.service.addDomainTool(this.domain, this.data.blueprint.id).toPromise().then(res => {
@@ -39,7 +39,7 @@ export class AdditionalDomainComponent {
       });
     }
   }
-  
+
   onNoClick(): void {
     //
     this.dialogRef.close();
