@@ -37,7 +37,7 @@ class BluePrints {
                     }
                 }
                 this.httpRequest(params).then(function(body) {
-                    console.log(body);
+                    //console.log(body);
                     cb(null);
                 }).catch((err)=>{
                     
