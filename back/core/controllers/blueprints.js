@@ -177,7 +177,7 @@ class BluePrints {
         return new Promise(function(resolve, reject) {
             var req = http.request(params, function(res) {
                 // reject on bad status
-                console.log(res);
+                //console.log(res);
                 if (res.statusCode < 200 || res.statusCode >= 302) {
                     return reject(new Error('statusCode=' + res.statusCode));
                 }
