@@ -98,7 +98,7 @@ export class HomeComponent implements OnInit {
       value = value.replace('https://', '');
       value = value.replace('http://', '');
       const arr = value.split('/');
-      value = arr[0];
+      value = arr[0].toLowerCase();
       data.target.value = value;
       this.domain.setValue( value );
     }
