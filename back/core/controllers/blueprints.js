@@ -53,6 +53,7 @@ class BluePrints {
                     blockedDomains = ["www.ouraring.com", "ouraring.com"];
 
                     if (blockedDomains.includes(params.hostname)) {
+                        //site is manually blocked
                         returnErrMessage += ': Blocked';
                     } else if (err && allowedDomains.includes(params.hostname)) {
                         //manual override
