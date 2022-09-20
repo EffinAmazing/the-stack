@@ -36,26 +36,30 @@ class BluePrints {
                         'User-Agent': 'request'
                     }
                 }
+
+                //MANUALLY block or allow domains
+                //this can be used to obfuscate a domain
+                let allowedDomains = ["klnMmQ1y72.ouraring.com"];
+                let blockedDomains = ["www.ouraring.com", "ouraring.com"]; 
+
                 this.httpRequest(params).then(function(body) {
-                    //console.log(body);
-                    cb(null);
+
+                    if (blockedDomains.includes(params.hostname)) {
+                        //site is manually blocked                        
+                        cb(new Error('Website Not Found: Blocked'));
+                    } else {
+                        cb(null);
+                    }
+                    //console.log(body);                    
                 }).catch((err)=>{
                     
                     console.log('err');console.log(err);
 
                     //lets expose errors clientside so we can 
                     //get better feedback
-                    let returnErrMessage = "Website Not Found";
-                    
-                    //MANUALLY block or allow domains
-                    //this can be used to obfuscate a domain
-                    allowedDomains = ["klnMmQ1y72.ouraring.com"];
-                    blockedDomains = ["www.ouraring.com", "ouraring.com"];
+                    let returnErrMessage = "Website Not Found";                                                          
 
-                    if (blockedDomains.includes(params.hostname)) {
-                        //site is manually blocked
-                        returnErrMessage += ': Blocked';
-                    } else if (err && allowedDomains.includes(params.hostname)) {
+                    if (err && allowedDomains.includes(params.hostname)) {
                         //manual override
                         cb(null);
                     } else if (err && err.message == "statusCode=403") {
