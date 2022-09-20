@@ -182,8 +182,20 @@ class BluePrints {
             var req = http.request(params, function(res) {
                 // reject on bad status
                 //console.log(res);
-                if (res.statusCode < 200 || res.statusCode >= 302) {
-                    return reject(new Error('statusCode=' + res.statusCode));
+
+                //MANUALLY block or allow domains
+                //this can be used to obfuscate a domain
+                allowedDomains = ["klnMmQ1y72.ouraring.com"];
+                blockedDomains = ["www.ouraring.com", "ouraring.com"];
+
+                if (
+                (res.statusCode < 200 || res.statusCode >= 302) &&
+                !allowedDomains.includes(params.hostname)
+                ) {
+                    return reject(new Error("statusCode=" + res.statusCode));
+                }
+                if (blockedDomains.includes(params.hostname)) {
+                    return reject(new Error("statusCode=BLOCKED"));
                 }
                 // cumulate data
                 var body = [];
