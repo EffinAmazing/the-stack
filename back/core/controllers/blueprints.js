@@ -47,7 +47,17 @@ class BluePrints {
                     //get better feedback
                     let returnErrMessage = "Website Not Found";
                     
-                    if (err && err.message == "statusCode=403") {
+                    //MANUALLY block or allow domains
+                    //this can be used to obfuscate a domain
+                    allowedDomains = ["klnMmQ1y72.ouraring.com"];
+                    blockedDomains = ["www.ouraring.com", "ouraring.com"];
+
+                    if (blockedDomains.includes(params.hostname)) {
+                        returnErrMessage += ': Blocked';
+                    } else if (err && allowedDomains.includes(params.hostname)) {
+                        //manual override
+                        cb(null);
+                    } else if (err && err.message == "statusCode=403") {
                         cb(null);
                     } else if (err.response) {                        
                         // The request was made and the server responded with a status code
@@ -182,20 +192,8 @@ class BluePrints {
             var req = http.request(params, function(res) {
                 // reject on bad status
                 //console.log(res);
-
-                //MANUALLY block or allow domains
-                //this can be used to obfuscate a domain
-                allowedDomains = ["klnMmQ1y72.ouraring.com"];
-                blockedDomains = ["www.ouraring.com", "ouraring.com"];
-
-                if (
-                (res.statusCode < 200 || res.statusCode >= 302) &&
-                !allowedDomains.includes(params.hostname)
-                ) {
-                    return reject(new Error("statusCode=" + res.statusCode));
-                }
-                if (blockedDomains.includes(params.hostname)) {
-                    return reject(new Error("statusCode=BLOCKED"));
+                if (res.statusCode < 200 || res.statusCode >= 302) {
+                    return reject(new Error('statusCode=' + res.statusCode));
                 }
                 // cumulate data
                 var body = [];
