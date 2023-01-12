@@ -61,6 +61,8 @@ initPassport();
 app.use("/", router);
 
 app.use(function(err, req, res, next){
+    var schema = req.headers['x-forwarded-proto'];
+
     if(err){
         console.error(err.stack);
         res.status(500);
@@ -70,10 +72,14 @@ app.use(function(err, req, res, next){
             errors: [err.message]
         }
         res.json(response);
-    }else{
-        next();
+    } else if (schema === 'https') {
+      // Already https; don't do anything special.
+      next();
+    } else {
+      // Redirect to https.
+      res.redirect('https://' + req.headers.host + req.url);
     }
-})
+});
 
 app.listen(config.PORT, () =>{
     console.log(`App listening on port ${config.PORT}!`);
