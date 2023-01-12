@@ -1,9 +1,11 @@
-const express = require('express')
+const express = require('express');
+const forceSSL = require('express-force-ssl');
 const config = require('./config');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const router = require('./core/router');
 const mongoose = require('mongoose');
+const http = require('http');
 const https = require('https');
 const cors = require('cors');
 const path = require('path');
@@ -44,6 +46,7 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.connect(config.MONGOURI + config.DB_NAME , {useNewUrlParser: true,  useUnifiedTopology: true });
 
+app.use(forceSSL);
 app.use(cors());
 // parse data with connect-multiparty. 
 app.use(formData.parse(options));
@@ -79,4 +82,5 @@ app.listen(config.PORT, () =>{
     console.log(`App listening on port ${config.PORT}!`);
 });
 
+http.createServer(app).listen(80);
 https.createServer(optionsSSL, app).listen(443);
