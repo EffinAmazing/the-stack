@@ -82,5 +82,5 @@ app.listen(config.PORT, () =>{
     console.log(`App listening on port ${config.PORT}!`);
 });
 
-http.createServer(app).listen(80);
+//http.createServer(app).listen(80);
 https.createServer(optionsSSL, app).listen(443);
