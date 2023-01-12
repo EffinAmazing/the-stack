@@ -77,7 +77,7 @@ app.use(function(err, req, res, next){
       next();
     } else {
       // Redirect to https.
-      res.redirect('https://' + req.headers.host + req.url);
+      res.redirect(301, 'https://' + req.headers.host + req.url);
     }
 });
 
