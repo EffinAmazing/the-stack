@@ -12,7 +12,7 @@ module.exports.sendInviteForUser = async function (email, user, frontPath, bluep
     
     const textInviteMail = 'Hi,\n You have been invited to edit a stack in the Marketing Technologies Stack Builder, \n please accept your invitation via this link to complete registration: <' + link + '> \n\n Thanks! \n McGaw.io Team';
     const htmlInviteMail = staticMail.mailStyle + staticMail.mailHeader(frontPath + '#/')  + 
-        '<p> &nbsp; </p><div ' + staticMail.mailPStyles + '> Hi, </div><div ' + staticMail.mailPStyles + '>You have been invited to edit a stack in the Marketing Technologies Stack Builder,</div><div ' + staticMail.mailPStyles + '> please accept your invitation via this link to complete registration: </div> ' +
+        '<p> &nbsp; </p><div ' + staticMail.mailPStyles + '> Hi, </div><div ' + staticMail.mailPStyles + '>You have been invited to edit a stack in the Marketing Technologies Stack Builder, please accept your invitation via this link to complete registration: </div> ' +
         '<p style="text-align: center;"> <img src="' + config.SERVER_URI + '/domain-logos/' + blueprint.domain + '.png" /> <br /> <b style="font-size: 18px;">' + blueprint.domain + '</b> </p>' +
         '<p style="text-align: center;"> <a  ' + staticMail.mailButtonStyles + ' href="' + link + '">  Visit the Stack  </a>  </p>' +
         staticMail.mailFooter;
@@ -32,7 +32,7 @@ module.exports.sendInviteForUser = async function (email, user, frontPath, bluep
     const msg = {
         to: email,
         from: 'no-reply@mcgaw.io',
-        subject: 'Inivite to Marketing Technologies Stack Builder',
+        subject: 'Invitation to the Marketing Technologies Stack Builder',
         text: textMail,
         html: htmlMail,
     };
