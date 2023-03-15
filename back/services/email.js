@@ -32,7 +32,7 @@ module.exports.sendInviteForUser = async function (email, user, frontPath, bluep
     const msg = {
         to: email,
         from: 'no-reply@mcgaw.io',
-        subject: 'Inivite to Marketing Technologies Stack Builder',
+        subject: 'Invitation to the Marketing Technologies Stack Builder',
         text: textMail,
         html: htmlMail,
     };
