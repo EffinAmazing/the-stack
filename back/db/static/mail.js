@@ -11,12 +11,12 @@ module.exports.mailHeader = function(frontUrl) {
                 <table style="max-width: 540px; width: 100%; margin: auto; border: 0;"><tbody><tr><td>`;
 }
 
-module.exports.mailFooter = `<div> Thanks! <br/> McGaw.io Team </div></td></tr></table>
+module.exports.mailFooter = `<div> Thanks! <br/> McGaw Team </div></td></tr></table>
             </td>
         </tr>
         <tr>
             <td class="content-cell" align="center" style="padding-top: 40px;"> 
-              <p style="line-height: 1.5em; margin-top: 0; color: #aeaeae; font-size: 12px; text-align: center;">  © Copyright ${new Date().getFullYear()} McGaw.io, All Rights Reserved. </p>
+              <p style="line-height: 1.5em; margin-top: 0; color: #aeaeae; font-size: 12px; text-align: center;">  © Copyright ${new Date().getFullYear()} McGaw, All Rights Reserved. </p>
             </td>
         </tr>
     </tbody>
