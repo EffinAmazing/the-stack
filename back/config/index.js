@@ -7,7 +7,7 @@ var configs = Object.create(null);
 // let configs = dotenv.config();
 let data = {
     PORT: 9000,
-    PORT_V2: 9100,
+    PORT_V2: 4000,
     MONGOURI: 'mongodb://localhost:27017/',
     DB_NAME: 'marchtach'
 }
