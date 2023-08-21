@@ -8,6 +8,7 @@ const BluePrintAccessModel = require('../../db/models/BlueprintAccess');
 const UsersModel = require('../../db/models/Users');
 const axios = require('axios');
 const http = require('https');
+const dns = require('dns');
 
 class BluePrints {
     constructor(){
@@ -42,16 +43,30 @@ class BluePrints {
                 let allowedDomains = ["klnMmQ1y72.ouraring.com"];
                 let blockedDomains = ["www.ouraring.com", "ouraring.com"]; 
 
-                this.httpRequest(params).then(function(body) {
+                
 
-                    if (blockedDomains.includes(params.hostname)) {
+                //TODO
+                //check domain with dns lookup instead of httpRequest 
+                //to avoid servers blocking the request
+                dns.lookup(domain, function(err, result){
+
+                //this.httpRequest(params).then(function(body) {
+                    console.log(err,result);
+
+                    if (err) {
+                        cb(new Error(err.code));
+                    } else if (blockedDomains.includes(params.hostname)) {
                         //site is manually blocked                        
                         cb(new Error('Website Not Found: Blocked'));
                     } else {
                         cb(null);
                     }
                     //console.log(body);                    
-                }).catch((err)=>{
+                })
+                
+                
+                /*
+                .catch((err)=>{
                     
                     console.log('err');console.log(err);
 
@@ -87,6 +102,7 @@ class BluePrints {
                     cb(new Error(returnErrMessage));
                 })
                 // cb(null);
+                */
             },
             (cb) => {
                 // 1. get blueprint of domain
@@ -125,6 +141,7 @@ class BluePrints {
                 } else {
                     // 2. get tools of domain
                     ToolsServices.getToolsOfDomain(domain).then((result) => {
+                        console.log('ToolsServices.getToolsOfDomain', result);
                         const list = result.tech;
                         data.blueprint['spend'] = result.spend;
                         console.log(data.blueprint);
