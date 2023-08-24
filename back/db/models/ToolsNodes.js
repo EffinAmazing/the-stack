@@ -301,8 +301,11 @@ class ToolsNodesModel extends AbstaractModel {
         return mappedDocs;
     }
 
+    /*
+    DEPRECATED: INEFFICIENT
     async getNodesIdForTools(tools, blueprintId) {
         // 1 get ids of tools
+        
         let mappedTool = await async.map(tools, (item, cb) => { 
             this.modelDB.findOne({ toolId: item.id, blueprintId:  blueprintId}, (err, doc) => {
                 if (err || !doc) {
@@ -313,9 +316,38 @@ class ToolsNodesModel extends AbstaractModel {
                 }
             }) 
         });
-
+        
+        console.log(tools);
         return tools
     }
+    */
+
+    
+    async getNodesIdForTools(tools, blueprintId) {
+        const toolIds = tools.map(item => item.id);
+
+        const query = {
+            toolId: { $in: toolIds },
+            blueprintId: blueprintId
+        };
+
+        const matchingDocs = await this.modelDB.find(query);
+
+        const toolIdToNode = {};
+        matchingDocs.forEach(doc => {
+            toolIdToNode[doc.toolId] = doc._id;
+        });
+
+        tools.forEach(tool => {
+            if (toolIdToNode.hasOwnProperty(tool.id)) {
+                tool.nodeId = toolIdToNode[tool.id];
+            }
+        });
+
+        console.log(tools);
+        return tools;
+    }
+    
 
     async copyNodes(formId, newId) {
         let list = await this.getNodesByBlueprint(formId);
