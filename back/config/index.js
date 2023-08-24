@@ -8,8 +8,12 @@ var configs = Object.create(null);
 let data = {
     PORT: 9000,
     PORT_V2: 4000,
+    PORT_DEV: 4100,
     MONGOURI: 'mongodb://localhost:27017/',
-    DB_NAME: 'marchtach'
+    DB_NAME: 'marchtach',
+    DEV_DB_NAME: 'marchtachdev',
+    SEGMENT_STAGING_KEY: 'TODO',
+    SEGMENT_PRODUCTION_KEY: 'bcaHysqEPZdxWrQBgDUz8ymdtKnWVB8H'
 }
 
 if (process.env.NODE_ENV === "prod" || process.env.NODE_ENV === "production") {

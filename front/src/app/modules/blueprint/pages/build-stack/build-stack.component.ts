@@ -121,6 +121,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
         this.stackRequest = this.service.postDomainTools(this.domain).subscribe((data) => {   
           if (typeof data === 'string' && String(data).includes('Error: ')) {
             this.errMessageReturned = data;
+            this.emitErrorToDataLayer('service.postDomainTools',this.errMessageReturned);
           }                
           if (!this.toolsLoaded) {
             this.proceedBluePrintData(data);
@@ -131,6 +132,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
         this.stackRequest = this.service.getDomainTools(this.domain).subscribe((data) => {
           if (typeof data === 'string' && String(data).includes('Error: ')) {
             this.errMessageReturned = data;
+            this.emitErrorToDataLayer('service.getDomainTools',this.errMessageReturned);
           }
           if (!this.toolsLoaded) {
             this.proceedBluePrintData(data);
@@ -142,6 +144,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       this.stackRequest = this.service.getBlueprint(this.id).subscribe((data) => {
         if (typeof data === 'string' && String(data).includes('Error: ')) {
           this.errMessageReturned = data;
+          this.emitErrorToDataLayer('service.getBlueprint',this.errMessageReturned);
         }
         if (!this.toolsLoaded) {
           this.proceedBluePrintData(data);
@@ -150,7 +153,19 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       }, err => this.isError = true );
     } else {
       this.isError = true;
+      this.emitErrorToDataLayer('Unknown error in build-stack.components ngOnInit',this.errMessageReturned);
     }
+  }
+
+  private emitErrorToDataLayer(type,message) {
+    window['dataLayer'].push({
+      event: 'stackbuilder.node.debug',
+      data:  {
+        error_context: 'frontend',
+        error_type: type,
+        error_message: message
+      }
+    });
   }
 
   private proceedBluePrintData(data) {
