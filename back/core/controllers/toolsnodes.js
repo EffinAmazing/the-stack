@@ -254,6 +254,7 @@ class ToolsNodes {
                 (callback)=>{
 
                     this.tools.getByName(name, limit, offset).then(result=>{
+                        console.log('getByName done');
                         callback(null, result);
                     }).catch(err=>{
                         callback(err);
@@ -262,6 +263,7 @@ class ToolsNodes {
                 // 2. check if this tool is already in stack
                 (tools, callback) => {
                     this.model.getNodesIdForTools(tools, blueprintId).then(result => {
+                        console.log('getNodesIdForTools done');
                         callback(null, result);
                     }).catch(err => {
                         callback(err);
