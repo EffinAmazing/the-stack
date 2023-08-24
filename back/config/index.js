@@ -11,9 +11,7 @@ let data = {
     PORT_DEV: 4100,
     MONGOURI: 'mongodb://localhost:27017/',
     DB_NAME: 'marchtach',
-    DEV_DB_NAME: 'marchtachdev',
-    SEGMENT_STAGING_KEY: 'TODO',
-    SEGMENT_PRODUCTION_KEY: 'bcaHysqEPZdxWrQBgDUz8ymdtKnWVB8H'
+    DEV_DB_NAME: 'marchtachdev'
 }
 
 if (process.env.NODE_ENV === "prod" || process.env.NODE_ENV === "production") {
