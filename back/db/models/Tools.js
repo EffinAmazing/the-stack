@@ -154,7 +154,9 @@ class ToolsModel extends AbstaractModel {
             offset = parseInt(offset);
             if (!offset) offset = 0;
         }
-        const listDocs = await this.modelDB.find().where('name').regex( new RegExp(name.toLowerCase(), "i") ).exec();
+        //const listDocs = await this.modelDB.find().where('name').regex( new RegExp(name.toLowerCase(), "i") ).exec();
+        //({name: new RegExp(name.toLowerCase(), "i")}).collation({locale: "en", strength: 2})
+        const listDocs = await this.modelDB.find({name: new RegExp(name.toLowerCase(), "i")}).collation({locale: "en", strength: 2}).exec();
         const tools = await async.map(listDocs, (item, cb) => { cb(null, this.mapDocument(item)) });
         return tools;
     }
