@@ -55,6 +55,7 @@ class BluePrints {
 
                     if (err) {
                         cb(new Error(err.code));
+
                     } else if (blockedDomains.includes(params.hostname)) {
                         //site is manually blocked                        
                         cb(new Error('Website Not Found: Blocked'));
