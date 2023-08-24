@@ -159,8 +159,10 @@ class ToolsModel extends AbstaractModel {
         console.log('start search');
         const listDocs = await this.modelDB.find({name: new RegExp(name.toLowerCase(), "i")}).collation({locale: "en", strength: 2}).exec();
         console.log('search done');
+        console.log(listDocs.length);
         const tools = await async.map(listDocs, (item, cb) => { cb(null, this.mapDocument(item)) });
         console.log('search mapped');
+        console.log(tools.length);
         return tools;
     }
 }
