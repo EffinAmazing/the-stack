@@ -16,6 +16,10 @@
     max-height: 480px;
     overflow: auto;
 
+    &.transparent-list {
+        opacity: .2;
+    }
+
     .logo-tool{
         max-width: 100%;
         max-height: 100%;

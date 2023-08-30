@@ -22,6 +22,7 @@ export class AddNewToolDialogComponent {
   tools: Tool[] = [];
   selected: { [key: string]: Tool } = {};
   showSpinner = false;
+  transparentListOfTools = false;
 
   constructor(
     public dialogRef: MatDialogRef<AddNewToolDialogComponent>,
@@ -54,14 +55,17 @@ export class AddNewToolDialogComponent {
         this.runedTimeout = false;
         console.log(this.toolSearchName);
         this.showSpinner = true;
+        this.transparentListOfTools = true;
         this.service.getToolsList(this.toolSearchName, this.data.blueprintId).toPromise().then((result) => {
           this.tools = this.parseResults(result);
           console.log(this.tools);
           this.toolsDataLoaded = true;
           this.showSpinner = false;
+          this.transparentListOfTools = false;
         }).catch(err => {
           console.log(err);
           this.showSpinner = false;
+          this.transparentListOfTools = false;
         });
       }
     }

@@ -8,7 +8,7 @@
     </mat-form-field>
   </div>
   <div class="spinner-wrapper"><mat-progress-spinner *ngIf="showSpinner" mode="indeterminate"></mat-progress-spinner></div>
-  <div class="list-of-tools"> 
+  <div class="list-of-tools" [class.transparent-list]="transparentListOfTools"> 
     <mat-list>
         <mat-list-item *ngFor="let toolItem of tools" [ngClass]="{'selected': isToolSlected(toolItem.id), 'is-already-in-stack': !!toolItem.nodeId}"  (click)="handleSelectTool(toolItem)">
             <mat-icon mat-list-icon><img class="logo-tool"
