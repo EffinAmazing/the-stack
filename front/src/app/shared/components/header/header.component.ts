@@ -13,6 +13,15 @@ export class HeaderComponent implements OnInit {
   constructor(private auth: AuthService, private router: Router) { }
 
   logout() {
+    console.log('logout');
+    window['dataLayer'].push({
+      event: 'stackbuilder.logout',
+      user: {
+        email: this.user.email,
+        firstName: this.user.firstName,
+        lastName: this.user.lastName        
+      }
+    });
     this.auth.logout();
     this.router.navigateByUrl('/profile/signin');
 

@@ -30,6 +30,14 @@ export class SigninComponent implements OnInit {
         this.isError = true;
       } else {
         this.service.setSession(res);
+        window['dataLayer'].push({
+          event: 'stackbuilder.signin',
+          user: {
+            email: res.user.email,
+            firstName: res.user.firstName,
+            lastName: res.user.lastName
+          }
+        }); 
         this.router.onSameUrlNavigation = 'reload';
         this.router.navigateByUrl('/profile', { skipLocationChange: false });
       }

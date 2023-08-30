@@ -44,9 +44,8 @@ export class AuthService {
 
   setSession(authResult) {
     const userStr = encodeURI( JSON.stringify(authResult.user) );
-    if (authResult.user && this.first && !window['authCompleted']) {
-      this.first = false;
-      window['authCompleted'] = true;
+    if (authResult.user) {
+      //trigger this everytime we set session      
       window['dataLayer'].push({
         event: 'stackbuilder.auth',
         user: {
@@ -56,7 +55,14 @@ export class AuthService {
         }
       });
     }
+    //TODO do we need this.first auth? not sure the purpose
+    if (authResult.user && this.first && !window['authCompleted']) {
+      this.first = false;
+      window['authCompleted'] = true;
+            
+    }    
     localStorage.setItem('session_user', userStr);
     localStorage.setItem('auth_token', authResult.token);
   }
+
 }
