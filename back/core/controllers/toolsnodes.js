@@ -248,6 +248,9 @@ class ToolsNodes {
         const blueprintId = req.query.blueprint;
         let limit = req.query.limit;
         let offset = req.query.offset;
+
+        //setTimeout(function(req, res, name, blueprintId, limit, offset){
+
         if (name && blueprintId) {
             async.waterfall([
                 // 1. find tools with simular name
@@ -286,6 +289,8 @@ class ToolsNodes {
                 message: "incorrect data"
             });
         }
+
+     //}, 2000);
     }
 
     getListOfCategories( req, res, next ) {
