@@ -73,11 +73,13 @@ export class HomeComponent implements OnInit {
   }
 
   submitDomain() {
+
     if (!this.domain.invalid) {
       window['dataLayer'].push({
           event: 'stackbuilder.domainInput',
           domain: this.domain.value
       });
+
       this.router.navigateByUrl('/stack/build?domain=' + this.domain.value);
     } else {
       this.hasError = true;
@@ -94,6 +96,7 @@ export class HomeComponent implements OnInit {
 
   handleInput(data) {
     let value = data.target.value;
+
     if (value) {
       value = value.replace('https://', '');
       value = value.replace('http://', '');

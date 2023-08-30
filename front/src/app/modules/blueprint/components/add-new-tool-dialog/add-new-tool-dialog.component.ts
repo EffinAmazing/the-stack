@@ -5,7 +5,7 @@ import { BlueprintsService } from '../../../../core/services/blueprints.service'
 import { environment } from '../../../../../environments/environment';
 
 const host = environment.serverURI;
-const timeout = 300;
+const timeout = 1000;
 
 @Component({
   selector: 'app-add-new-tool-dialog',

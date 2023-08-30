@@ -88,8 +88,16 @@ export class SignupSigninPopupComponent {
         this.isError = true;
         this.errorMessage = 'Fail to sigin User, try again';
         this.formActive = 'signin';
-      } else {
+      } else {             
         this.auth.setSession(res);
+        window['dataLayer'].push({
+          event: 'stackbuilder.signin',
+          user: {
+            email: res.user.email,
+            firstName: res.user.firstName,
+            lastName: res.user.lastName
+          }
+        });  
         this.addUserToStack();
         /* */
       }
@@ -119,12 +127,13 @@ export class SignupSigninPopupComponent {
 
       this.userService.createUser(data).toPromise().then(res => {
         console.log(res);
-
         window['dataLayer'].push({
           event: 'stackbuilder.signup',
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName
+          user: {
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName
+          }
         });
         this.loginIn(data);
       }).catch((err) => {

@@ -43,7 +43,16 @@ export class SignupComponent implements OnInit {
       if (res === 'Error') {
         this.isError = true;
       } else {
+        console.log('loginAfterSignUp');
         this.auth.setSession(res);
+        window['dataLayer'].push({
+          event: 'stackbuilder.signin',
+          user: {
+            email: res.user.email,
+            firstName: res.user.firstName,
+            lastName: res.user.lastName
+          }
+        }); 
         this.router.onSameUrlNavigation = 'reload';
         this.router.navigateByUrl('/profile', { skipLocationChange: false });
       }
@@ -64,9 +73,11 @@ export class SignupComponent implements OnInit {
         this.isLoading = false;
         window['dataLayer'].push({
           event: 'stackbuilder.signup',
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName
+          user: {
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName
+          }
         });
         /**/
         // window.location.href = window.location.origin + window.location.pathname + '#/profile/signin';
@@ -83,9 +94,11 @@ export class SignupComponent implements OnInit {
         this.isLoading = false;
         window['dataLayer'].push({
           event: 'stackbuilder.signup',
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName
+          user: {
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName
+          }
         });
         this.loginAfterSignUp(data);
       }).catch(err => {
