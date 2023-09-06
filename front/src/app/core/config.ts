@@ -12,6 +12,22 @@ export const forbiddenTags: Array<string> = [
     'CDN',
     'copyright' ];
 
+export const forbiddenTools: Array<string> = [
+    'US Privacy User Signal Mechanism',
+    'Facebook Signal',
+    'Facebook Custom Audiences',
+    'Global Site Tag',
+    'Shopify Custom Theme',
+    'Shopify Conversions',
+    'Shopify US Dollar',
+    'Shopify Account',
+    'American Express',
+    'Amazon Payments',
+    'MasterCard',
+    'PayPal',
+    'Visa',
+    'Apple Pay' ];    
+
 export const hiddenCategories: Array<string> = [
     'Copyright',
     'CSS Media Queries',

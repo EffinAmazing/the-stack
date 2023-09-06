@@ -33,7 +33,9 @@ async function getTestDataFromFile(domain){
 
     console.log('API Response');
     console.log(response);
-    
+
+    //TODO
+    //limit where item.Tag == 'domain' ?
     const results = await async.map(Technologies, (item, cb)=>{
         cb(null, { 
             categories: item.Categories,
