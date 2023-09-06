@@ -5,10 +5,20 @@
     margin-left: auto;
     margin-right: auto;
 }
+.spinner-wrapper {
+    position: absolute;
+    left: 50%;
+    transform: translate3d(-50%, 0, 0);
+    top: 50%;
+}
 .list-of-tools{
     min-height: 220px;
     max-height: 480px;
     overflow: auto;
+
+    &.transparent-list {
+        opacity: .2;
+    }
 
     .logo-tool{
         max-width: 100%;

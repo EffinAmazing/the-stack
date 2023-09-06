@@ -1,11 +1,12 @@
 import {Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; // Import the MatProgressSpinnerModule
 import { Tool } from '../../../../shared/models/tool';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
 import { environment } from '../../../../../environments/environment';
 
 const host = environment.serverURI;
-const timeout = 1000;
+const timeout = 500;
 
 @Component({
   selector: 'app-add-new-tool-dialog',
@@ -20,6 +21,8 @@ export class AddNewToolDialogComponent {
   runedTimeout = false;
   tools: Tool[] = [];
   selected: { [key: string]: Tool } = {};
+  showSpinner = false;
+  transparentListOfTools = false;
 
   constructor(
     public dialogRef: MatDialogRef<AddNewToolDialogComponent>,
@@ -51,12 +54,18 @@ export class AddNewToolDialogComponent {
       } else {
         this.runedTimeout = false;
         console.log(this.toolSearchName);
+        this.showSpinner = true;
+        this.transparentListOfTools = true;
         this.service.getToolsList(this.toolSearchName, this.data.blueprintId).toPromise().then((result) => {
           this.tools = this.parseResults(result);
           console.log(this.tools);
           this.toolsDataLoaded = true;
+          this.showSpinner = false;
+          this.transparentListOfTools = false;
         }).catch(err => {
           console.log(err);
+          this.showSpinner = false;
+          this.transparentListOfTools = false;
         });
       }
     }
