@@ -171,19 +171,18 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   private proceedBluePrintData(data) {
     if (typeof data === 'string') {
       return this.isError = true;
-    }
-   
-    //console.log(data);
+    } 
+
     let hidden = 0;
     this.blueprint = data.blueprint;
-    data.nodes.forEach((item) => {
+    data.nodes.forEach((item) => {  
       if (item.toolId) {
         const tool = data.tools.find((atool) =>  atool.id === item.toolId );
         item.tool = tool;
         if (tool.tag && tool.tag === 'domain') {
            // console.log(tool);
            this.domainsList.push(tool.name);
-        }
+        }    
         this.nodes[item.id] = item;
         this.nodesList.push(item.id);
         if (item.hide ) { hidden++; }
@@ -237,6 +236,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
             oldTool = true;
           }
         }
+        
         if (!item.hide && ( this.verifyOrderToHide(item.tool.categories) || forbiddenTags.includes(item.tool.tag) || oldTool ) &&
         ( item.tool.tag !== 'analytics' || oldTool) && all - hidden > 10) {
           item.hide = true;
