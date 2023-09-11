@@ -16,7 +16,7 @@ import { InviteDialogComponent } from '../../components/invite-dialog/invite-dia
 import { CreateCustomToolDialogComponent } from '../../components/create-custom-tool-dialog/create-custom-tool-dialog.component';
 import { Observable, BehaviorSubject, Subscription } from 'rxjs';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { forbiddenTags, hiddenCategories, forbiddenTools } from '../../../../core/config';
+import { forbiddenTags, hiddenCategories } from '../../../../core/config';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SignupSigninPopupComponent } from '../../../../shared/components/signup-signin-popup/signup-signin-popup.component';
 import { ComponentCanDeactivate } from '../../../../core/guards/component-can-deactivate.guard';
@@ -171,19 +171,18 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   private proceedBluePrintData(data) {
     if (typeof data === 'string') {
       return this.isError = true;
-    }
-   
-    //console.log(data);
+    } 
+
     let hidden = 0;
     this.blueprint = data.blueprint;
-    data.nodes.forEach((item) => {
+    data.nodes.forEach((item) => {  
       if (item.toolId) {
         const tool = data.tools.find((atool) =>  atool.id === item.toolId );
         item.tool = tool;
         if (tool.tag && tool.tag === 'domain') {
            // console.log(tool);
            this.domainsList.push(tool.name);
-        }
+        }    
         this.nodes[item.id] = item;
         this.nodesList.push(item.id);
         if (item.hide ) { hidden++; }
@@ -237,7 +236,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
             oldTool = true;
           }
         }
-        if (!item.hide && ( this.verifyOrderToHide(item.tool.categories) || forbiddenTags.includes(item.tool.tag) || forbiddenTools.includes(item.tool.name) || oldTool ) &&
+        
+        if (!item.hide && ( this.verifyOrderToHide(item.tool.categories) || forbiddenTags.includes(item.tool.tag) || oldTool ) &&
         ( item.tool.tag !== 'analytics' || oldTool) && all - hidden > 10) {
           item.hide = true;
           this.nodesForUpdate.push(item.id);
