@@ -16,7 +16,7 @@ import { InviteDialogComponent } from '../../components/invite-dialog/invite-dia
 import { CreateCustomToolDialogComponent } from '../../components/create-custom-tool-dialog/create-custom-tool-dialog.component';
 import { Observable, BehaviorSubject, Subscription } from 'rxjs';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { forbiddenTags, hiddenCategories } from '../../../../core/config';
+import { forbiddenTags, hiddenCategories, forbiddenTools } from '../../../../core/config';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SignupSigninPopupComponent } from '../../../../shared/components/signup-signin-popup/signup-signin-popup.component';
 import { ComponentCanDeactivate } from '../../../../core/guards/component-can-deactivate.guard';
@@ -237,8 +237,17 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
           }
         }
         
-        if (!item.hide && ( this.verifyOrderToHide(item.tool.categories) || forbiddenTags.includes(item.tool.tag) || oldTool ) &&
-        ( item.tool.tag !== 'analytics' || oldTool) && all - hidden > 10) {
+        //TODO
+        //this IF statement is complex and should be simplified if possible
+        if (
+          !item.hide && ( this.verifyOrderToHide(item.tool.categories) 
+          || forbiddenTools.includes(item.tool.name) 
+          || forbiddenTags.includes(item.tool.tag) || oldTool ) 
+          && ( 
+            item.tool.tag !== 'analytics' 
+            || oldTool
+            || (item.tool.tag == 'analytics' && forbiddenTools.includes(item.tool.name))
+            ) && all - hidden > 10) {
           item.hide = true;
           this.nodesForUpdate.push(item.id);
           hidden++;
