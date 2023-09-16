@@ -17,22 +17,6 @@ async function getTestDataFromFile(domain){
         // url = `http://localhost:9000/cashed/bitbucket.org.json`;
     }
 
-    const forbiddenTools = [
-        'US Privacy User Signal Mechanism',
-        'Facebook Signal',
-        'Facebook Custom Audiences',
-        'Global Site Tag',
-        'Shopify Custom Theme',
-        'Shopify Conversions',
-        'Shopify US Dollar',
-        'Shopify Account',
-        'American Express',
-        'Amazon Payments',
-        'MasterCard',
-        'PayPal',
-        'Visa',
-        'Apple Pay' ];   
-
     // let pathURI = path.resolve("../test-data/", 'effinamazing.com.json');
     let response = await axios({
         method: 'GET',
@@ -50,8 +34,6 @@ async function getTestDataFromFile(domain){
     console.log('API Response');
     console.log(response);
 
-    //TODO
-    //limit where item.Tag == 'domain' ?
     const results = await async.map(Technologies, (item, cb)=>{        
         cb(null, { 
             categories: item.Categories,
@@ -63,13 +45,9 @@ async function getTestDataFromFile(domain){
             end: item.LastDetected
         })
     });
-
-    const filteredResults = results.filter((item) => {
-        return !forbiddenTools.includes(item.name);
-    });
             
     return  { 
-        tech: filteredResults, 
+        tech: results, 
         spend: A.Results[0].Result.Spend 
     };
 }
