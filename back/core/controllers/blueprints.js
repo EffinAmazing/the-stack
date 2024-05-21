@@ -40,10 +40,12 @@ class BluePrints {
 
                 //MANUALLY block or allow domains
                 //this can be used to obfuscate a domain
-                let allowedDomains = ["klnMmQ1y72.ouraring.com"];
-                let blockedDomains = ["www.ouraring.com", "ouraring.com"]; 
-
+                //let allowedDomains = ["klnMmQ1y72.ouraring.com"];
                 
+                //JDH
+                //reverting this
+                //let blockedDomains = ["www.ouraring.com", "ouraring.com"]; 
+                let blockedDomains = [];                
 
                 //TODO
                 //check domain with dns lookup instead of httpRequest 
