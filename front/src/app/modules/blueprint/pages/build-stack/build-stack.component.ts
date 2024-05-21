@@ -236,18 +236,27 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
             oldTool = true;
           }
         }
-        
+
+        //TESTING
+        //console.log('forbiddenTools',item.tool.name,item.tool,forbiddenTools.includes(item.tool.name) );
+        //console.log('forbiddenTags',item.tool.tag,item.tool,forbiddenTags.includes(item.tool.tag) );
+ 
         //TODO
         //this IF statement is complex and should be simplified if possible
         if (
-          !item.hide && ( this.verifyOrderToHide(item.tool.categories) 
+          !item.hide && ( 
+             this.verifyOrderToHide(item.tool.categories) 
+          || (item.tool.tag == 'domain' && !item.tool.name.replace(/^www\./i, "").toLowerCase().includes(this.blueprint.domain.replace(/^www\./i, "").toLowerCase()))  
           || forbiddenTools.includes(item.tool.name) 
-          || forbiddenTags.includes(item.tool.tag) || oldTool ) 
+          || forbiddenTags.includes(item.tool.tag) || oldTool 
+        ) 
           && ( 
             item.tool.tag !== 'analytics' 
             || oldTool
             || (item.tool.tag == 'analytics' && forbiddenTools.includes(item.tool.name))
-            ) && all - hidden > 10) {
+            ) && all - hidden > 5) {
+
+
           item.hide = true;
           this.nodesForUpdate.push(item.id);
           hidden++;
