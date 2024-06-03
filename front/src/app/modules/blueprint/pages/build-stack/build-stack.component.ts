@@ -504,6 +504,49 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   private completedProceedNodes() {
 
     this.loaded = true;
+
+    //nodes processed and stack is loaded
+
+    let tools = [];
+    let hiddenTools = [];    
+
+    // Loop through each ID in nodesList
+    this.nodesList.forEach(id => {
+
+      try {
+        let node = this.nodes[id];
+
+        if (node) {             
+          // Check the hide property and push tool.name to the appropriate array
+          if (node.tool && node.tool.name && node.tool.name !== this.domain) {
+            if (node.hide) {
+              hiddenTools.push(node.tool?.name);
+            } else {
+              tools.push(node.tool?.name);
+            }
+          }
+        }
+      } catch (error) {
+        //node id not in obj array
+      }  
+    });
+
+    const params = {
+      tools: tools,
+      hiddenTools: hiddenTools,
+      categories: Object.keys(this.categories),
+      domainsList: this.domainsList,
+      domain: this.domain,
+      isError: this.isError,
+      errMessageReturned: this.errMessageReturned
+    };
+
+    console.log('loadedStack');
+    window['dataLayer'].push({
+      event: 'stackbuilder.loadedStack',
+      data: params
+    });
+
     if (this.nodesForUpdate.length) {
       this.service.hideNodes(this.nodesForUpdate).subscribe((data) => {
         this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain });
