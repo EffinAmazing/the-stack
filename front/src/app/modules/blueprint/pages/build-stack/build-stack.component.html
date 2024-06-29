@@ -75,6 +75,8 @@
         </div>
         <app-builder *ngIf="loaded" 
           [loadedNodes]="changedNodes$" 
+          [toolsHiddenGlobally]="toolsHiddenGlobally$" 
+          (toogleGlobalVisibilityNode)="handleGlobalHideNodeItem($event)" 
           [loadedArrows]="changedArrows$"
           [historyEmit]="history.getEmmiter(blueprint.id)"
           [addedNewNode]="addedNewNode$"
@@ -121,10 +123,12 @@
       <div #categoriesList>
         <app-tools-list  [ngClass]="{'hideTools': false}" *ngIf="loaded" 
             [loadedNodes]="changedNodes$" 
+            [toolsHiddenGlobally]="toolsHiddenGlobally$" 
             [loadedCategories]="changedCategories$"
             [updatedOutNodeData]="changeNodeData$"
             [addedNewNode]="addedNewNode$"
             (toogleVisibilityNode)="handleHideNodeItem($event)"
+            (toogleGlobalVisibilityNode)="handleGlobalHideNodeItem($event)"
             (closeTools)="handleCloseTools()"
             (updatedNodeData)="handleUpdatedNodeData($event)"
             (callEditNode)="handleEditCustomTool($event)"

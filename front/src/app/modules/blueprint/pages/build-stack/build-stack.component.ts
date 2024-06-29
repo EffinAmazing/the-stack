@@ -40,6 +40,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   nodes: BluePrintTool[] = [];
   nodesList: string[] = [];
   showNodes: BluePrintTool[] = [];
+  globalHiddenTools: Tool[] = [];
+  toolsHiddenGlobally$: BehaviorSubject<any> = new BehaviorSubject({});
   categories: any = { 'None': [] };
   changedNodes$: BehaviorSubject<any> = new BehaviorSubject({});
   changedArrows$: BehaviorSubject<any> = new BehaviorSubject([]);
@@ -172,9 +174,13 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     if (typeof data === 'string') {
       return this.isError = true;
     } 
+    
+    console.log('proceedBluePrintData',data);
 
     let hidden = 0;
     this.blueprint = data.blueprint;
+    this.globalHiddenTools = data.hiddenTools;
+    this.toolsHiddenGlobally$.next({nodes: data.hiddenTools});
     data.nodes.forEach((item) => {  
       if (item.toolId) {
         const tool = data.tools.find((atool) =>  atool.id === item.toolId );
@@ -209,6 +215,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   private proceedNodes(all, hidden, force?) {
+
+    console.log('proceedNodes');
 
     if (force) {
       this.nodesList.forEach((nodeId) => {
@@ -249,13 +257,16 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
           || (item.tool.tag == 'domain' && !item.tool.name.replace(/^www\./i, "").toLowerCase().includes(this.blueprint.domain.replace(/^www\./i, "").toLowerCase()))  
           || forbiddenTools.includes(item.tool.name) 
           || forbiddenTags.includes(item.tool.tag) || oldTool 
+          || (this.globalHiddenTools.length > 0 && this.globalHiddenTools.some(tool => tool.name === item.tool.name))
+
         ) 
           && ( 
             item.tool.tag !== 'analytics' 
             || oldTool
             || (item.tool.tag == 'analytics' && forbiddenTools.includes(item.tool.name))
             ) && all - hidden > 5) {
-
+          
+          console.log('found',item.tool.name);
 
           item.hide = true;
           this.nodesForUpdate.push(item.id);
@@ -841,6 +852,46 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       this.nodes[data.item.id] = res;
       this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain  });
     });
+  }
+
+  public handleGlobalHideNodeItem(data: { item: BluePrintTool, disableHistory?: boolean, isHidden?: boolean }) {
+    console.log('handle global hide node, global tool hidden state was: ', data.isHidden);
+
+    //check if this node is in hidden array or not
+    //then handle updating the hidden array
+    //this means toggle the hidden property on the tool itself in mongo
+    //then update the hiddentools array so that the node shows/hides correctly
+
+
+
+    /*
+    if (!data.item.hide) {
+      data.item.hide = true;
+      window['dataLayer'].push({
+        event: 'stackbuilder.node.hide',
+        node: data.item,
+        tool: data.item.tool,
+        stack: this.blueprint
+      });
+    } else {
+      data.item.hide = false;
+      window['dataLayer'].push({
+        event: 'stackbuilder.node.added',
+        node: data.item,
+        tool: data.item.tool,
+        stack: this.blueprint
+      });
+    }
+
+    console.log(' handleHideNodeItem - ', data);
+    if (!data.disableHistory) {  this.history.addAction(this.blueprint.id, { name: 'hideNode', data }); }
+
+    this.service.updateNodeTool(data.item.id, { hide: data.item.hide }, this.blueprint.id).subscribe((res) => {
+      res.tool = this.nodes[data.item.id].tool;
+      this.nodes[data.item.id] = res;
+      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain  });
+    });
+    */
   }
 
   public handleAddArrow(data) {

@@ -12,3 +12,4 @@
 /back/*.csr
 /back/.env
 /back/public/.well-known/*
+.DS_Store

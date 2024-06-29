@@ -30,7 +30,8 @@
           [cdkDragFreeDragPosition]="hasCoords(node.position)?node.position:{x: 0, y: 0}" 
           (cdkDragEnded)="relisedMove($event, node)"
           (cdkDragMoved)="$event.event.stopPropagation();  handleNodeMove($event, node)"
-          (cdkDragStarted)="handleStartDrag($event, node)" >
+          (cdkDragStarted)="handleStartDrag($event, node)" >            
+
             <img class="node-icon" crossorigin [src]="node.tool.logo?processImageSrc(node.tool.logo):getAssetsFolder() + 'assets/images/layers.png'"  />
             {{ node.tool?.name }}
             <button *ngIf="node.tool.tag !== 'domain'" mat-button class="icon-info-button"  (click)="handleClick(node)"><img [src]="getAssetsFolder() + 'assets/images/info.png'" /></button>
@@ -52,7 +53,11 @@
                 (mouseenter)="handleMouseOverPointer($event, node, 'Bottom')"
                 (mouseleave)="handleMouseOutPointer()"></div>
             </div>
+            
             <div class="hide-item-from-stack" (click)="hideNodeFormStack(node)"> <mat-icon>clear</mat-icon> </div>
+
+            <div *ngIf="isUserAdmin" class="admin-hide-tool-button" (click)="hideNodeGlobally(node)"> <mat-icon>block</mat-icon> </div>
+
     </div>
     <div #selectMany [ngClass]="{'select-many-elements': true, 'visible': isMultiselect }"> </div>
     <div #selectorArea class="seletor-area-box"> </div>

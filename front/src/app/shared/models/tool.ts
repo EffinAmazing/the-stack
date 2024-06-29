@@ -9,6 +9,7 @@ export interface Tool {
     nodeId?: string;
     created?: string;
     updated?: string;
+    hidden: Boolean;
 }
 
 export interface BluePrintTool {

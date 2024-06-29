@@ -7,6 +7,7 @@ import { NodeDetailsComponent } from '../node-details/node-details.component';
 import { ArrowsHelper } from '../../../../shared/helper/arrows-draw.helper';
 import { Observable, Subscription } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmActionDialogComponent } from '../../../../shared/components/confirm-action-dialog/confirm-action-dialog.component';
 import * as d3 from 'd3';
 
@@ -39,6 +40,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() selectArrow: EventEmitter<any> = new EventEmitter();
   @Output() callEditNode: EventEmitter<string> = new EventEmitter();
   @Output() groupMoveCompleted: EventEmitter<{ nodeIds: string[], diff: Pointer }> = new EventEmitter();
+  @Output() toogleGlobalVisibilityNode: EventEmitter<any> = new EventEmitter();
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
   @Input() historyEmit: Observable<any>;
@@ -48,6 +50,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() showGrid: Observable<boolean>;
   @Input() snapGrid: Observable<boolean>;
   @Input() domainsList: String[];
+  @Input() toolsHiddenGlobally: Observable<any>;
   isMultiselect = false;
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
@@ -74,6 +77,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   useSnapGrid = true;
   // subscriptions
   indexNode = 0;
+  isUserAdmin: Boolean;
   nodesSubscription: Subscription;
   arrowSubscription: Subscription;
   addedNewNodeSubcription: Subscription;
@@ -81,11 +85,15 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateNodeDataSubscription: Subscription;
   gridSubscription: Subscription;
   snapSubscription: Subscription;
+  globalHiddenTools: Tool[] = [];
 
-  constructor(private detailsDialog: MatDialog, private confirm: MatDialog) {  }
+  constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) {  }
 
   ngOnInit(): void {
     this.svgD3 = this.arrowHelper.initSvg('svg#paint');
+    const user = this.auth.getCurrentUser();
+
+    if (user) this.isUserAdmin = user.role === 0;
 
     const offsetX = 200;
     const offsetY = 55;
@@ -988,6 +996,34 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       node.hide = true;
       this.doHideNode(node, false);
     }
+  }
+
+  public hideNodeGlobally(node: BluePrintTool) {
+      const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
+        width: '480px',
+        data: { title: 'Hide tool globally',  content: 'This will hide this tool for all users: ' + this.nodes[node.id].tool.name + '. Proceed?'}
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+         
+          console.log('TODO');
+
+          this.toogleGlobalVisibilityNode.emit({ item: node, disableHistory: true, isHidden: false });
+          
+          //USE THIS, IT IS DISABLED JUST FOR TESTING
+          /*
+          node.hide = true;
+          this.nodes[node.id].hide = true;
+          this.doHideNode(node, false);
+          */
+
+          //TODO
+          //This needs to hide the node AND add a hide flag to the tool, so that it is permanently hidden
+
+        }
+      });
+    
   }
 
   doHideNode(node: BluePrintTool, disableHistory: boolean) {

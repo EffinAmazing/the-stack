@@ -142,6 +142,12 @@ class ToolsModel extends AbstaractModel {
         return mappedDocs;
     }
 
+    async getHiddenTools(){
+        let docs = await this.modelDB.find({ hidden: true }).exec();
+        let mappedDocs = await async.map(docs, (item, cb)=>{  cb( null, this.mapDocument(item) ); });
+        return mappedDocs;
+    }
+
 
     async getByName(name, offset, limit){
         if (!limit) limit = 15;
