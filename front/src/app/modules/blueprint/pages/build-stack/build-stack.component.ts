@@ -584,6 +584,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       if (dot1) { dot1.remove(); }
       const dot2 = document.querySelector(`#dot-${this.selectedArrow.end.nodeId}`);
       if (dot2) { dot2.remove(); }
+      const controlPoint1 = document.querySelector(`#control1-${this.selectedArrow.lineId}`);
+      if (controlPoint1) { controlPoint1.remove(); }
+      const controlPoint2 = document.querySelector(`#control2-${this.selectedArrow.lineId}`);
+      if (controlPoint2) { controlPoint2.remove(); }
     }
   }
 

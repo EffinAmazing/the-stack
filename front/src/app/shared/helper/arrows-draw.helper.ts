@@ -65,8 +65,47 @@ export class ArrowsHelper {
             arr.push([ start[0] + diffX * 0.35, start[1] + diffY * 0.15]);
             arr.push(end);
         }
+        console.log('dots',arr);
         return arr;
     }
+
+    public generateDotsWithBez(start, end, bezCtrlX, bezCtrlY, bezCtrlString, currentPathPoints) {
+        const arr = [];
+
+        let cpp = currentPathPoints.map(item => {
+            // Perform the conversion for each item
+            return [
+                item.x,
+                item.y
+            ];
+        });     
+
+        //console.log('bezCtrlX', 'bezCtrlY', bezCtrlX, bezCtrlY ); 
+        //console.log('bezCtrlString',bezCtrlString);
+
+        arr.push(cpp[0]);
+          
+    
+        if (bezCtrlString === 'control1') {
+           
+            arr.push([bezCtrlX,bezCtrlY]);
+            arr.push([cpp[2][0],cpp[2][1]]);
+
+        } else if (bezCtrlString === 'control2') {
+                
+            arr.push([cpp[1][0],cpp[1][1]]);
+            arr.push([bezCtrlX,bezCtrlY]);
+            
+        }
+    
+        arr.push(cpp[3]);
+        
+        //console.log('and the dots are', arr);
+        return arr;
+    }
+    
+    
+    
 
     public culcStartPosition(startLine: HTMLElement, container: HTMLElement, node: BluePrintTool, direction: string): DrawArrow {
         /* */
@@ -179,6 +218,36 @@ export class ArrowsHelper {
             }
         }
         const dots = this.genrateDots([arrow.start.x, arrow.start.y], [arrow.end.x, arrow.end.y], arrow.start.pos, arrow.end.pos );
+        this.SVG.select(`path#${arrow.lineId}`)
+            .attr('d', this.lineGenerator(dots));
+    }
+
+    public updateExistedArrowBezier(arrow: DrawArrow, container: HTMLElement, ctrlX: Number, ctrlY: Number, bezCtrl: String, currentPathPoints: any[]): void {
+        //console.log(arrow, ctrlX, ctrlY, bezCtrl, currentPathPoints);
+        console.log('currentPathPoints', currentPathPoints);
+        /*
+        if (container) {
+            const refElstart = container.querySelector(`#node-${arrow.start.nodeId} .pointers>.pointer-${arrow.start.pos}`) as HTMLElement;
+            if (refElstart) {
+                const startPointer = this.getArrowPointerByOffset(refElstart, container, arrow.start.pos, arrow.start.offset);
+                arrow.start.x = startPointer.x;
+                arrow.start.y = startPointer.y;
+            } else {
+                console.log(`#node-${arrow.start.nodeId} .pointers>.pointer-${arrow.start.pos}`);
+            }
+
+            const refElend = container.querySelector(`#node-${arrow.end.nodeId} .pointers>.pointer-${arrow.end.pos}`) as HTMLElement;
+            if (refElend) {
+                const endPointer = this.getArrowPointerByOffset(refElend, container, arrow.end.pos, arrow.end.offset);
+                arrow.end.x = endPointer.x;
+                arrow.end.y = endPointer.y;
+            } else {
+                console.log(`#node-${arrow.end.nodeId} .pointers>.pointer-${arrow.end.pos}`);
+            }
+        }
+        */
+        
+        const dots = this.generateDotsWithBez([arrow.start.x, arrow.start.y], [arrow.end.x, arrow.end.y], ctrlX, ctrlY, bezCtrl, currentPathPoints);
         this.SVG.select(`path#${arrow.lineId}`)
             .attr('d', this.lineGenerator(dots));
     }

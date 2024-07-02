@@ -12,7 +12,7 @@ import * as d3 from 'd3';
 
 const containerOffset = 0;
 const dotRadius = 9;
-const lineGenerator = d3.line().curve(d3.curveCardinal);
+const lineGenerator = d3.line().curve(d3.curveBasis);
 const host = environment.serverURI;
 
 @Component({
@@ -63,6 +63,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   isMoving = false;
   oldArrowData: DrawArrow | null;
   dotForDrag: HTMLDivElement | null = null;
+  currentPathPoints: any[] | null = null;
   disableTillDrawLine = false;
   startSelecting = false;
   starMoveSelected = false;
@@ -671,68 +672,209 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     const line = document.querySelector(`path#${ArrowId}`);
 
     line.addEventListener('click', () => {
-      // console.log(' ***** click ***** ');
-      const container = this.stackWorkFlow.nativeElement;
-      if (this.selectedArrow) {
-        this.svgD3.select('path#' + this.selectedArrow.lineId).attr('stroke-width', 2);
-        const adot1 = container.querySelector(`#dot-${this.selectedArrow.start.nodeId}`);
-        if (adot1) { adot1.remove(); }
-        const adot2 = container.querySelector(`#dot-${this.selectedArrow.end.nodeId}`);
-        if (adot2) { adot2.remove(); }
-      }
-      //
-      this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === ArrowId );
-      const old = this.oldArrowData = Object.assign({}, this.selectedArrow);
-      // 1. add start dot
-      const refElstart = container.querySelector(
-        `#node-${this.selectedArrow.start.nodeId} .pointers>.pointer-${this.selectedArrow.start.pos}`) as HTMLElement;
-      if (refElstart ) {
-        const poiterStart = this.arrowHelper.getArrowPointerByOffset(
-          refElstart, container, this.selectedArrow.start.pos, this.selectedArrow.start.offset);
-        const dot1 = document.createElement('div');
-        dot1.id = 'dot-' + this.selectedArrow.start.nodeId;
-        dot1.className = 'dot-drag-arrow';
-        dot1.dataset.line = this.selectedArrow.lineId;
-        dot1.dataset.position = 'start';
-        container.append(dot1);
-        dot1.addEventListener('mousedown', () => { this.dotForDrag = dot1; });
-        dot1.addEventListener('mouseup', () => {
-          this.dotForDrag = null;
-          this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
-        });
-        dot1.style.transform = `translate3d(${poiterStart.x - 20}px, ${poiterStart.y - 20}px, 0px)`;
-        document.querySelector(`#node-${this.selectedArrow.start.nodeId}`).classList.add('has-selected-arrow');
-        document.querySelector(`#node-${this.selectedArrow.end.nodeId}`).classList.add('has-selected-arrow');
-      } else {
-        // console.log(`#node-${this.selectedArrow.start.nodeId} .pointers>.pointer-${this.selectedArrow.start.pos}`);
-      }
+        const container = this.stackWorkFlow.nativeElement;
+        if (this.selectedArrow) {
+            this.svgD3.select('path#' + this.selectedArrow.lineId).attr('stroke-width', 2);
+            const adot1 = container.querySelector(`#dot-${this.selectedArrow.start.nodeId}`);
+            if (adot1) { adot1.remove(); }
+            const adot2 = container.querySelector(`#dot-${this.selectedArrow.end.nodeId}`);
+            if (adot2) { adot2.remove(); }
+            const c1 = container.querySelector(`#control1-${this.selectedArrow.lineId}`);
+            if (c1) { c1.remove(); }
+            const c2 = container.querySelector(`#control2-${this.selectedArrow.lineId}`);
+            if (c2) { c2.remove(); }
+        }
 
-      // 2. add end dot
-      const refElend = container.querySelector(
-        `#node-${this.selectedArrow.end.nodeId} .pointers>.pointer-${this.selectedArrow.end.pos}`) as HTMLElement;
-      if (refElend) {
-        const poiterEnd = this.arrowHelper.getArrowPointerByOffset(
-          refElend, container, this.selectedArrow.end.pos, this.selectedArrow.end.offset);
-        const dot2 = document.createElement('div');
-        dot2.id = 'dot-' + this.selectedArrow.end.nodeId;
-        dot2.dataset.line = this.selectedArrow.lineId;
-        dot2.dataset.position = 'end';
-        dot2.className = 'dot-drag-arrow';
-        container.append(dot2);
-        dot2.addEventListener('mousedown', () => { this.dotForDrag = dot2; });
-        dot2.addEventListener('mouseup', () => {
-          this.dotForDrag = null;
-          this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false});
-        });
-        dot2.style.transform = `translate3d(${poiterEnd.x - 20}px, ${poiterEnd.y - 20}px, 0px)`;
+        this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === ArrowId);
+        const old = this.oldArrowData = Object.assign({}, this.selectedArrow);
 
-        this.selectArrow.emit(this.selectedArrow);
-        line.setAttribute('stroke-width', '4');
-      } else {
-       // console.log(`#node-${this.selectedArrow.end.nodeId} .pointers>.pointer-${this.selectedArrow.end.pos}`);
-      }
+        // Extract path start and end points from the path data
+        const pathData = line.getAttribute('d');
+        const pathSegments = pathData.match(/([MLC])[^MLC]*/g);
+
+        if (!pathSegments || pathSegments.length < 2) {
+            console.error('Invalid path data');
+            return;
+        }
+
+        //console.log('pathData',pathData);
+
+        //const start = this.extractCoordinates(pathSegments[0]);
+        //const end = this.extractCoordinates(pathSegments[pathSegments.length - 1]);
+
+        let currentPathPoints = this.getPointsFromPath(pathData);
+        console.log('getting curPath',currentPathPoints);
+
+        // Calculate control points positions
+        const control1 = currentPathPoints[1];
+        const control2 = currentPathPoints[2];
+
+        console.log(control1,control2);
+        
+
+        // 1. Add start dot
+        const refElstart = container.querySelector(
+            `#node-${this.selectedArrow.start.nodeId} .pointers>.pointer-${this.selectedArrow.start.pos}`) as HTMLElement;
+        if (refElstart) {
+            const poiterStart = this.arrowHelper.getArrowPointerByOffset(
+                refElstart, container, this.selectedArrow.start.pos, this.selectedArrow.start.offset);
+            const dot1 = document.createElement('div');
+            dot1.id = 'dot-' + this.selectedArrow.start.nodeId;
+            dot1.className = 'dot-drag-arrow';
+            dot1.dataset.line = this.selectedArrow.lineId;
+            dot1.dataset.position = 'start';
+            container.append(dot1);
+            dot1.addEventListener('mousedown', () => { this.dotForDrag = dot1; });
+            dot1.addEventListener('mouseup', () => {
+                this.dotForDrag = null;
+                this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
+            });
+            dot1.style.transform = `translate3d(${poiterStart.x - 20}px, ${poiterStart.y - 20}px, 0px)`;
+            document.querySelector(`#node-${this.selectedArrow.start.nodeId}`).classList.add('has-selected-arrow');
+            document.querySelector(`#node-${this.selectedArrow.end.nodeId}`).classList.add('has-selected-arrow');
+        }
+
+        // 2. Add end dot
+        const refElend = container.querySelector(
+            `#node-${this.selectedArrow.end.nodeId} .pointers>.pointer-${this.selectedArrow.end.pos}`) as HTMLElement;
+        if (refElend) {
+            const poiterEnd = this.arrowHelper.getArrowPointerByOffset(
+                refElend, container, this.selectedArrow.end.pos, this.selectedArrow.end.offset);
+            const dot2 = document.createElement('div');
+            dot2.id = 'dot-' + this.selectedArrow.end.nodeId;
+            dot2.dataset.line = this.selectedArrow.lineId;
+            dot2.dataset.position = 'end';
+            dot2.className = 'dot-drag-arrow';
+            container.append(dot2);
+            dot2.addEventListener('mousedown', () => { this.dotForDrag = dot2; });
+            dot2.addEventListener('mouseup', () => {
+                this.dotForDrag = null;
+                this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
+            });
+            dot2.style.transform = `translate3d(${poiterEnd.x - 20}px, ${poiterEnd.y - 20}px, 0px)`;
+
+            // 3. Add start control point
+            const controlPoint1 = document.createElement('div');
+            controlPoint1.id = 'control1-' + this.selectedArrow.lineId;
+            controlPoint1.className = 'control-drag-arrow';
+            controlPoint1.dataset.line = this.selectedArrow.lineId;
+            controlPoint1.dataset.position = 'control1';            
+            container.append(controlPoint1);
+            controlPoint1.addEventListener('mousedown', () => { 
+              this.dotForDrag = controlPoint1; 
+              let pathData = line.getAttribute('d');
+              let curPathPoints = this.getPointsFromPath(pathData);
+              this.currentPathPoints = curPathPoints;  
+            });
+            controlPoint1.addEventListener('mouseup', () => {
+                this.dotForDrag = null;
+                this.currentPathPoints = null;
+                this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
+            });
+            controlPoint1.style.transform = `translate3d(${control1.x - 20}px, ${control1.y - 20}px, 0px)`;
+
+            // 4. Add end control point
+            const controlPoint2 = document.createElement('div');
+            controlPoint2.id = 'control2-' + this.selectedArrow.lineId;
+            controlPoint2.className = 'control-drag-arrow';
+            controlPoint2.dataset.line = this.selectedArrow.lineId;
+            controlPoint2.dataset.position = 'control2';
+            container.append(controlPoint2);
+            controlPoint2.addEventListener('mousedown', () => { 
+              this.dotForDrag = controlPoint2; 
+              let pathData = line.getAttribute('d');
+              let curPathPoints = this.getPointsFromPath(pathData);
+              this.currentPathPoints = curPathPoints; 
+            });
+            controlPoint2.addEventListener('mouseup', () => {
+                this.dotForDrag = null;
+                this.currentPathPoints = null;
+                this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
+            });
+            controlPoint2.style.transform = `translate3d(${control2.x - 20}px, ${control2.y - 20}px, 0px)`;
+
+            this.selectArrow.emit(this.selectedArrow);
+            line.setAttribute('stroke-width', '4');
+        }
     });
+}
+
+private getPointsFromPath(pathData) {
+  const points = [];
+  const regex = /([MLCSAZ])([^MLCSAZ]*)/gi;
+  let match;
+
+  while ((match = regex.exec(pathData)) !== null) {
+    const command = match[1];
+    const coordinates = match[2].trim().split(/[\s,]+/).map(Number);
+
+    switch (command) {
+      case 'M':
+      case 'L':
+        for (let i = 0; i < coordinates.length; i += 2) {
+          if (!isNaN(coordinates[i]) && !isNaN(coordinates[i + 1])) {
+            points.push({ x: coordinates[i], y: coordinates[i + 1] });
+          }
+        }
+        break;
+      case 'C':
+        for (let i = 4; i < coordinates.length; i += 6) {
+          if (!isNaN(coordinates[i]) && !isNaN(coordinates[i + 1])) {
+            points.push({ x: coordinates[i], y: coordinates[i + 1] });
+          }
+        }
+        break;
+      case 'S':
+      case 'Q':
+        for (let i = 2; i < coordinates.length; i += 4) {
+          if (!isNaN(coordinates[i]) && !isNaN(coordinates[i + 1])) {
+            points.push({ x: coordinates[i], y: coordinates[i + 1] });
+          }
+        }
+        break;
+      case 'T':
+        for (let i = 0; i < coordinates.length; i += 2) {
+          if (!isNaN(coordinates[i]) && !isNaN(coordinates[i + 1])) {
+            points.push({ x: coordinates[i], y: coordinates[i + 1] });
+          }
+        }
+        break;
+      case 'A':
+        for (let i = 5; i < coordinates.length; i += 7) {
+          if (!isNaN(coordinates[i]) && !isNaN(coordinates[i + 1])) {
+            points.push({ x: coordinates[i], y: coordinates[i + 1] });
+          }
+        }
+        break;
+      case 'Z':
+        if (points.length > 0) {
+          points.push(points[0]); // Closing path
+        }
+        break;
+    }
   }
+
+  return points;
+}
+
+
+
+private extractCoordinates(segment: string): { x: number, y: number } {
+    const coords = segment.slice(1).split(',').map(Number);
+    return { x: coords[0], y: coords[1] };
+}
+
+private calculateControlPoint(start: { x: number, y: number }, end: { x: number, y: number }, isStart: boolean): { x: number, y: number } {
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const offset = 50; // Adjust this value as needed for your control point distance
+    if (isStart) {
+        return { x: start.x + dx / 3 + offset, y: start.y + dy / 3 };
+    } else {
+        return { x: end.x - dx / 3 - offset, y: end.y - dy / 3 };
+    }
+}
+
 
   public getAssetsFolder() {
     if (typeof window['assets'] !== 'undefined') {
@@ -929,19 +1071,50 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.selectedArrow && this.dotForDrag) {
-      const container = this.stackWorkFlow.nativeElement;
-      const position = this.dotForDrag.dataset.position;
-      const nodeId = this.selectedArrow[position].nodeId;
-      const result = this.getPosOfNodeByPoint(nodeId, container, { x: evt.x, y: evt.y});
-      const data = this.arrowHelper.getArrowPointer(
-        result.el, container, result.pos, { x: evt.x, y: evt.y});
 
-      this.selectedArrow[position].x = data.pointer.x;
-      this.selectedArrow[position].y = data.pointer.y;
-      this.selectedArrow[position].pos = result.pos;
-      this.selectedArrow[position].offset = data.offset;
-      this.arrowHelper.updateExistedArrow(this.selectedArrow);
-      this.dotForDrag.style.transform = `translate3d(${data.pointer.x - 20}px, ${data.pointer.y - 20}px, 0px)`;
+      //console.log('this.dotForDrag',this.dotForDrag);
+
+        const container = this.stackWorkFlow.nativeElement;
+        const position = this.dotForDrag.dataset.position;
+        
+        
+        if (this.selectedArrow[position]?.nodeId) {
+          console.log(this.selectedArrow[position].nodeId);
+
+          const nodeId = this.selectedArrow[position].nodeId;
+          const result = this.getPosOfNodeByPoint(nodeId, container, { x: evt.x, y: evt.y});
+          const data = this.arrowHelper.getArrowPointer(
+            result.el, container, result.pos, { x: evt.x, y: evt.y});
+
+          this.selectedArrow[position].x = data.pointer.x;
+          this.selectedArrow[position].y = data.pointer.y;
+          this.selectedArrow[position].pos = result.pos;
+          this.selectedArrow[position].offset = data.offset;
+          this.arrowHelper.updateExistedArrow(this.selectedArrow);
+          this.dotForDrag.style.transform = `translate3d(${data.pointer.x - 20}px, ${data.pointer.y - 20}px, 0px)`;
+        } else if (position === 'control1' || position === 'control2') {
+          //control point   
+          const rectContainer = container.getBoundingClientRect();
+
+          const X = rectContainer.x;
+          const Y = rectContainer.y;
+
+          const pos = { y: evt.y - Y - containerOffset, x: evt.x - X - containerOffset };
+          //console.log(pos.x,pos.y,evt.x,evt.y);
+
+          if (position === 'control1') {
+            this.arrowHelper.updateExistedArrowBezier(this.selectedArrow, container, pos.x, pos.y, position, this.currentPathPoints);
+          } else if (position === 'control2') {
+            this.arrowHelper.updateExistedArrowBezier(this.selectedArrow, container, pos.x, pos.y, position, this.currentPathPoints);
+          }
+
+       
+          
+
+          this.dotForDrag.style.transform = `translate3d(${pos.x - 28}px, ${pos.y - 28}px, 0px)`;
+        }
+      
+    
     }
   }
 

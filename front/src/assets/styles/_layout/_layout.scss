@@ -61,6 +61,18 @@ html, body{
     cursor: pointer;
 }
 
+.control-drag-arrow {
+    width: 10px;
+    height: 10px;
+    background-color: white;
+    border: 2px solid #000; 
+    border-radius: 50%; 
+    position: absolute;
+    transform: translate(-50%, -50%);
+    pointer-events: auto; 
+    z-index: 100; 
+}
+
 .stack-section-container {
     overflow: hidden;
     border-top-left-radius: 7px;
