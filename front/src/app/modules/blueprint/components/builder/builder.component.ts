@@ -36,11 +36,11 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() arrowAdded: EventEmitter<{ arrow: DrawArrow, disableHystory: boolean }> = new EventEmitter();
   @Output() arrowUpdated: EventEmitter<{ newData?: DrawArrow, oldData?: DrawArrow, disableHistory?: boolean}> = new EventEmitter();
   @Output() hideNode: EventEmitter<{ item: BluePrintTool, arrows?: Array<DrawArrow>, disableHistory?: boolean }> = new EventEmitter();
+  @Output() hideGlobalVisibilityNode: EventEmitter<any> = new EventEmitter();
   @Output() removeArrows: EventEmitter<string[]> = new EventEmitter();
   @Output() selectArrow: EventEmitter<any> = new EventEmitter();
   @Output() callEditNode: EventEmitter<string> = new EventEmitter();
   @Output() groupMoveCompleted: EventEmitter<{ nodeIds: string[], diff: Pointer }> = new EventEmitter();
-  @Output() toogleGlobalVisibilityNode: EventEmitter<any> = new EventEmitter();
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
   @Input() historyEmit: Observable<any>;
@@ -999,6 +999,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public hideNodeGlobally(node: BluePrintTool) {
+    const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 );
       const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
         width: '480px',
         data: { title: 'Hide tool globally',  content: 'This will hide this tool for all users: ' + this.nodes[node.id].tool.name + '. Proceed?'}
@@ -1007,26 +1008,26 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
          
-          console.log('TODO');
-
-          this.toogleGlobalVisibilityNode.emit({ item: node, disableHistory: true, isHidden: false });
           
-          //USE THIS, IT IS DISABLED JUST FOR TESTING
-          /*
-          node.hide = true;
-          this.nodes[node.id].hide = true;
-          this.doHideNode(node, false);
-          */
+           
+          if (arrowsToRemove.length > 0) {
+            node.hide = true;
+            this.nodes[node.id].hide = true;
+            this.doHideNode(node, true, true); 
+          } else {
+            node.hide = true;
+            this.doHideNode(node, true, true);
+          }         
 
           //TODO
-          //This needs to hide the node AND add a hide flag to the tool, so that it is permanently hidden
+          //This needs to hide the node AND add a hidden flag to the tool, so that it is permanently hidden
 
         }
       });
     
   }
 
-  doHideNode(node: BluePrintTool, disableHistory: boolean) {
+  doHideNode(node: BluePrintTool, disableHistory: boolean, globalHide: boolean = false) {
     const index = this.showNodes.findIndex((item) => item.id === node.id);
     if (index !== -1) {
       this.showNodes.splice(index, 1);
@@ -1044,6 +1045,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => { this.removeArrows.emit(ids); }, 0);
     }
     this.hideNode.emit({ item: node, arrows: arrowsToRemove, disableHistory });
+    if (globalHide) this.hideGlobalVisibilityNode.emit({ item: node, disableHistory: true, isHidden: false }); 
 
   }
 

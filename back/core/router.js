@@ -1,6 +1,7 @@
 const express = require('express');
 const BlueprintsController = require('./controllers/blueprints');
 const ToolsNodes = require('./controllers/toolsnodes');
+const Tools = require('./controllers/tools');
 const Arrows = require('./controllers/arrows');
 const Upload = require('./controllers/uploads');
 const Users = require('./controllers/users');
@@ -10,6 +11,7 @@ const router = express.Router();
 
 const blueprints = new BlueprintsController();
 const toolsNodes = new ToolsNodes();
+const tools = new Tools();
 const arrows = new Arrows();
 const upload = new Upload();
 const users = new Users();
@@ -49,6 +51,8 @@ router.get('/tools/search', toolsNodes.getListOfTools.bind(toolsNodes));
 router.post('/toolsnodes/custom', toolsNodes.createCustom.bind(toolsNodes));
 router.put('/toolsnodes/custom/:id', toolsNodes.updateCustom.bind(toolsNodes));
 router.get('/tools/categories', toolsNodes.getListOfCategories.bind(toolsNodes));
+router.post('/tools/updateVisibility/:id', passport.authenticate('jwt', { session: false }), tools.updateVisibility.bind(tools));
+
 
 router.post("/arrows/", arrows.add.bind(arrows));
 router.get("/arrows/", arrows.list.bind(arrows));

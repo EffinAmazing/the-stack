@@ -75,8 +75,7 @@
         </div>
         <app-builder *ngIf="loaded" 
           [loadedNodes]="changedNodes$" 
-          [toolsHiddenGlobally]="toolsHiddenGlobally$" 
-          (toogleGlobalVisibilityNode)="handleGlobalHideNodeItem($event)" 
+          [toolsHiddenGlobally]="toolsHiddenGlobally$"           
           [loadedArrows]="changedArrows$"
           [historyEmit]="history.getEmmiter(blueprint.id)"
           [addedNewNode]="addedNewNode$"
@@ -89,6 +88,7 @@
           (arrowAdded)="handleAddArrow($event)"
           (arrowUpdated)="handleUpdateArrow($event)"
           (hideNode)="handleHideNode($event)"
+          (hideGlobalVisibilityNode)="handleGlobalHideNodeItem($event)" 
           (removeArrows)="handleRemoveArrows($event)"
           (selectArrow)="handleSlectArrow($event)"
           (updatedNodeData)="handleUpdatedNodeData($event)"
