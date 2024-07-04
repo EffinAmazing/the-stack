@@ -47,10 +47,10 @@
               </div>
               <div class="actions" *ngIf="isUserAdmin">
                 <div class="actions" (click)="toggleNodeGlobally(nodes[nodeId])">
-                  <mat-icon class="visible" *ngIf="nodes[nodeId].hiddenGlobally"
+                  <mat-icon class="visible" [ngClass]="{'loading': nodes[nodeId].isUpdatingToolVisibility}"  *ngIf="nodes[nodeId].hiddenGlobally"
                     >restore</mat-icon
                   >
-                  <mat-icon class="hidden" *ngIf="!nodes[nodeId].hiddenGlobally"
+                  <mat-icon class="hidden" [ngClass]="{'loading': nodes[nodeId].isUpdatingToolVisibility}"  *ngIf="!nodes[nodeId].hiddenGlobally"
                     >block</mat-icon
                   >
                 </div>

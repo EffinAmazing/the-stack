@@ -25,7 +25,6 @@ export class ToolsListComponent implements OnInit {
   @Output() closeTools: EventEmitter<any> = new EventEmitter();
   @Output() updatedNodeData: EventEmitter<{ nodeId: string, data: BluePrintTool }> = new EventEmitter();
   @Output() callEditNode: EventEmitter<string> = new EventEmitter();
-  @Input() toolsHiddenGlobally: Observable<any>;
   categories: any;
   totalCost: number;
   categoriesList: Array<{
@@ -47,51 +46,12 @@ export class ToolsListComponent implements OnInit {
     const user = this.auth.getCurrentUser();
     if (user) this.isUserAdmin = user.role === 0;
     this.totalCost = 0;
-    this.toolsHiddenGlobally.subscribe(hiddenTools => {
-      //this.globalHiddenTools = hiddenTools.nodes;
-   /*   console.log('Hidden tools updated:', this.globalHiddenTools);
-
-      console.log('this.nodes.length',this.nodes.length);
- 
-      //hidden tools changed
-      //check this.nodes and set the hiddenGlobally property 
-      if (this.globalHiddenTools.length > 0) {
-        console.log('should update length is ',this.globalHiddenTools.length);
-        this.nodes.forEach(node => {
-          if (this.globalHiddenTools.some(hiddenTool => hiddenTool.id === node.tool.id)) {
-            console.log('have to hide',node.id);
-            node.hiddenGlobally = true;
-          } else {
-            node.hiddenGlobally = false;
-          }
-        });      
-      } else {
-        console.log('should update length is 0');
-        this.nodes.forEach(node => {
-          node.hiddenGlobally = false;
-        });
-      }
-      console.log('help!',this.nodes.length);
-      this.nodes.forEach(node => {
-        console.log(node.tool.id);
-      });
-      */
-
-    });
     this.loadedNodes.subscribe((data) => {
 
-      //console.log('loadedNodes change');
-
       this.nodes = data.nodes;
-      //console.log('testing',typeof this.nodes, typeof data.nodes);
-
-      //console.log('loadedNodes',this.nodes,typeof this.nodes);
 
       for (const key in this.nodes) {
-        const node = this.nodes[key];
-        //console.log(node.hiddenGlobally,this.nodes[key].hiddenGlobally);
-        //console.log('this.nodes[key].hiddenGlobally',this.nodes[key].hiddenGlobally);
-        //if (this.nodes[key].hiddenGlobally === undefined) this.nodes[key].hiddenGlobally = this.isToolHiddenGlobally(node);
+        const node = this.nodes[key];        
       }  
 
       for (const key in data.nodes) {
@@ -199,24 +159,6 @@ export class ToolsListComponent implements OnInit {
     });
 
   }
-
-  /*
-  private toolsHiddenGloballySubject = new BehaviorSubject<Tool[]>([]);
-  toolsHiddenGlobally$: Observable<Tool[]> = this.toolsHiddenGloballySubject.asObservable();
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.toolsHiddenGlobally) {
-      this.toolsHiddenGloballySubject.next(this.toolsHiddenGlobally);
-    }
-  }
-  */
-
-  /*
-  public isToolHiddenGlobally(node: any): boolean {    
-    //console.log('checking',node,this.globalHiddenTools.some(tool => tool.name === node.tool.name));
-    return this.globalHiddenTools.some(tool => tool.name === node.tool.name);
-  }
-  */
 
   public handleClickToEdit(nodeId: string, field: string) {
     if (this.currentNodeEdit) {

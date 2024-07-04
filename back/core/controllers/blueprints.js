@@ -122,8 +122,7 @@ class BluePrints {
                     blueprint: blueprint,
                     nodes: [],
                     tools: []
-                }
-                console.log('blueprint',blueprint);
+                }                
                 this._toolsNodes.getNodesByBlueprint(data.blueprint.id).then((result)=>{
                     data.nodes = result;
                     cb(null, data)

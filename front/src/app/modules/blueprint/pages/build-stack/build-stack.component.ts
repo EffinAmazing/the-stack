@@ -861,27 +861,29 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     });
   }
 
-  public handleGlobalHideNodeItem(data: { item: Tool, disableHistory?: boolean, isHidden?: boolean }) {
+
+
+  public handleGlobalHideNodeItem(data: { item: BluePrintTool, disableHistory?: boolean, isHidden?: boolean }) {
     
     //TODO
     //we need an async loading animation for the global icon until the database update finishes
+    
+    let nodesArray = Object.values(this.nodes);
+    let nodeItem = nodesArray.find(node => node.toolId === data.item.tool.id);
+    if (nodeItem && this.nodes[nodeItem.id]) this.nodes[nodeItem.id].isUpdatingToolVisibility = true;
 
     //update the tool in the database 
     this.service.updateToolVisibility(data.item, !data.isHidden).subscribe((res) => {
-      //
-      //console.log('this.service.updateToolVisibility',res);
-      //console.log('this.globalHiddenTools',this.globalHiddenTools);
-
+   
       let tool = res;
 
       console.log('updated tool',tool.id,tool.hidden);
-      //console.log('this.nodes',this.nodes);
-     
-      let nodesArray = Object.values(this.nodes);
+      //console.log('this.nodes',this.nodes);     
+      
       let updatedNode = nodesArray.find(node => node.toolId === tool.id);
       if (updatedNode) {
-        //console.log('updatedNode',updatedNode, updatedNode.id, this.nodes[updatedNode.id]);
         if (this.nodes[updatedNode.id]) {
+          this.nodes[updatedNode.id].isUpdatingToolVisibility = false;
           this.nodes[updatedNode.id].hiddenGlobally = tool.hidden;
         }
       }  
@@ -1009,45 +1011,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     });
   }
 
-  /*public handleGlobalHideNode(data) {
-
-     //update the tool in the database 
-     this.service.updateToolVisibility(data.item, true).subscribe((res) => {
-      //
-      console.log('this.service.updateToolVisibility',res);
-
-      let tool = res;
-      if (tool.hidden) {
-        this.globalHiddenTools.push(tool);
-      } else {
-        this.globalHiddenTools = this.globalHiddenTools.filter(t => t.id !== tool.id);
-      }
-
-      //update the node
-      if (this.globalHiddenTools.length > 0) {
-        console.log('should update length is ',this.globalHiddenTools.length);
-        this.nodes.forEach(node => {
-          if (this.globalHiddenTools.some(hiddenTool => hiddenTool.id === node.tool.id)) {
-            console.log('have to hide',node.id);
-            node.hiddenGlobally = true;
-          } else {
-            node.hiddenGlobally = false;
-          }
-        });      
-      } else {
-        console.log('should update length is 0');
-        this.nodes.forEach(node => {
-          node.hiddenGlobally = false;
-        });
-      }
-      this.toolsHiddenGlobally$.next({nodes: this.globalHiddenTools});
-      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain  });
-     
-      
-    });
-
-
-
+  public handleGlobalHideNodeItemFromStack(data) {
     window['dataLayer'].push({
       event: 'stackbuilder.node.hide',
       node: data.item,
@@ -1055,20 +1019,37 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       stack: this.blueprint
     });
     if (!data.disableHistory) {
-      this.history.addAction(this.blueprint.id, { name: 'globalHideNode', data });
+      this.history.addAction(this.blueprint.id, { name: 'hideNode', data });
     }
-    console.log(' handleHideNode - ', data);
+    console.log(' handleHideNodeFromStack - ', data);
     this.service.updateNodeTool(data.item.id, { hide: data.item.hide }, this.blueprint.id).subscribe((res) => {
       res.tool = this.nodes[data.item.id].tool;
-      this.nodes[data.item.id] = res;
+     /////this.nodes[data.item.id] = res;
+     //update the tool in the database 
+    this.service.updateToolVisibility(data.item, !data.isHidden).subscribe((res) => {
+   
+      this.nodes[data.item.id].hiddenGlobally = res.hidden;
+
+      /*
+      console.log('updated tool',tool.id,tool.hidden);
+      //console.log('this.nodes',this.nodes);     
+      
+      let updatedNode = nodesArray.find(node => node.toolId === tool.id);
+      if (updatedNode) {
+        if (this.nodes[updatedNode.id]) {
+          this.nodes[updatedNode.id].isUpdatingToolVisibility = false;
+          this.nodes[updatedNode.id].hiddenGlobally = tool.hidden;
+        }
+      }  
+   
+      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain  });
+      */
+     
     });
-    
 
-    //TODO
-    //we must flag hidden = true on the tool in the database
-    //ANYTHING else that must be done?
-
-  }*/
+     
+    });
+  }
 
   public removeStack() {
     const dialogRef = this.deleteDialog.open(DeleteStackDialogComponent, {

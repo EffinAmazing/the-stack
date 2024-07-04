@@ -1044,8 +1044,12 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       setTimeout(() => { this.removeArrows.emit(ids); }, 0);
     }
-    this.hideNode.emit({ item: node, arrows: arrowsToRemove, disableHistory });
-    if (globalHide) this.hideGlobalVisibilityNode.emit({ item: node, disableHistory: true, isHidden: false }); 
+    
+    if (globalHide) {
+      this.hideGlobalVisibilityNode.emit({ item: node, arrows: arrowsToRemove, disableHistory: true, isHidden: false }); 
+    } else {
+      this.hideNode.emit({ item: node, arrows: arrowsToRemove, disableHistory });
+    }
 
   }
 

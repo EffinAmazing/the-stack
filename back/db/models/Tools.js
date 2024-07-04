@@ -109,7 +109,6 @@ class ToolsModel extends AbstaractModel {
     async updateTool(id, data){
         console.log('updating',id,data);
         let doc = await this.updateOne(id, data);
-        console.log('this.mapDocument',this.mapDocument(doc));
         return this.mapDocument(doc);
     }
 
