@@ -22,22 +22,48 @@ export class ArrowsHelper {
         return this.SVG;
     }
 
-    public genrateDots(start, end, StartPos?, EndPos?) {
+    //TODO
+    //add default param controlPoints = []
+    //to enable support for saved controlPoints
+
+    public genrateDots(start, end, StartPos?, EndPos?, controlPoints?, isDragging?, arrowPosition = 'start') {
+        if (isDragging) console.log('isDragging');
         const arr = [];
-        switch (EndPos) {
-            case 'Left':
-                end[0] -= 5;
-                break;
-            case 'Right':
-                end[0] += 5;
-                break;
-            case 'Top':
-                end[1] -= 5;
-                break;
-            case 'Bottom':
-                end[1] += 5;
-                break;
+        var cpArr = (controlPoints && controlPoints.length > 0) ? controlPoints.map(item => [item.x, item.y]) : [];
+
+        if (arrowPosition === 'start' || arrowPosition === 'both') {
+            switch (EndPos) {
+                case 'Left':
+                    end[0] -= 5;
+                    break;
+                case 'Right':
+                    end[0] += 5;
+                    break;
+                case 'Top':
+                    end[1] -= 5;
+                    break;
+                case 'Bottom':
+                    end[1] += 5;
+                    break;
+            }
         }
+        if (arrowPosition === 'end' || arrowPosition === 'both') {
+            switch (StartPos) {
+                case 'Left':
+                    start[0] -= 5;
+                    break;
+                case 'Right':
+                    start[0] += 5;
+                    break;
+                case 'Top':
+                    start[1] -= 5;
+                    break;
+                case 'Bottom':
+                    start[1] += 5;
+                    break;
+            }
+        }
+
         const diffX = end[0] - start[0];
         const diffY = end[1] - start[1];
 
@@ -46,27 +72,33 @@ export class ArrowsHelper {
             arr.push(start);
 
             // addoditional dot start;
-            if (StartPos === 'Left' || StartPos === 'Right') {
-                arr.push([start[0] + diffX * 0.35, start[1] + diffY * 0.15] );
-            } else {
-                arr.push([start[0] + diffX * 0.15, start[1] + diffY * 0.35]);
-            }
-            /* */
-            // addotional dot end
-            if (EndPos === 'Left' || EndPos === 'Right') {
-                arr.push([start[0] + diffX * 0.75, end[1] - diffY * 0.15] );
-            } else {
-                arr.push([end[0] - diffX * 0.15, start[1] + diffY * 0.75]);
-            }
+            //TODO add || isDragging
+            //IF you want to reset the control points while dragging a tool node
+            if (cpArr == 0 || isDragging) {
+                if (StartPos === 'Left' || StartPos === 'Right') {
+                    cpArr.push([start[0] + diffX * 0.35, start[1] + diffY * 0.15] );
+                } else {
+                    cpArr.push([start[0] + diffX * 0.15, start[1] + diffY * 0.35]);
+                }
+                /* */
+                // addotional dot end
+                if (EndPos === 'Left' || EndPos === 'Right') {
+                    cpArr.push([start[0] + diffX * 0.75, end[1] - diffY * 0.15] );
+                } else {
+                    cpArr.push([end[0] - diffX * 0.15, start[1] + diffY * 0.75]);
+                }
+            } 
             // end
             arr.push(end);
         } else {
             arr.push(start);
-            arr.push([ start[0] + diffX * 0.35, start[1] + diffY * 0.15]);
+            cpArr.push([ start[0] + diffX * 0.35, start[1] + diffY * 0.15]);
             arr.push(end);
-        }
-        console.log('dots',arr);
-        return arr;
+        }                     
+         
+        let finalArr = [arr[0], ...cpArr, arr[1]]
+        //console.log('dots', finalArr);
+        return finalArr;
     }
 
     public generateDotsWithBez(start, end, bezCtrlX, bezCtrlY, bezCtrlString, currentPathPoints) {
@@ -125,8 +157,11 @@ export class ArrowsHelper {
         const Arrow = {
             start: { nodeId: node.id, x: pos.x, y: pos.y, pos: direction, offset: offsetRel },
             end: { x: pos.x + 20, y: pos.y + 20 },
+            controlPoints: [],
             lineId: 'line-' + node.id,
-            relesed: true
+            arrowPosition: 'start',
+            relesed: true,
+            id: null
         };
 
         return Arrow;
@@ -197,7 +232,8 @@ export class ArrowsHelper {
         return  { pointer: dotPointer, offset };
     }
 
-    public updateExistedArrow(arrow: DrawArrow, container?: HTMLElement): void {
+    public updateExistedArrow(arrow: DrawArrow, container?: HTMLElement, isDragging?: boolean): void {
+        //console.log('updateExistedArrow',arrow,arrow.arrowPosition);
         if (container) {
             const refElstart = container.querySelector(`#node-${arrow.start.nodeId} .pointers>.pointer-${arrow.start.pos}`) as HTMLElement;
             if (refElstart) {
@@ -217,38 +253,92 @@ export class ArrowsHelper {
                 console.log(`#node-${arrow.end.nodeId} .pointers>.pointer-${arrow.end.pos}`);
             }
         }
-        const dots = this.genrateDots([arrow.start.x, arrow.start.y], [arrow.end.x, arrow.end.y], arrow.start.pos, arrow.end.pos );
-        this.SVG.select(`path#${arrow.lineId}`)
-            .attr('d', this.lineGenerator(dots));
+
+        //TODO
+        //NOTE
+        //Comment out this line if you want the control points to NOT change while dragging a tool node
+        if (isDragging) arrow.controlPoints = [];
+
+        const dots = this.genrateDots([arrow.start.x, arrow.start.y], [arrow.end.x, arrow.end.y], arrow.start.pos, arrow.end.pos, arrow.controlPoints, isDragging, arrow.arrowPosition);
+        //this.SVG.select(`path#${arrow.lineId}`).attr('d', this.lineGenerator(dots));
+         
+        if (arrow.arrowPosition === 'start') {
+            this.SVG.select(`path#${arrow.lineId}`).attr('d', this.lineGenerator(dots)).attr('marker-end', 'url(#arrow-marker)').attr('marker-start', null);
+        } else if (arrow.arrowPosition === 'end') {
+            this.SVG.select(`path#${arrow.lineId}`).attr('d', this.lineGenerator(dots)).attr('marker-start', 'url(#arrow-marker)').attr('marker-end', null);
+        } else if (arrow.arrowPosition === 'both') {
+            this.SVG.select(`path#${arrow.lineId}`).attr('d', this.lineGenerator(dots)).attr('marker-start', 'url(#arrow-marker)').attr('marker-end', 'url(#arrow-marker)');
+        }
+        
     }
 
     public updateExistedArrowBezier(arrow: DrawArrow, container: HTMLElement, ctrlX: Number, ctrlY: Number, bezCtrl: String, currentPathPoints: any[]): void {
         //console.log(arrow, ctrlX, ctrlY, bezCtrl, currentPathPoints);
-        console.log('currentPathPoints', currentPathPoints);
-        /*
-        if (container) {
-            const refElstart = container.querySelector(`#node-${arrow.start.nodeId} .pointers>.pointer-${arrow.start.pos}`) as HTMLElement;
-            if (refElstart) {
-                const startPointer = this.getArrowPointerByOffset(refElstart, container, arrow.start.pos, arrow.start.offset);
-                arrow.start.x = startPointer.x;
-                arrow.start.y = startPointer.y;
-            } else {
-                console.log(`#node-${arrow.start.nodeId} .pointers>.pointer-${arrow.start.pos}`);
-            }
+        //console.log('currentPathPoints', currentPathPoints);
 
-            const refElend = container.querySelector(`#node-${arrow.end.nodeId} .pointers>.pointer-${arrow.end.pos}`) as HTMLElement;
-            if (refElend) {
-                const endPointer = this.getArrowPointerByOffset(refElend, container, arrow.end.pos, arrow.end.offset);
-                arrow.end.x = endPointer.x;
-                arrow.end.y = endPointer.y;
-            } else {
-                console.log(`#node-${arrow.end.nodeId} .pointers>.pointer-${arrow.end.pos}`);
-            }
-        }
-        */
+        //TODO
+        //pass control points
         
         const dots = this.generateDotsWithBez([arrow.start.x, arrow.start.y], [arrow.end.x, arrow.end.y], ctrlX, ctrlY, bezCtrl, currentPathPoints);
         this.SVG.select(`path#${arrow.lineId}`)
             .attr('d', this.lineGenerator(dots));
     }
+
+    public getPointsFromPath(pathData) {
+        const points = [];
+        const regex = /([MLCSAZ])([^MLCSAZ]*)/gi;
+        let match;
+      
+        while ((match = regex.exec(pathData)) !== null) {
+          const command = match[1];
+          const coordinates = match[2].trim().split(/[\s,]+/).map(Number);
+      
+          switch (command) {
+            case 'M':
+            case 'L':
+              for (let i = 0; i < coordinates.length; i += 2) {
+                if (!isNaN(coordinates[i]) && !isNaN(coordinates[i + 1])) {
+                  points.push({ x: coordinates[i], y: coordinates[i + 1] });
+                }
+              }
+              break;
+            case 'C':
+              for (let i = 4; i < coordinates.length; i += 6) {
+                if (!isNaN(coordinates[i]) && !isNaN(coordinates[i + 1])) {
+                  points.push({ x: coordinates[i], y: coordinates[i + 1] });
+                }
+              }
+              break;
+            case 'S':
+            case 'Q':
+              for (let i = 2; i < coordinates.length; i += 4) {
+                if (!isNaN(coordinates[i]) && !isNaN(coordinates[i + 1])) {
+                  points.push({ x: coordinates[i], y: coordinates[i + 1] });
+                }
+              }
+              break;
+            case 'T':
+              for (let i = 0; i < coordinates.length; i += 2) {
+                if (!isNaN(coordinates[i]) && !isNaN(coordinates[i + 1])) {
+                  points.push({ x: coordinates[i], y: coordinates[i + 1] });
+                }
+              }
+              break;
+            case 'A':
+              for (let i = 5; i < coordinates.length; i += 7) {
+                if (!isNaN(coordinates[i]) && !isNaN(coordinates[i + 1])) {
+                  points.push({ x: coordinates[i], y: coordinates[i + 1] });
+                }
+              }
+              break;
+            case 'Z':
+              if (points.length > 0) {
+                points.push(points[0]); // Closing path
+              }
+              break;
+          }
+        }
+      
+        return points;
+      }
 }

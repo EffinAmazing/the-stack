@@ -38,6 +38,9 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() removeArrows: EventEmitter<string[]> = new EventEmitter();
   @Output() selectArrow: EventEmitter<any> = new EventEmitter();
   @Output() callEditNode: EventEmitter<string> = new EventEmitter();
+  @Output() clickNode: EventEmitter<string> = new EventEmitter();
+  @Output() mouseoverNode: EventEmitter<string> = new EventEmitter();
+  @Output() clickWorkspace: EventEmitter<any> = new EventEmitter();
   @Output() groupMoveCompleted: EventEmitter<{ nodeIds: string[], diff: Pointer }> = new EventEmitter();
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
@@ -210,6 +213,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.arrowSubscription = this.loadedArrows.subscribe((list) => {
+      console.log('this.arrowSubscription',list);
       list.forEach((item) => {
         if ( document.querySelector(`path#${item.lineId}`) ) { } else {
           if (typeof item.start.offset === 'undefined') {
@@ -232,6 +236,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
               }
             }
           }
+
+          if (!item.arrowPosition) item.arrowPosition = "start";
 
           this.addNewArrow(item);
         }
@@ -469,21 +475,37 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private addNewArrow(item) {
+    console.log('item',item);
     this.listOfArrows.push(item);
+    
     this.svgD3.append('path')
     .attr('id', item.lineId)
     .attr('class', 'line')
     .attr('d', lineGenerator(this.arrowHelper.genrateDots(
       [item.start.x, item.start.y],
-      [item.end.x, item.end.y], item.start.pos, item.end.pos)))
+      [item.end.x, item.end.y], item.start.pos, item.end.pos, item.controlPoints)))
     .attr('stroke', '#1c57a4')
     .attr('stroke-width', 2)
     .attr('fill', 'transparent')
     .attr('marker-end', 'url(#arrow-marker)');
 
+    console.log('addNewArrow');
+    
+    /*
+    if (item.arrowPosition === 'start') {
+        path.attr('marker-end', 'url(#arrow-marker)');
+    } else if (item.arrowPosition === 'end') {
+        path.attr('marker-start', 'url(#arrow-marker)');
+    } else if (item.arrowPosition === 'both') {
+        path.attr('marker-start', 'url(#arrow-marker)');       
+        path.attr('marker-end', 'url(#arrow-marker)');
+    }
+    */
+
     setTimeout(() => {
       this.addHandleSelectArrow(item.lineId);
     }, 100);
+    
   }
 
   public processImageSrc(link) {
@@ -613,6 +635,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public relisedMove(data, node: BluePrintTool) {
+
     //
     /*if (this.hoveredNode && this.hoveredNode.id !== node.id) {
       this.retriveNodePosition(data, node);
@@ -626,11 +649,15 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       const theNode = this.showNodes.find((item) => item.id === node.id );
       this.positionNodeChanged.emit({ nodeId: node.id, position: data.source._dragRef._activeTransform  });
       let position = data.source._dragRef._activeTransform;
+      
+      /*
+      //do not useSnapGrid
       if (this.useSnapGrid) {
         const X = position.x;
         const Y = position.y;
         position = { x: Math.floor(X / 10) * 10, y: Math.floor(Y / 10) * 10 };
       }
+      */
       this.nodes[node.id].position = theNode.position = position;
       // console.log(position);
       if (this.useSnapGrid) {
@@ -649,16 +676,34 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   public drawArrow(Arrow: DrawArrow) {
     this.listOfArrows.push(Arrow);
 
+    console.log('drawArrow');
+    //TODO
+    //This code must check for control points (expected 2)
+    //If there are none, then use defaults
+
     this.svgD3.append('path')
-          .attr('id', Arrow.lineId)
-          .attr('class', 'line')
-          .attr('d', lineGenerator(this.arrowHelper.genrateDots(
+        .attr('id', Arrow.lineId)
+        .attr('class', 'line')
+        .attr('d', lineGenerator(this.arrowHelper.genrateDots(
             [Arrow.start.x, Arrow.start.y],
-            [Arrow.end.x, Arrow.end.y], Arrow.start.pos, Arrow.end.pos)))
-          .attr('stroke', '#1c57a4')
-          .attr('stroke-width', 2)
-          .attr('fill', 'transparent')
-          .attr('marker-end', 'url(#arrow-marker)');
+            [Arrow.end.x, Arrow.end.y], Arrow.start.pos, Arrow.end.pos, Arrow.controlPoints)))
+        .attr('stroke', '#1c57a4')
+        .attr('stroke-width', 2)
+        .attr('fill', 'transparent')
+        .attr('marker-end', 'url(#arrow-marker)');
+
+        console.log('drawArrow');
+
+        /*
+        if (Arrow.arrowPosition === 'start') {
+            path.attr('marker-start', 'url(#arrow-marker)');
+        } else if (Arrow.arrowPosition === 'end') {
+            path.attr('marker-end', 'url(#arrow-marker)');
+        } else if (Arrow.arrowPosition === 'both') {
+            path.attr('marker-start', 'url(#arrow-marker)');       
+            path.attr('marker-end', 'url(#arrow-marker)');
+        }
+        */
 
     setTimeout(() => {
       // const line = document.querySelector(`path#${Arrow.lineId}`);
@@ -668,9 +713,17 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.arrowAdded.emit({arrow: Arrow, disableHystory: false});
   }
 
+  public deselectArrow() {
+    console.log('deselect in builder.component');
+    this.selectedArrow = null;
+  }
+
   public addHandleSelectArrow(ArrowId: string): void {
     const line = document.querySelector(`path#${ArrowId}`);
 
+    console.log('ArrowId',ArrowId);
+
+    /*
     line.addEventListener('click', () => {
         const container = this.stackWorkFlow.nativeElement;
         if (this.selectedArrow) {
@@ -690,7 +743,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Extract path start and end points from the path data
         const pathData = line.getAttribute('d');
-        const pathSegments = pathData.match(/([MLC])[^MLC]*/g);
+        const pathSegments = pathData.match(/([MLC])[^MLC]-----*-----/g);
 
         if (!pathSegments || pathSegments.length < 2) {
             console.error('Invalid path data');
@@ -727,7 +780,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             dot1.addEventListener('mousedown', () => { this.dotForDrag = dot1; });
             dot1.addEventListener('mouseup', () => {
                 this.dotForDrag = null;
-                this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
+                this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: true });
             });
             dot1.style.transform = `translate3d(${poiterStart.x - 20}px, ${poiterStart.y - 20}px, 0px)`;
             document.querySelector(`#node-${this.selectedArrow.start.nodeId}`).classList.add('has-selected-arrow');
@@ -749,7 +802,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             dot2.addEventListener('mousedown', () => { this.dotForDrag = dot2; });
             dot2.addEventListener('mouseup', () => {
                 this.dotForDrag = null;
-                this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
+                this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: true });
             });
             dot2.style.transform = `translate3d(${poiterEnd.x - 20}px, ${poiterEnd.y - 20}px, 0px)`;
 
@@ -769,9 +822,9 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             controlPoint1.addEventListener('mouseup', () => {
                 this.dotForDrag = null;
                 this.currentPathPoints = null;
-                this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
+                this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: true });
             });
-            controlPoint1.style.transform = `translate3d(${control1.x - 20}px, ${control1.y - 20}px, 0px)`;
+            controlPoint1.style.transform = `translate3d(${control1.x}px, ${control1.y}px, 0px)`;
 
             // 4. Add end control point
             const controlPoint2 = document.createElement('div');
@@ -789,14 +842,162 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             controlPoint2.addEventListener('mouseup', () => {
                 this.dotForDrag = null;
                 this.currentPathPoints = null;
-                this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
+                this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: true });
             });
-            controlPoint2.style.transform = `translate3d(${control2.x - 20}px, ${control2.y - 20}px, 0px)`;
+            controlPoint2.style.transform = `translate3d(${control2.x}px, ${control2.y}px, 0px)`;
 
             this.selectArrow.emit(this.selectedArrow);
             line.setAttribute('stroke-width', '4');
         }
     });
+    */
+
+    line.addEventListener('mouseover', () => {
+      
+      
+
+      const container = this.stackWorkFlow.nativeElement;
+
+      console.log('what is selected',this.selectedArrow);
+
+      if (this.selectedArrow) return;
+      
+      /*
+      if (this.selectedArrow) {          
+          this.svgD3.select('path#' + this.selectedArrow.lineId).attr('stroke-width', 2);
+          const adot1 = container.querySelector(`#dot-${this.selectedArrow.start.nodeId}`);
+          if (adot1) { adot1.remove(); }
+          const adot2 = container.querySelector(`#dot-${this.selectedArrow.end.nodeId}`);
+          if (adot2) { adot2.remove(); }
+          const c1 = container.querySelector(`#control1-${this.selectedArrow.lineId}`);
+          if (c1) { c1.remove(); }
+          const c2 = container.querySelector(`#control2-${this.selectedArrow.lineId}`);
+          if (c2) { c2.remove(); }          
+      }
+      */
+
+
+      this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === ArrowId);
+      const old = this.oldArrowData = Object.assign({}, this.selectedArrow);
+
+      // Extract path start and end points from the path data
+      const pathData = line.getAttribute('d');
+      const pathSegments = pathData.match(/([MLC])[^MLC]*/g);
+
+      if (!pathSegments || pathSegments.length < 2) {
+          console.error('Invalid path data');
+          return;
+      }
+
+      //console.log('pathData',pathData);
+
+      //const start = this.extractCoordinates(pathSegments[0]);
+      //const end = this.extractCoordinates(pathSegments[pathSegments.length - 1]);
+
+      
+
+      let currentPathPoints = this.getPointsFromPath(pathData);
+      console.log('getting curPath',currentPathPoints);
+
+      // Calculate control points positions
+      const control1 = currentPathPoints[1];
+      const control2 = currentPathPoints[2];
+
+      console.log('control1,control2',control1,control2,this.selectedArrow.controlPoints);
+
+      if (this.selectedArrow.controlPoints.length == 0) {
+        this.selectedArrow.controlPoints.push(control1);
+        this.selectedArrow.controlPoints.push(control2);
+      }
+      
+
+      // 1. Add start dot
+      const refElstart = container.querySelector(
+          `#node-${this.selectedArrow.start.nodeId} .pointers>.pointer-${this.selectedArrow.start.pos}`) as HTMLElement;
+      if (refElstart) {
+          const poiterStart = this.arrowHelper.getArrowPointerByOffset(
+              refElstart, container, this.selectedArrow.start.pos, this.selectedArrow.start.offset);
+          const dot1 = document.createElement('div');
+          dot1.id = 'dot-' + this.selectedArrow.start.nodeId;
+          dot1.className = 'dot-drag-arrow';
+          dot1.dataset.line = this.selectedArrow.lineId;
+          dot1.dataset.position = 'start';
+          container.append(dot1);
+          dot1.addEventListener('mousedown', () => { this.dotForDrag = dot1; });
+          dot1.addEventListener('mouseup', () => {
+              this.dotForDrag = null;
+              this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: true });
+          });
+          dot1.style.transform = `translate3d(${poiterStart.x - 20}px, ${poiterStart.y - 20}px, 0px)`;
+          document.querySelector(`#node-${this.selectedArrow.start.nodeId}`).classList.add('has-selected-arrow');
+          document.querySelector(`#node-${this.selectedArrow.end.nodeId}`).classList.add('has-selected-arrow');
+      }
+
+      // 2. Add end dot
+      const refElend = container.querySelector(
+          `#node-${this.selectedArrow.end.nodeId} .pointers>.pointer-${this.selectedArrow.end.pos}`) as HTMLElement;
+      if (refElend) {
+          const poiterEnd = this.arrowHelper.getArrowPointerByOffset(
+              refElend, container, this.selectedArrow.end.pos, this.selectedArrow.end.offset);
+          const dot2 = document.createElement('div');
+          dot2.id = 'dot-' + this.selectedArrow.end.nodeId;
+          dot2.dataset.line = this.selectedArrow.lineId;
+          dot2.dataset.position = 'end';
+          dot2.className = 'dot-drag-arrow';
+          container.append(dot2);
+          dot2.addEventListener('mousedown', () => { this.dotForDrag = dot2; });
+          dot2.addEventListener('mouseup', () => {
+              this.dotForDrag = null;
+              this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: true });
+          });
+          dot2.style.transform = `translate3d(${poiterEnd.x - 20}px, ${poiterEnd.y - 20}px, 0px)`;
+
+          // 3. Add start control point
+          const controlPoint1 = document.createElement('div');
+          controlPoint1.id = 'control1-' + this.selectedArrow.lineId;
+          controlPoint1.className = 'control-drag-arrow';
+          controlPoint1.dataset.line = this.selectedArrow.lineId;
+          controlPoint1.dataset.position = 'control1';            
+          container.append(controlPoint1);
+          controlPoint1.addEventListener('mousedown', () => { 
+            this.dotForDrag = controlPoint1; 
+            let pathData = line.getAttribute('d');
+            let curPathPoints = this.getPointsFromPath(pathData);
+            this.currentPathPoints = curPathPoints;  
+          });
+          controlPoint1.addEventListener('mouseup', () => {
+              this.dotForDrag = null;
+              this.currentPathPoints = null;
+              this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: true });
+          });
+          controlPoint1.style.transform = `translate3d(${control1.x - 25}px, ${control1.y - 25}px, 0px)`;
+
+          // 4. Add end control point
+          const controlPoint2 = document.createElement('div');
+          controlPoint2.id = 'control2-' + this.selectedArrow.lineId;
+          controlPoint2.className = 'control-drag-arrow';
+          controlPoint2.dataset.line = this.selectedArrow.lineId;
+          controlPoint2.dataset.position = 'control2';
+          container.append(controlPoint2);
+          controlPoint2.addEventListener('mousedown', () => { 
+            this.dotForDrag = controlPoint2; 
+            let pathData = line.getAttribute('d');
+            let curPathPoints = this.getPointsFromPath(pathData);
+            this.currentPathPoints = curPathPoints; 
+          });
+          controlPoint2.addEventListener('mouseup', () => {
+              this.dotForDrag = null;
+              this.currentPathPoints = null;
+              this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: true });
+          });
+          controlPoint2.style.transform = `translate3d(${control2.x - 25}px, ${control2.y - 25}px, 0px)`;
+
+          this.selectArrow.emit(this.selectedArrow);
+          line.setAttribute('stroke-width', '4');
+      }
+  });
+
+
 }
 
 private getPointsFromPath(pathData) {
@@ -858,24 +1059,6 @@ private getPointsFromPath(pathData) {
 }
 
 
-
-private extractCoordinates(segment: string): { x: number, y: number } {
-    const coords = segment.slice(1).split(',').map(Number);
-    return { x: coords[0], y: coords[1] };
-}
-
-private calculateControlPoint(start: { x: number, y: number }, end: { x: number, y: number }, isStart: boolean): { x: number, y: number } {
-    const dx = end.x - start.x;
-    const dy = end.y - start.y;
-    const offset = 50; // Adjust this value as needed for your control point distance
-    if (isStart) {
-        return { x: start.x + dx / 3 + offset, y: start.y + dy / 3 };
-    } else {
-        return { x: end.x - dx / 3 - offset, y: end.y - dy / 3 };
-    }
-}
-
-
   public getAssetsFolder() {
     if (typeof window['assets'] !== 'undefined') {
       return window['assets'];
@@ -912,7 +1095,10 @@ private calculateControlPoint(start: { x: number, y: number }, end: { x: number,
               pos: this.activeArrow.end.pos,
               offset: this.activeArrow.end.offset
             },
-            lineId: this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId
+            lineId: this.activeArrow.lineId + '-' + this.activeArrow.end.nodeId,
+            controlPoints: this.activeArrow.controlPoints,
+            arrowPosition: this.activeArrow.arrowPosition,
+            id: this.activeArrow.id
           };
 
           this.listOfArrows.push(Arrow);
@@ -934,6 +1120,8 @@ private calculateControlPoint(start: { x: number, y: number }, end: { x: number,
       } else {
         this.activeArrow.relesed = false;
       }
+    } else {
+      this.clickWorkspace.emit();
     }
 
   }
@@ -950,6 +1138,14 @@ private calculateControlPoint(start: { x: number, y: number }, end: { x: number,
     this.activeNode = node;
     this.startPositionNode = data.source.element.nativeElement.style.transform;
     this.connectedLines = lines;
+  }
+
+  public handleNodeMouseover(data) {
+    this.mouseoverNode.emit(data.id);
+  }
+
+  public handleNodeClick(data) {
+    this.clickNode.emit(data.id);
   }
 
   private parseTranslate(text) {
@@ -974,7 +1170,7 @@ private calculateControlPoint(start: { x: number, y: number }, end: { x: number,
       const dot = container.querySelector('#dot-' + node.id) as HTMLElement;
 
       this.connectedLines.forEach((item) => {
-        this.arrowHelper.updateExistedArrow(item, container);
+        this.arrowHelper.updateExistedArrow(item, container,this.isMoving);
         if (dot && dot.dataset.line === item.lineId) {
           const pos = dot.dataset.position;
           dot.style.transform = `translate3d(${item[pos].x - 20}px, ${item[pos].y - 20}px, 0px)`;
@@ -985,6 +1181,7 @@ private calculateControlPoint(start: { x: number, y: number }, end: { x: number,
   }
 
   public redrawArrows() {
+    console.log('redrawArrows',this.listOfArrows);
     const container = this.stackWorkFlow.nativeElement;
     const ids = [];
     this.listOfArrows.forEach((item) => {
@@ -1032,6 +1229,11 @@ private calculateControlPoint(start: { x: number, y: number }, end: { x: number,
   }
 
   public handleAddArrowClick(evt, direction, node?) {
+
+    //TODO
+    //if there is a selectedArrow, deselect
+    //Need to check this assumption
+
     if (!this.activeArrow) {
       const target = evt.target;
       const container = this.stackWorkFlow.nativeElement;
@@ -1042,7 +1244,6 @@ private calculateControlPoint(start: { x: number, y: number }, end: { x: number,
   }
 
   public handleMouseMove(evt) {
-    //
     if (this.activeArrow) {
       if (!this.activeArrow.end.nodeId) {
         const container = this.stackWorkFlow.nativeElement;
@@ -1102,16 +1303,34 @@ private calculateControlPoint(start: { x: number, y: number }, end: { x: number,
           const pos = { y: evt.y - Y - containerOffset, x: evt.x - X - containerOffset };
           //console.log(pos.x,pos.y,evt.x,evt.y);
 
+          //if (position === 'control1') {
+          //  this.arrowHelper.updateExistedArrowBezier(this.selectedArrow, container, pos.x, pos.y, position, this.currentPathPoints);
+          //} else if (position === 'control2') {
+          //  this.arrowHelper.updateExistedArrowBezier(this.selectedArrow, container, pos.x, pos.y, position, this.currentPathPoints);
+          //}
+
+          //this updates selectedArrow controlPoints
+          //expected number of control points array length is 2
+
+          
           if (position === 'control1') {
-            this.arrowHelper.updateExistedArrowBezier(this.selectedArrow, container, pos.x, pos.y, position, this.currentPathPoints);
+            this.selectedArrow.controlPoints[0].x = pos.x;
+            this.selectedArrow.controlPoints[0].y = pos.y;
           } else if (position === 'control2') {
-            this.arrowHelper.updateExistedArrowBezier(this.selectedArrow, container, pos.x, pos.y, position, this.currentPathPoints);
+            this.selectedArrow.controlPoints[1].x = pos.x;
+            this.selectedArrow.controlPoints[1].y = pos.y;
           }
+
+          console.log('this.selectedArrow after move', this.selectedArrow);
+          
+
+          this.arrowHelper.updateExistedArrowBezier(this.selectedArrow, container, pos.x, pos.y, position, this.currentPathPoints);
+          
 
        
           
 
-          this.dotForDrag.style.transform = `translate3d(${pos.x - 28}px, ${pos.y - 28}px, 0px)`;
+          this.dotForDrag.style.transform = `translate3d(${pos.x - 25}px, ${pos.y - 25}px, 0px)`;
         }
       
     

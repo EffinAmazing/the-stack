@@ -56,7 +56,7 @@ html, body{
     border-radius: 50%;
     margin-left: -5px;
     margin-top: -5px;
-    z-index: 120;
+    z-index: 1200;
     user-select: none;
     cursor: pointer;
 }
@@ -70,7 +70,8 @@ html, body{
     position: absolute;
     transform: translate(-50%, -50%);
     pointer-events: auto; 
-    z-index: 100; 
+    z-index: 1300; 
+    box-sizing: border-box;
 }
 
 .stack-section-container {

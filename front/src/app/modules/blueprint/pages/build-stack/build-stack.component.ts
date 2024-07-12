@@ -24,6 +24,8 @@ import html2canvas from 'html2canvas';
 import * as d3 from 'd3';
 import { environment } from 'src/environments/environment';
 import { DrawArrow } from 'src/app/shared/models/draws-item';
+import { ArrowsHelper } from '../../../../shared/helper/arrows-draw.helper';
+import { BuilderComponent } from '../../components/builder/builder.component';
 
 const maxNewVisibleItems = 40;
 
@@ -35,6 +37,7 @@ const maxNewVisibleItems = 40;
 })
 export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeactivate {
   @ViewChild('categoriesList') categoriesList: ElementRef;
+  @ViewChild(BuilderComponent) builderComponent!: BuilderComponent;
   id: string | null = null;
   blueprint: BluePrint;
   nodes: BluePrintTool[] = [];
@@ -64,6 +67,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   snapGrid = true;
   toolsLoaded = false;
   authUser: User;
+  arrowHelper: ArrowsHelper = new ArrowsHelper();
   // subscriptions
   private stackRequest: Subscription;
   @HostListener('window:beforeunload', ['$event']) unloadHandler(event: Event) {
@@ -450,7 +454,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
   public handleRemoveArrow() {
     if (this.selectedArrow) {
-      this.deleteArrowDots();
+      this.deleteArrowDots(this.selectedArrow);
       this.history.addAction(this.blueprint.id, { name: 'removeArrow', data: this.selectedArrow });
       const lineId = this.selectedArrow.lineId;
 
@@ -568,26 +572,107 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       }).catch((err) => { console.log(err); });
     }
   }
+  
+  public handleResetControlPoints() {
+    console.log('handleResetControlPoints',this.selectedArrow);
+    if (this.selectedArrow) this.selectedArrow.controlPoints = [];
+    this.service.getArrows(this.blueprint.id).toPromise().then((data) => {
+      
+      console.log(data);
+
+      data.forEach(obj => {
+        if (obj.id === this.selectedArrow.id) {
+          console.log('found it');
+            obj.controlPoints = [];
+        }
+      });
+
+      this.service.updateArrow({id: this.selectedArrow.id, controlPoints: []}).toPromise().then((result) => { /* */ }).catch(err => console.log(err));
+      //this.handleDeselectArrow();
+      
+      this.changedArrows$.next(data);
+      this.resetArrowControlPoints();
+
+    }).catch((err) => { console.log(err); });
+  }
 
   public handleDeselectArrow() {
     document.querySelector(`path#${this.selectedArrow.lineId}`).setAttribute('stroke-width', '2');
-    this.deleteArrowDots();
+    this.deleteArrowDots(this.selectedArrow);
 
     document.querySelector(`#node-${this.selectedArrow.start.nodeId}`).classList.remove('has-selected-arrow');
     document.querySelector(`#node-${this.selectedArrow.end.nodeId}`).classList.remove('has-selected-arrow');
     this.selectedArrow = null;
+
+    this.builderComponent.deselectArrow();
+
   }
 
-  public deleteArrowDots() {
+  public handleChangeArrowPosition() {
+    
     if (this.selectedArrow) {
-      const dot1 = document.querySelector(`#dot-${this.selectedArrow.start.nodeId}`);
+      if (this.selectedArrow.arrowPosition == 'start') this.selectedArrow.arrowPosition = 'end';
+      else if (this.selectedArrow.arrowPosition == 'end') this.selectedArrow.arrowPosition = 'both';
+      else if (this.selectedArrow.arrowPosition == 'both') this.selectedArrow.arrowPosition = 'start';
+
+      
+      
+
+      //TODO
+      //trigger redraw in builder component for the arrow
+
+      
+      this.service.getArrows(this.blueprint.id).toPromise().then((data) => {
+        
+        console.log(data);
+
+        data.forEach(obj => {
+          if (obj.id === this.selectedArrow.id) {
+            console.log('found it');
+              obj.arrowPosition = this.selectedArrow.arrowPosition;
+          }
+        });
+
+        this.service.updateArrow({id: this.selectedArrow.id, arrowPosition: this.selectedArrow.arrowPosition}).toPromise().then((result) => { /* */ }).catch(err => console.log(err));
+        //this.handleDeselectArrow();
+        this.changedArrows$.next(data);
+        
+      }).catch((err) => { console.log(err); });
+      
+
+    }
+    
+   
+  }
+
+  public deleteArrowDots(selectedArrow) {
+      const dot1 = document.querySelector(`#dot-${selectedArrow.start.nodeId}`);
       if (dot1) { dot1.remove(); }
-      const dot2 = document.querySelector(`#dot-${this.selectedArrow.end.nodeId}`);
+      const dot2 = document.querySelector(`#dot-${selectedArrow.end.nodeId}`);
       if (dot2) { dot2.remove(); }
-      const controlPoint1 = document.querySelector(`#control1-${this.selectedArrow.lineId}`);
+      const controlPoint1 = document.querySelector(`#control1-${selectedArrow.lineId}`);
       if (controlPoint1) { controlPoint1.remove(); }
-      const controlPoint2 = document.querySelector(`#control2-${this.selectedArrow.lineId}`);
+      const controlPoint2 = document.querySelector(`#control2-${selectedArrow.lineId}`);
       if (controlPoint2) { controlPoint2.remove(); }
+  }
+
+  public resetArrowControlPoints() {
+    if (this.selectedArrow) {
+
+      
+      const line = document.querySelector(`path#${this.selectedArrow.lineId}`);
+      const dots = this.arrowHelper.genrateDots(
+        [this.selectedArrow.start.x, this.selectedArrow.start.y], 
+        [this.selectedArrow.end.x, this.selectedArrow.end.y], 
+        this.selectedArrow.start.pos, 
+        this.selectedArrow.end.pos, [], false, this.selectedArrow.arrowPosition); 
+
+        console.log('resetDots',dots);
+
+      const controlPoint1 = document.querySelector(`#control1-${this.selectedArrow.lineId}`);
+      if (controlPoint1) controlPoint1.style.transform = `translate3d(${dots[1][0] - 25}px, ${dots[1][1] - 25}px, 0px)`;
+      const controlPoint2 = document.querySelector(`#control2-${this.selectedArrow.lineId}`);
+      if (controlPoint2) controlPoint2.style.transform = `translate3d(${dots[2][0] - 25}px, ${dots[2][1] - 25}px, 0px)`;
     }
   }
 
@@ -654,6 +739,21 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   public handleEditCustomTool(id: string) {
     const node = this.nodes[id];
     this.handleCeateCustomTool(node);
+  }
+
+  public handleClickNode(id: string) {
+    console.log('handleClickNode');
+    if (this.selectedArrow) this.handleDeselectArrow();
+  }
+
+  public handleMouseoverNode(id: string) {
+    //console.log('handleMouseoverNode');
+    //if (this.selectedArrow) this.handleDeselectArrow();
+  }
+
+  public handleClickWorkspace(event) {
+    console.log('handleClickWorkspace');
+    if (this.selectedArrow) this.handleDeselectArrow();
   }
 
   public handleAddNewTool() {
@@ -792,7 +892,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   public handleRemoveArrows(ids, blockReload?: any ) {
-    this.deleteArrowDots();
+    this.deleteArrowDots(this.selectedArrow);
     this.selectedArrow = null;
     this.service.removeArrows(ids).toPromise().then((result) => {
       if (!blockReload) {
@@ -848,6 +948,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   public handleAddArrow(data) {
+    console.log('handleAddArrow');
     // console.log(data);
     if (!data.disableHystory) {
       this.history.addAction(this.blueprint.id, { name: 'addArrow', data: data.arrow });
@@ -944,6 +1045,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
   public handleUpdateArrow(data) {
     if (!data.disableHistory) {  this.history.addAction(this.blueprint.id, { name: 'updateArrow', data: Object.assign({}, data) }); }
+    console.log('updateArrow',data);
     this.service.updateArrow(data.newData).toPromise().then((result) => { }).catch(err => console.log(err));
   }
 

@@ -38,10 +38,27 @@
             <!-- <button *ngIf="snapGrid" class="stack-button" color="primary" (click)="toggleSnapGrid()"> <mat-icon>highlight_alt</mat-icon> Snap to Grid </button>
             <button *ngIf="!snapGrid" class="stack-button" (click)="toggleSnapGrid()"> <mat-icon>highlight_alt</mat-icon> Snap to Grid </button>
             <div class="divider-buttons" ></div> -->
-            <button *ngIf="snapGrid && showGrid" class="stack-button icon-button" color="primary" (click)="toggleShowGrid()"> <mat-icon>grid_on</mat-icon> </button>
+            <!--<button *ngIf="snapGrid && showGrid" class="stack-button icon-button" color="primary" (click)="toggleShowGrid()"> <mat-icon>grid_on</mat-icon> </button>
             <button *ngIf="snapGrid && !showGrid" class="stack-button icon-button" (click)="toggleShowGrid()"> <mat-icon>grid_off</mat-icon> </button>
-            <div *ngIf="snapGrid" class="divider-buttons" ></div>
-            <button class="stack-button" *ngIf="selectedArrow" (click)="handleDeselectArrow()"> Cancel </button>
+            <div *ngIf="snapGrid" class="divider-buttons" ></div>-->
+            <button class="stack-button" *ngIf="selectedArrow" (click)="handleChangeArrowPosition()"> 
+              <span class="arrowPositionIcon" [ngClass]="selectedArrow.arrowPosition">
+                <ng-container *ngIf="selectedArrow.arrowPosition === 'start'">
+                  <mat-icon>arrow_forward</mat-icon>
+                </ng-container>
+                <ng-container *ngIf="selectedArrow.arrowPosition === 'end'">
+                  <mat-icon>arrow_back</mat-icon>
+                </ng-container>
+                <ng-container *ngIf="selectedArrow.arrowPosition === 'both'">
+                  <mat-icon>arrow_forward</mat-icon>
+                  <mat-icon>arrow_back</mat-icon>
+                </ng-container>
+              </span>
+            </button>
+            <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
+            <button class="stack-button" *ngIf="selectedArrow" (click)="handleResetControlPoints()"> <span class="resetPointsIcon"> <mat-icon>restart_alt</mat-icon> </span> </button>
+            <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
+            <button class="stack-button" *ngIf="selectedArrow" (click)="handleDeselectArrow()"> <mat-icon>done</mat-icon> </button>
             <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
             <button class="stack-button delete-arrow-action" *ngIf="selectedArrow" (click)="handleRemoveArrow()"> <mat-icon>clear</mat-icon>  Delete Arrow </button>
             <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
@@ -91,6 +108,9 @@
           (selectArrow)="handleSlectArrow($event)"
           (updatedNodeData)="handleUpdatedNodeData($event)"
           (callEditNode)="handleEditCustomTool($event)"
+          (clickNode)="handleClickNode($event)" 
+          (mouseoverNode)="handleMouseoverNode($event)" 
+          (clickWorkspace)="handleClickWorkspace($event)" 
           (groupMoveCompleted)="handleGroupMove($event)"
           ></app-builder>
 
