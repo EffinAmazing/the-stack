@@ -238,3 +238,19 @@
         display: none;
     }
 }
+.resetPointsIcon {
+    position: relative;
+}
+.resetPointsIcon mat-icon {
+    rotate: 40deg; 
+}
+.resetPointsIcon span {
+    display: block;
+    font-size: 12px;
+    position: absolute;
+    top: 26px;
+    line-height: 1;
+    width: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+}

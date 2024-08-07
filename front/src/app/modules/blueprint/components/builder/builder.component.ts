@@ -852,17 +852,14 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     */
 
-    line.addEventListener('mouseover', () => {
+    line.addEventListener('click', (event) => {
       
-      
+      event.stopPropagation();
 
       const container = this.stackWorkFlow.nativeElement;
 
       console.log('what is selected',this.selectedArrow);
-
-      if (this.selectedArrow) return;
-      
-      /*
+              
       if (this.selectedArrow) {          
           this.svgD3.select('path#' + this.selectedArrow.lineId).attr('stroke-width', 2);
           const adot1 = container.querySelector(`#dot-${this.selectedArrow.start.nodeId}`);
@@ -874,7 +871,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
           const c2 = container.querySelector(`#control2-${this.selectedArrow.lineId}`);
           if (c2) { c2.remove(); }          
       }
-      */
+      
 
 
       this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === ArrowId);
@@ -905,7 +902,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       console.log('control1,control2',control1,control2,this.selectedArrow.controlPoints);
 
-      if (this.selectedArrow.controlPoints.length == 0) {
+      if (!this.selectedArrow.controlPoints || this.selectedArrow.controlPoints.length == 0) {
+        if (!this.selectedArrow.controlPoints) this.selectedArrow.controlPoints = [];
         this.selectedArrow.controlPoints.push(control1);
         this.selectedArrow.controlPoints.push(control2);
       }

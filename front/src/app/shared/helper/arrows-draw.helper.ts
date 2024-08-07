@@ -74,7 +74,7 @@ export class ArrowsHelper {
             // addoditional dot start;
             //TODO add || isDragging
             //IF you want to reset the control points while dragging a tool node
-            if (cpArr == 0 || isDragging) {
+            if (cpArr == 0) {
                 if (StartPos === 'Left' || StartPos === 'Right') {
                     cpArr.push([start[0] + diffX * 0.35, start[1] + diffY * 0.15] );
                 } else {
@@ -257,7 +257,7 @@ export class ArrowsHelper {
         //TODO
         //NOTE
         //Comment out this line if you want the control points to NOT change while dragging a tool node
-        if (isDragging) arrow.controlPoints = [];
+        //if (isDragging) arrow.controlPoints = [];
 
         const dots = this.genrateDots([arrow.start.x, arrow.start.y], [arrow.end.x, arrow.end.y], arrow.start.pos, arrow.end.pos, arrow.controlPoints, isDragging, arrow.arrowPosition);
         //this.SVG.select(`path#${arrow.lineId}`).attr('d', this.lineGenerator(dots));

@@ -669,9 +669,9 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
         console.log('resetDots',dots);
 
-      const controlPoint1 = document.querySelector(`#control1-${this.selectedArrow.lineId}`);
+      const controlPoint1 = document.querySelector(`#control1-${this.selectedArrow.lineId}`) as HTMLElement;
       if (controlPoint1) controlPoint1.style.transform = `translate3d(${dots[1][0] - 25}px, ${dots[1][1] - 25}px, 0px)`;
-      const controlPoint2 = document.querySelector(`#control2-${this.selectedArrow.lineId}`);
+      const controlPoint2 = document.querySelector(`#control2-${this.selectedArrow.lineId}`) as HTMLElement;
       if (controlPoint2) controlPoint2.style.transform = `translate3d(${dots[2][0] - 25}px, ${dots[2][1] - 25}px, 0px)`;
     }
   }
@@ -753,7 +753,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
   public handleClickWorkspace(event) {
     console.log('handleClickWorkspace');
-    if (this.selectedArrow) this.handleDeselectArrow();
+    //if (this.selectedArrow) this.handleDeselectArrow();
   }
 
   public handleAddNewTool() {
