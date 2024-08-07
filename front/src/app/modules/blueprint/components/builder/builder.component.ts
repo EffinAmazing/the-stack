@@ -71,7 +71,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedNodes: Array<{ node: BluePrintTool, elRef: HTMLDivElement }> = [];
   moveSelectStart: Pointer = { x: -1, y: -1 };
   isDrawingArrow = false;
-  useSnapGrid = true;
+  useSnapGrid = false;
   // subscriptions
   indexNode = 0;
   nodesSubscription: Subscription;
@@ -106,10 +106,12 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });*/
+    /*
     this.snapSubscription = this.snapGrid.subscribe(use => {
       console.log(' * snapSubscription * ', use);
       this.useSnapGrid = use;
     });
+    */
 
     this.gridSubscription = this.showGrid.subscribe((show) => {
       if (show) {
