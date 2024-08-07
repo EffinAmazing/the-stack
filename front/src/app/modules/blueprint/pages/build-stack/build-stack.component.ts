@@ -61,7 +61,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   errMessageReturned = '';
   isMultiSelectActive = false;
   showGrid =  false;
-  snapGrid = true;
+  snapGrid = false;
   toolsLoaded = false;
   authUser: User;
   // subscriptions

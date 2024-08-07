@@ -38,9 +38,11 @@
             <!-- <button *ngIf="snapGrid" class="stack-button" color="primary" (click)="toggleSnapGrid()"> <mat-icon>highlight_alt</mat-icon> Snap to Grid </button>
             <button *ngIf="!snapGrid" class="stack-button" (click)="toggleSnapGrid()"> <mat-icon>highlight_alt</mat-icon> Snap to Grid </button>
             <div class="divider-buttons" ></div> -->
-            <button *ngIf="snapGrid && showGrid" class="stack-button icon-button" color="primary" (click)="toggleShowGrid()"> <mat-icon>grid_on</mat-icon> </button>
+            <!--
+              <button *ngIf="snapGrid && showGrid" class="stack-button icon-button" color="primary" (click)="toggleShowGrid()"> <mat-icon>grid_on</mat-icon> </button>
             <button *ngIf="snapGrid && !showGrid" class="stack-button icon-button" (click)="toggleShowGrid()"> <mat-icon>grid_off</mat-icon> </button>
             <div *ngIf="snapGrid" class="divider-buttons" ></div>
+            -->
             <button class="stack-button" *ngIf="selectedArrow" (click)="handleDeselectArrow()"> Cancel </button>
             <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
             <button class="stack-button delete-arrow-action" *ngIf="selectedArrow" (click)="handleRemoveArrow()"> <mat-icon>clear</mat-icon>  Delete Arrow </button>
