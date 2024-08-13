@@ -78,7 +78,6 @@ export class ToolsListComponent implements OnInit {
     });
 
     const checkIsAdded: {[key: string]: boolean} = { };
-    console.log(this.categoriesList);
 
     this.loadedCategories.subscribe((data) => {
       const categories = Object.keys(data);

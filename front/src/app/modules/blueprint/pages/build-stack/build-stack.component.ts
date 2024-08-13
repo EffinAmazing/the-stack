@@ -13,6 +13,7 @@ import { AdditionalDomainComponent } from '../../components/additional-domain/ad
 import { InfoPopupDialogComponent } from '../../components/info-popup-dialog/info-popup-dialog.component';
 import { AddNewToolDialogComponent } from '../../components/add-new-tool-dialog/add-new-tool-dialog.component';
 import { InviteDialogComponent } from '../../components/invite-dialog/invite-dialog.component';
+import { LoadEmptyStackDialogComponent } from '../../components/load-empty-stack-dialog/load-empty-stack-dialog.component';
 import { CreateCustomToolDialogComponent } from '../../components/create-custom-tool-dialog/create-custom-tool-dialog.component';
 import { Observable, BehaviorSubject, Subscription } from 'rxjs';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
@@ -119,10 +120,22 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     if (this.domain) {
       if (this.authUser) {
         this.stackRequest = this.service.postDomainTools(this.domain).subscribe((data) => {   
+
+          console.log('build-stack ngOnInit',data);
+
           if (typeof data === 'string' && String(data).includes('Error: ')) {
             this.errMessageReturned = data;
             this.emitErrorToDataLayer('service.postDomainTools',this.errMessageReturned);
-          }                
+          }             
+          if (data.blueprint && data.blueprint.errorCode) {
+            if (data.blueprint.errorCode == -99) {
+              //builtwith returned error, show popup for building custom stack
+              const dialogRef = this.inviteDialog.open(LoadEmptyStackDialogComponent, {
+                width: '520px',
+                data: { domain: this.domain, errorMessage: data.blueprint.errorMessage }
+              });
+            }
+          }
           if (!this.toolsLoaded) {
             this.proceedBluePrintData(data);
             this.toolsLoaded = true;

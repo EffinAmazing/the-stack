@@ -38,6 +38,8 @@ export interface BluePrint {
     spend?: number;
     created?: string;
     updated?: string;
+    errorCode?: number;
+    errorMessage?: string;
 }
 
 export interface BluePrintResp {

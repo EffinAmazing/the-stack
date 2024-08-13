@@ -26,11 +26,24 @@ async function getTestDataFromFile(domain){
 
   
     let A = response.data;
+    let errorMsg = null;
+    let Technologies = [];
 
-    //TODO
-    //error handling here
-    let Technologies = A.Results[0].Result.Paths[0].Technologies;
+    console.log(A);
 
+    if (A.Results.length == 0) {
+        //BuiltWith returned no results
+        const errorCode = A.Errors && A.Errors.length > 0 ? A.Errors[0].Code : null;
+        const errorMessage = A.Errors && A.Errors.length > 0 ? A.Errors[0].Message : null;
+        return { 
+            tech: [], 
+            spend: 0,
+            errorCode: errorCode,
+            errorMessage: errorMessage
+        };      
+    } 
+
+    Technologies = A.Results[0].Result.Paths[0].Technologies;
     console.log('API Response');
     console.log(response);
 
@@ -48,7 +61,7 @@ async function getTestDataFromFile(domain){
             
     return  { 
         tech: results, 
-        spend: A.Results[0].Result.Spend 
+        spend: A.Results[0].Result.Spend,
     };
 }
 
