@@ -30,6 +30,7 @@ export interface BluePrintTool {
         direction: string
     } >;
     domain: string;
+    hiddenGlobally?: boolean;
 }
 
 export interface BluePrint {
