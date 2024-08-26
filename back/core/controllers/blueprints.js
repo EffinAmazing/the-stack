@@ -147,8 +147,8 @@ class BluePrints {
                         console.log('ToolsServices.getToolsOfDomain', result);
                         const list = result.tech;
                         data.blueprint['spend'] = result.spend;
-                        data.blueprint['errorCode'] = result.errorCode;
-                        data.blueprint['errorMessage'] = result.errorMessage;
+                        data.blueprint['errorCode'] = result.errorCode || null;
+                        data.blueprint['errorMessage'] = result.errorMessage || null;
                         console.log(data.blueprint);
                         this._bluePrints.updateOne(data.blueprint.id, { spend: result.spend }).then((result)=>{  }).catch(err=>console.log(err));
                         /* */

@@ -121,20 +121,15 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       if (this.authUser) {
         this.stackRequest = this.service.postDomainTools(this.domain).subscribe((data) => {   
 
-          console.log('build-stack ngOnInit',data);
-
           if (typeof data === 'string' && String(data).includes('Error: ')) {
             this.errMessageReturned = data;
             this.emitErrorToDataLayer('service.postDomainTools',this.errMessageReturned);
-          }             
-          if (data.blueprint && data.blueprint.errorCode) {
-            if (data.blueprint.errorCode == -99) {
+          } else if (data.blueprint?.errorCode && data.blueprint?.errorMessage) {
               //builtwith returned error, show popup for building custom stack
               const dialogRef = this.inviteDialog.open(LoadEmptyStackDialogComponent, {
                 width: '520px',
                 data: { domain: this.domain, errorMessage: data.blueprint.errorMessage }
-              });
-            }
+              });            
           }
           if (!this.toolsLoaded) {
             this.proceedBluePrintData(data);
