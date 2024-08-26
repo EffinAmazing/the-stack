@@ -26,10 +26,7 @@ async function getTestDataFromFile(domain){
 
   
     let A = response.data;
-    let errorMsg = null;
     let Technologies = [];
-
-    console.log(A);
 
     if (A.Results.length == 0) {
         //BuiltWith returned no results
@@ -44,8 +41,6 @@ async function getTestDataFromFile(domain){
     } 
 
     Technologies = A.Results[0].Result.Paths[0].Technologies;
-    console.log('API Response');
-    console.log(response);
 
     const results = await async.map(Technologies, (item, cb)=>{        
         cb(null, { 
