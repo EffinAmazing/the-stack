@@ -149,21 +149,40 @@ class ToolsModel extends AbstaractModel {
         return mappedDocs;
     }
 
+    async getList(offset, limit) {
+        let total = await this.modelDB.countDocuments({}).exec();
+        let list = await this.modelDB.find({}).limit(limit).skip(offset).sort({ name: 1 }).exec();
+
+        let mapped = await async.map(list, (item, cb) => { cb(null, this.mapDocument(item)); });
+        return {
+            list: mapped,
+            total: total,
+            offset: offset,
+            limit: limit
+        }
+    }
+
 
     async getByName(name, offset, limit){
-        if (!limit) limit = 15;
+        if (!limit) limit = 10;
         if (!offset) offset = 0 
         if (typeof limit !== 'number') {
             limit = parseInt(limit);
-            if (!limit) limit = 15;
+            if (!limit) limit = 10;
         }
         if (typeof offset !== 'number') {
             offset = parseInt(offset);
             if (!offset) offset = 0;
         }
-        const listDocs = await this.modelDB.find().where('name').regex( new RegExp(name.toLowerCase(), "i") ).exec();        
+        let total = await this.modelDB.find().where('name').regex( new RegExp(name.toLowerCase(), "i") ).exec();
+        const listDocs = await this.modelDB.find().where('name').regex( new RegExp(name.toLowerCase(), "i") ).limit(limit).skip(offset).sort({ name: 1 }).exec();        
         const tools = await async.map(listDocs, (item, cb) => { cb(null, this.mapDocument(item)) });
-        return tools;
+        return {
+            list: tools,
+            total: total.length,
+            offset: offset,
+            limit: limit
+        }
     }
 }
 

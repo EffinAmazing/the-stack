@@ -34,6 +34,63 @@ class Tools {
             })
         }
     }
+
+    getTools( req, res, next  ){
+        let limit = 10;
+        let offset = 0;
+        if (req.query.limit) {
+            limit = parseInt( req.query.limit );
+        }
+        if (req.query.offset) {
+            offset = parseInt( req.query.offset );
+        }
+        this.model.getList(offset, limit)
+        .then(data => {
+            res.json({
+                result: data
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                result: 'Error',
+                message: 'Server error'
+            }); 
+        });
+    }
+
+    getByName( req, res, next  ){
+        let limit = 10;
+        let offset = 0;
+        if (req.query.limit) {
+            limit = parseInt( req.query.limit );
+        }
+        if (req.query.offset) {
+            offset = parseInt( req.query.offset );
+        }
+        let name = null;
+        if (req.query.name) {
+            name = req.query.name.trim().toLowerCase();
+        } else {
+            res.status(400).json({
+                result: 'Error',
+                message: 'Bad Request'
+            }); 
+        }
+        this.model.getByName(name, offset, limit)
+        .then(data => {
+            res.json({
+                result: data
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                result: 'Error',
+                message: 'Server error'
+            }); 
+        });
+    }
   
 }
 

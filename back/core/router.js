@@ -54,6 +54,10 @@ router.get('/tools/categories', toolsNodes.getListOfCategories.bind(toolsNodes))
 router.post('/tools/updateVisibility/:id', passport.authenticate('jwt', { session: false }), tools.updateVisibility.bind(tools));
 
 
+router.get('/admin/tools', passport.authenticate('jwt', { session: false }), tools.getTools.bind(tools));
+router.get('/admin/tools/search', passport.authenticate('jwt', { session: false }), tools.getByName.bind(tools));
+
+
 router.post("/arrows/", arrows.add.bind(arrows));
 router.get("/arrows/", arrows.list.bind(arrows));
 router.put("/arrows/:id", arrows.update.bind(arrows));

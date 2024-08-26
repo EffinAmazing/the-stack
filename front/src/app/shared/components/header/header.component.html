@@ -6,6 +6,10 @@
       </div>
       <span class="spacer"></span>
       <div class="profile-data"> 
+        <a *ngIf="user.role === 0" class="header-link" mat-button [routerLink]="'/profile/tools'">
+          Tools
+        </a>
+        <div *ngIf="user.role === 0" class="divider-buttons"></div>
         <a *ngIf="user.role === 0" class="header-link" mat-button [routerLink]="'/profile/users'">
           Users
         </a>

@@ -190,7 +190,6 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
            // console.log(tool);
            this.domainsList.push(tool.name);
         }    
-        if (this.globalHiddenTools.some)
         if (this.globalHiddenTools.some(hiddenTool => hiddenTool.id === item.tool.id)) {
           item.hiddenGlobally = true;
         } else {
