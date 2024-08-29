@@ -369,9 +369,7 @@ export class ToolsListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {   
-        //what happens globally will also be set to the node
-        //TODO
-        //is this working
+
         node.hide = isHidden;
 
         this.toogleVisibilityNode.emit({ item: node, disableHistory: true });  
