@@ -37,8 +37,8 @@
                         <th mat-header-cell *matHeaderCellDef> Hidden Globally </th>
                         <td mat-cell *matCellDef="let item">                           
                             <div class="actions">
-                                <mat-icon class="visible visibility-toggle" *ngIf="item.hidden === true" (click)="handleShowHideGlobally(item)">restore</mat-icon>
-                                <mat-icon class="hidden visibility-toggle" *ngIf="item.hidden === false || item.hidden === undefined" (click)="handleShowHideGlobally(item)">block</mat-icon>
+                                <mat-icon class="visible-tool visibility-toggle" *ngIf="item.hidden === true" (click)="handleShowHideGlobally(item)">restore</mat-icon>
+                                <mat-icon class="hidden-tool visibility-toggle" *ngIf="item.hidden === false || item.hidden === undefined" (click)="handleShowHideGlobally(item)">block</mat-icon>
                             </div>                             
                         </td>
                       </ng-container> 
