@@ -24,7 +24,6 @@ import html2canvas from 'html2canvas';
 import * as d3 from 'd3';
 import { environment } from 'src/environments/environment';
 import { DrawArrow } from 'src/app/shared/models/draws-item';
-import { L } from '@angular/cdk/keycodes';
 
 const maxNewVisibleItems = 40;
 
@@ -863,10 +862,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
 
   public handleGlobalHideNodeItem(data: { item: BluePrintTool, disableHistory?: boolean, isHidden?: boolean }) {
-    
-    //TODO
-    //we need an async loading animation for the global icon until the database update finishes
-    
+        
     let nodesArray = Object.values(this.nodes);
     let nodeItem = nodesArray.find(node => node.toolId === data.item.tool.id);
     if (nodeItem && this.nodes[nodeItem.id]) this.nodes[nodeItem.id].isUpdatingToolVisibility = true;
