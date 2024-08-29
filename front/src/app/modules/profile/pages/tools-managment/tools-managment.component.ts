@@ -111,34 +111,7 @@ export class ToolsManagmentComponent implements OnInit {
     }
   }
 
-  //TODO
-  //Disable/Enable tool handler
 
-  /*
-  handleClickEdit(user) {
-    const dialogRef = this.editDialog.open(UpdateUserFormComponent, {
-      width: '640px',
-      data: { user }
-    });
-
-    dialogRef.afterClosed().subscribe(data => {
-      if (data) {
-        console.log(data);
-        this.usersService.updateUsers(user.id, data).toPromise()
-        .then(done => {
-          this.usersService.getUsersList(0).toPromise().then(res => {
-            this.users = res.list;
-            this.total = res.total;
-          }).catch(err => {
-            console.log(err);
-          });
-        })
-        .catch(err => {
-          console.log(err);
-        });
-      }
-    });
-  }*/
 
   public handleShowHideGlobally(item) {
     var hideTool = false;
