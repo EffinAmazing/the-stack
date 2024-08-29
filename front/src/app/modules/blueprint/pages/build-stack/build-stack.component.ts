@@ -1025,20 +1025,6 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
    
       this.nodes[data.item.id].hiddenGlobally = res.hidden;
 
-      /*
-      console.log('updated tool',tool.id,tool.hidden);
-      //console.log('this.nodes',this.nodes);     
-      
-      let updatedNode = nodesArray.find(node => node.toolId === tool.id);
-      if (updatedNode) {
-        if (this.nodes[updatedNode.id]) {
-          this.nodes[updatedNode.id].isUpdatingToolVisibility = false;
-          this.nodes[updatedNode.id].hiddenGlobally = tool.hidden;
-        }
-      }  
-   
-      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain  });
-      */
      
     });
 
