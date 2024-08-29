@@ -15,6 +15,7 @@ import { SigninFormComponent } from './components/signin-form/signin-form.compon
 import { AccountComponent } from './pages/account/account.component';
 import { SharedModule } from '../../shared/shared.module';
 import { UsersManagmentComponent } from './pages/users-managment/users-managment.component';
+import { ToolsManagmentComponent } from './pages/tools-managment/tools-managment.component';
 import { ConfirmActionComponent } from './components/confirm-action/confirm-action.component';
 import { UpdateUserFormComponent } from './components/update-user-form/update-user-form.component';
 import { InvitedUsersComponent } from './components/invited-users/invited-users.component';
@@ -31,6 +32,7 @@ import { ResetPasswordFormComponent } from './pages/reset-password-form/reset-pa
     SigninFormComponent,
     AccountComponent,
     UsersManagmentComponent,
+    ToolsManagmentComponent,
     ConfirmActionComponent,
     UpdateUserFormComponent,
     InvitedUsersComponent,

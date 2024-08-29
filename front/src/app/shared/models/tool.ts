@@ -9,6 +9,7 @@ export interface Tool {
     nodeId?: string;
     created?: string;
     updated?: string;
+    hidden: Boolean;
 }
 
 export interface BluePrintTool {
@@ -29,6 +30,7 @@ export interface BluePrintTool {
         direction: string
     } >;
     domain: string;
+    hiddenGlobally?: boolean;
 }
 
 export interface BluePrint {

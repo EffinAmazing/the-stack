@@ -7,6 +7,7 @@ import { NodeDetailsComponent } from '../node-details/node-details.component';
 import { ArrowsHelper } from '../../../../shared/helper/arrows-draw.helper';
 import { Observable, Subscription } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmActionDialogComponent } from '../../../../shared/components/confirm-action-dialog/confirm-action-dialog.component';
 import * as d3 from 'd3';
 
@@ -35,6 +36,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() arrowAdded: EventEmitter<{ arrow: DrawArrow, disableHystory: boolean }> = new EventEmitter();
   @Output() arrowUpdated: EventEmitter<{ newData?: DrawArrow, oldData?: DrawArrow, disableHistory?: boolean}> = new EventEmitter();
   @Output() hideNode: EventEmitter<{ item: BluePrintTool, arrows?: Array<DrawArrow>, disableHistory?: boolean }> = new EventEmitter();
+  @Output() hideGlobalVisibilityNode: EventEmitter<any> = new EventEmitter();
   @Output() removeArrows: EventEmitter<string[]> = new EventEmitter();
   @Output() selectArrow: EventEmitter<any> = new EventEmitter();
   @Output() callEditNode: EventEmitter<string> = new EventEmitter();
@@ -48,6 +50,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() showGrid: Observable<boolean>;
   @Input() snapGrid: Observable<boolean>;
   @Input() domainsList: String[];
+  @Input() toolsHiddenGlobally: Observable<any>;
   isMultiselect = false;
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
@@ -74,6 +77,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   useSnapGrid = false;
   // subscriptions
   indexNode = 0;
+  isUserAdmin: Boolean;
   nodesSubscription: Subscription;
   arrowSubscription: Subscription;
   addedNewNodeSubcription: Subscription;
@@ -81,11 +85,15 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateNodeDataSubscription: Subscription;
   gridSubscription: Subscription;
   snapSubscription: Subscription;
+  globalHiddenTools: Tool[] = [];
 
-  constructor(private detailsDialog: MatDialog, private confirm: MatDialog) {  }
+  constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) {  }
 
   ngOnInit(): void {
     this.svgD3 = this.arrowHelper.initSvg('svg#paint');
+    const user = this.auth.getCurrentUser();
+
+    if (user) this.isUserAdmin = user.role === 0;
 
     const offsetX = 200;
     const offsetY = 55;
@@ -992,7 +1000,33 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  doHideNode(node: BluePrintTool, disableHistory: boolean) {
+  public hideNodeGlobally(node: BluePrintTool) {
+    const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 );
+      const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
+        width: '480px',
+        data: { title: 'Hide tool globally',  content: 'This will hide this tool for all users: ' + this.nodes[node.id].tool.name + '. Proceed?'}
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+         
+          
+           
+          if (arrowsToRemove.length > 0) {
+            node.hide = true;
+            this.nodes[node.id].hide = true;
+            this.doHideNode(node, true, true); 
+          } else {
+            node.hide = true;
+            this.doHideNode(node, true, true);
+          }         
+
+        }
+      });
+    
+  }
+
+  doHideNode(node: BluePrintTool, disableHistory: boolean, globalHide: boolean = false) {
     const index = this.showNodes.findIndex((item) => item.id === node.id);
     if (index !== -1) {
       this.showNodes.splice(index, 1);
@@ -1009,7 +1043,12 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       setTimeout(() => { this.removeArrows.emit(ids); }, 0);
     }
-    this.hideNode.emit({ item: node, arrows: arrowsToRemove, disableHistory });
+    
+    if (globalHide) {
+      this.hideGlobalVisibilityNode.emit({ item: node, arrows: arrowsToRemove, disableHistory: true, isHidden: false }); 
+    } else {
+      this.hideNode.emit({ item: node, arrows: arrowsToRemove, disableHistory });
+    }
 
   }
 
