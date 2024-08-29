@@ -1019,9 +1019,6 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             this.doHideNode(node, true, true);
           }         
 
-          //TODO
-          //This needs to hide the node AND add a hidden flag to the tool, so that it is permanently hidden
-
         }
       });
     
