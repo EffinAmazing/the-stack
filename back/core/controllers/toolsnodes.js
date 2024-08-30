@@ -253,7 +253,7 @@ class ToolsNodes {
                 // 1. find tools with simular name
                 (callback)=>{
 
-                    this.tools.getByName(name, limit, offset).then(result=>{                        
+                    this.tools.getToolsListByName(name, limit, offset).then(result=>{                        
                         callback(null, result);
                     }).catch(err=>{
                         callback(err);

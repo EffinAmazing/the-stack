@@ -184,6 +184,24 @@ class ToolsModel extends AbstaractModel {
             limit: limit
         }
     }
+
+
+    async getToolsListByName(name, offset, limit){
+        if (!limit) limit = 15;
+        if (!offset) offset = 0 
+        if (typeof limit !== 'number') {
+            limit = parseInt(limit);
+            if (!limit) limit = 15;
+        }
+        if (typeof offset !== 'number') {
+            offset = parseInt(offset);
+            if (!offset) offset = 0;
+        }
+        const listDocs = await this.modelDB.find().where('name').regex( new RegExp(name.toLowerCase(), "i") ).exec();        
+        const tools = await async.map(listDocs, (item, cb) => { cb(null, this.mapDocument(item)) });
+        return tools;
+    }
+    
 }
 
 module.exports = ToolsModel;
