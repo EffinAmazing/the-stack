@@ -324,7 +324,8 @@ class ToolsNodesModel extends AbstaractModel {
 
     
     async getNodesIdForTools(tools, blueprintId) {
-        const toolIds = tools.map(item => item.id);
+
+        const toolIds = tools.list.map(item => item.id);
 
         const query = {
             toolId: { $in: toolIds },
