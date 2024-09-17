@@ -183,8 +183,6 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       return this.isError = true;
     } 
     
-    console.log('proceedBluePrintData',data);
-
     let hidden = 0;
     this.blueprint = data.blueprint;
     this.globalHiddenTools = data.hiddenTools;
@@ -228,8 +226,6 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   private proceedNodes(all, hidden, force?) {
-
-    console.log('proceedNodes');
 
     if (force) {
       this.nodesList.forEach((nodeId) => {
@@ -277,9 +273,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
             item.tool.tag !== 'analytics' 
             || oldTool
             || (item.tool.tag == 'analytics' && forbiddenTools.includes(item.tool.name))
+            || (item.tool.tag == 'analytics' && (this.globalHiddenTools.length > 0 && this.globalHiddenTools.some(tool => tool.name === item.tool.name)))
             ) && all - hidden > 5) {
           
-          console.log('found',item.tool.name);
+          //console.log('found',item.tool.name);
 
           item.hide = true;
           this.nodesForUpdate.push(item.id);
@@ -536,11 +533,13 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
     // Loop through each ID in nodesList
     this.nodesList.forEach(id => {
+     
 
       try {
         let node = this.nodes[id];
 
         if (node) {             
+
           // Check the hide property and push tool.name to the appropriate array
           if (node.tool && node.tool.name && node.tool.name !== this.domain) {
             if (node.hide) {
