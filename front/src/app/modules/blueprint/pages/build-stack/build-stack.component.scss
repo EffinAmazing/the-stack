@@ -238,3 +238,7 @@
         display: none;
     }
 }
+/* Custom style fix for overflow nodeDetails component */
+::ng-deep .node-details-custom-wrapper .mat-dialog-container {
+    padding-bottom: 0;
+}

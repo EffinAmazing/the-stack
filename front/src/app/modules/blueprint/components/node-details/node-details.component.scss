@@ -89,6 +89,18 @@
         width: 90%;
     }
 }
+.mat-dialog-content.mat-dialog-content-collapse {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
 .mat-dialog-actions{
     justify-content: flex-end;
+}
+.mat-dialog-actions.mat-dialog-actions-collapse {
+    border-bottom: 0;
+    margin-bottom: 0;
+    margin-left: -24px;
+    margin-right: -24px;
+    padding: 8px 24px 8px;
+    border-top: solid 1px #dcdbdc;
 }
