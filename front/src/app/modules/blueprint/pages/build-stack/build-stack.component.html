@@ -7,18 +7,22 @@
           <h2> Build Your Stack </h2>  
           <div *ngIf="!authUser" class="signin-buttons-box">
             <button class="stack-button" (click)="showPopupFoSignUp('signin')"> Sign In </button> 
-            <span> or </span>
-            <button class="stack-button" (click)="showPopupFoSignUp()"> Sign Up </button> 
+            <!--
+              <span> or </span>
+              <button class="stack-button" (click)="showPopupFoSignUp()"> Sign Up </button> 
+            -->
           </div>
         </div>
+        <!--
         <div class="share-block" *ngIf="loaded">
           <span class="title"> Share </span>
           <div class="waiting-process" *ngIf="isWaiting"> <mat-spinner [diameter]="25"></mat-spinner> </div>
           <button mat-icon-button class="share-image-button" (click)="handleShare('facebook')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/fb.svg'" /> </button>
           <button mat-icon-button class="share-image-button" (click)="handleShare('linkedin')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/ln.svg'" /> </button>
           <button mat-icon-button class="share-image-button" (click)="handleShare('twitter')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/tw.svg'" /> </button>
-          <!-- <button mat-icon-button class="share-image-button" (click)="handleShare('email')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/email.svg'" /> </button> -->
+          <! <button mat-icon-button class="share-image-button" (click)="handleShare('email')"> <img class="social-icon" [src]="getAssetsFolder() + 'assets/images/email.svg'" /> </button> 
         </div>
+        -->
       </div>
       <div class="stack-builder-top-actions">
         <div class="stackActions" *ngIf="loaded" >
@@ -29,7 +33,8 @@
             <div class="divider-buttons"></div> 
             <button class="stack-button" (click)="handleAddAdditionalDomain()"> <mat-icon>add</mat-icon> Add Additional Domain </button>
             <div *ngIf="!authUser" class="divider-buttons"></div>
-            <button *ngIf="!authUser" class="stack-button" color="primary" (click)="showPopupFoSignUp()"> <mat-icon>save</mat-icon> Save your stack </button>
+            <!-- <button *ngIf="!authUser" class="stack-button" color="primary" (click)="showPopupFoSignUp()"> <mat-icon>save</mat-icon> Save your stack </button> -->
+            <button *ngIf="!authUser" class="stack-button" color="primary" (click)="shareUrlPopup()"> <mat-icon>share</mat-icon> Share your stack </button>
           </div>
           <div>
              
@@ -112,10 +117,10 @@
           </div>
           <div  class="actions-container">
             <button class="stack-button" color="primary" (click)="createNewStack()"> <mat-icon>add</mat-icon> Create new stack </button>
-            <div class="divider-buttons"></div>
-            <button class="stack-button" color="primary" (click)="handleClickInviteUser()"> <mat-icon>person_add</mat-icon> Invite users </button>
-            <div class="divider-buttons"></div>
-            <button class="stack-button" (click)="removeStack()"> <mat-icon>delete</mat-icon> Delete stack </button>
+            <div *ngIf="authUser" class="divider-buttons"></div>
+            <button *ngIf="authUser" class="stack-button" color="primary" (click)="handleClickInviteUser()"> <mat-icon>person_add</mat-icon> Invite users </button>
+            <div *ngIf="authUser" class="divider-buttons"></div>
+            <button *ngIf="authUser" class="stack-button" (click)="removeStack()"> <mat-icon>delete</mat-icon> Delete stack </button>
           </div>
         </div>
       </div>

@@ -20,6 +20,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 // import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { ShareUrlDialogComponent } from './components/share-url-dialog/share-url-dialog.component';
 import { InfoPopupDialogComponent } from './components/info-popup-dialog/info-popup-dialog.component';
 import { AddNewToolDialogComponent } from './components/add-new-tool-dialog/add-new-tool-dialog.component';
 import { SubdomainDetectComponent } from './components/subdomain-detect/subdomain-detect.component';
@@ -45,7 +46,8 @@ import { AdditionalDomainComponent } from './components/additional-domain/additi
     LoadEmptyStackDialogComponent,
     CreateCustomToolDialogComponent,
     ToolIconCropperComponent,
-    AdditionalDomainComponent
+    AdditionalDomainComponent,
+    ShareUrlDialogComponent
   ],
   imports: [
     CommonModule,
