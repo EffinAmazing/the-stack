@@ -199,126 +199,6 @@ class ToolsNodesModel extends AbstaractModel {
         return isInArray;
     }
 
-    /*
-    async filterToolsByNodes(blueprintId, tools, domain = '') {
-        let filteredTools = [];
-        let filteredNodes = [];
-        const self = this;
-        let counter = 0;
-        let dataList = await async.map(tools, (item, cb)=>{ 
-            self.modelDB.find({ blueprintId: blueprintId, toolId: item.id }).then((docs) => {
-                // console.log('find node for tool: ' + item.name, doc );
-                if (docs.length > 0) {
-                    cb(null, docs);
-                } else {
-                    
-                    self.isBlockedCat(item.categories).then(isInArray =>{
-                        let data = {
-                            blueprintId: blueprintId,
-                            toolId: item.id,
-                            hide: isInArray
-                        }
-                        console.log(' -------------- save  ------------- ', counter);
-                        if(domain) data['domain'] = domain;
-                        if(item.start) data['start'] = new Date(item.start);
-                        if(item.end) data['end'] = new Date(item.end);
-                        self.modelDB.create(data).then((docN) => {
-                            let node = self.mapDocument(docN);
-                            console.log(' create node ' + docN._id + ' for tool: ' + item.name);
-                            // console.log(docN);
-                            node.tool = item;
-                            filteredNodes.push( node );
-                            cb(null, docN);
-                        }).catch(error => {
-                            console.log(' create error ', error );
-                            cb(error, null);
-                        });
-                    }).catch(err=>{
-                        console.log(' create error ', err );
-                        cb(err, null);
-                    })
-                }
-            }).catch(err => {
-                let data = {
-                    blueprintId: blueprintId,
-                    toolId: item.id
-                }
-                console.log(' find error ', err, counter);
-                
-                if(item.start) data['start'] = new Date(item.start);
-                if(item.end) data['end'] = new Date(item.end);
-                self.modelDB.create(data).then((docN) => {
-                    let node = self.mapDocument(docN);
-                    console.log(' create node ' + docN._id + ' for tool: ' + item.name);
-                    // console.log(docN);
-                    node.tool = item;
-                    filteredNodes.push( node );
-                }).catch(error => {
-                    console.log(' create error ', error );
-                    cb(error, null);
-                });
-            });
-            counter++;
-        });
-
-        return filteredNodes;
-    }
-    */
-    
-/*
-    async filterToolsByNodes(blueprintId, tools, domain = '') {
-        
-        const toolMap = new Map(tools.map(tool => [tool.id, tool]));
-
-        const existingDocs = await this.modelDB.find({
-            blueprintId,
-            toolId: { $in: tools.map(t => t.id) }
-        });
-
-        console.log('existingDocs',existingDocs);
-
-        const existingToolIds = new Set(existingDocs.map(doc => doc.toolId));
-
-        console.log('existingToolIds',existingToolIds);
-
-        const existingNodes = existingDocs.map(doc => {
-            const node = this.mapDocument(doc);
-            const toolIdStr = doc.toolId.toString(); // Ensure string
-            const tool = toolMap.get(toolIdStr);
-            if (tool) node.tool = tool;
-            return node;
-        });
-
-        console.log('existingNodes',existingNodes);
-
-        const toolsToCreate = tools.filter(tool => !existingToolIds.has(tool.id));
-
-        const newNodes = await Promise.all(toolsToCreate.map(async (tool) => {
-            try {
-                const isInArray = await this.isBlockedCat(tool.categories);
-                const data = {
-                    blueprintId,
-                    toolId: tool.id,
-                    hide: isInArray,
-                    ...(domain && { domain }),
-                    ...(tool.start && { start: new Date(tool.start) }),
-                    ...(tool.end && { end: new Date(tool.end) }),
-                };
-
-                const doc = await this.modelDB.create(data);
-                const node = this.mapDocument(doc);
-                node.tool = tool;
-                return node;
-            } catch (err) {
-                console.error(`Failed to create node for tool "${tool.name}":`, err);
-                return null; // Optional: skip on failure
-            }
-        }));
-
-        return [...existingNodes, ...newNodes.filter(Boolean)];
-    }
-    */
-
     async filterToolsByNodes(blueprintId, tools, domain = '') {
         const toolMap = new Map(tools.map(tool => [tool.id.toString(), tool]));
 
@@ -354,8 +234,6 @@ class ToolsNodesModel extends AbstaractModel {
 
         return newNodes.filter(Boolean);
     }
-
-
 
     async updateOne(id, data){
         let doc = await super.updateOne(id, data);
