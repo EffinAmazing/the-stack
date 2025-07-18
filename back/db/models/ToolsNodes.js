@@ -200,8 +200,7 @@ class ToolsNodesModel extends AbstaractModel {
     }
 
     async filterToolsByNodes(blueprintId, tools, domain = '') {
-        const toolMap = new Map(tools.map(tool => [tool.id.toString(), tool]));
-
+        
         const existingDocs = await this.modelDB.find({
             blueprintId,
             toolId: { $in: tools.map(t => t.id) }
@@ -209,6 +208,8 @@ class ToolsNodesModel extends AbstaractModel {
         const existingToolIds = new Set(existingDocs.map(doc => doc.toolId.toString()));
 
         const toolsToCreate = tools.filter(tool => !existingToolIds.has(tool.id.toString()));
+
+        //console.log('toolsToCreate',toolsToCreate);
 
         const newNodes = await Promise.all(toolsToCreate.map(async (tool) => {
             try {
