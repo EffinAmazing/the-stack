@@ -7,6 +7,7 @@ import { Tool, BluePrintTool, BluePrint } from '../../../../shared/models/tool';
 import { User } from '../../../../shared/models/users';
 import { Pointer } from '../../../../shared/models/general';
 import { MatDialog } from '@angular/material/dialog';
+import { ShareUrlDialogComponent } from '../../components/share-url-dialog/share-url-dialog.component';
 import { DeleteStackDialogComponent } from '../../components/delete-stack-dialog/delete-stack-dialog.component';
 import { CreateNewStackDialogComponent } from '../../components/create-new-stack-dialog/create-new-stack-dialog.component';
 import { AdditionalDomainComponent } from '../../components/additional-domain/additional-domain.component';
@@ -69,6 +70,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   authUser: User;
   // subscriptions
   private stackRequest: Subscription;
+
+  /*
+   * Deprecated on unload listener
+   * 
   @HostListener('window:beforeunload', ['$event']) unloadHandler(event: Event) {
     if (!this.authUser && !window['requestToSignIn']) {
       const dialogText = 'Save Your Stack Before You Go';
@@ -78,6 +83,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       return dialogText;
     }
   }
+  */
 
 
   constructor(
@@ -106,7 +112,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   canDeactivate(): boolean {
-    if (!this.authUser && !window['requestToSignIn']) {
+    if (!this.authUser && !window['requestToSignIn']) {      
       if (confirm('Save Your Stack Before You Go')) {
         this.showPopupFoSignUp();
         return false;
@@ -330,6 +336,27 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       console.log(result);
     });
   }
+
+  shareUrlPopup() {
+  const { origin, pathname, hash } = window.location;
+  const [path, queryString = ''] = hash.split('?');
+
+  const params = new URLSearchParams(queryString);
+  const domain = params.get('domain');
+
+  const cleanHash = domain ? `${path}?domain=${domain}` : path;
+  const shareUrl = `${origin}${pathname}${cleanHash}`;
+
+  const dialogRef = this.infoDialog.open(ShareUrlDialogComponent, {
+    width: '520px',
+    data: { url: shareUrl }
+  });
+
+  dialogRef.afterClosed().subscribe(() => {
+    console.log('Share URL dialog closed');
+  });
+}
+
 
   public handleUpdatedNodeData(result) {
     // console.log(result);
