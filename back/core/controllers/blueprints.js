@@ -15,6 +15,7 @@ class BluePrints {
         this._bluePrints = new BluePrintModel();
         this._tools = new ToolsModel();
         this._toolsNodes = new ToolsNodesModel();
+        this._hiddenTools = new ToolsModel();
         this._arrows = new ArrowsModel();
         this._bluePrintsAccess = new BluePrintAccessModel();
         this._users = new UsersModel();
@@ -121,9 +122,15 @@ class BluePrints {
                     blueprint: blueprint,
                     nodes: [],
                     tools: []
-                }
+                }                
                 this._toolsNodes.getNodesByBlueprint(data.blueprint.id).then((result)=>{
                     data.nodes = result;
+                    cb(null, data)
+                }).catch((err)=>{ cb(null, data); })
+            },
+            (data, cb)=>{
+                this._hiddenTools.getHiddenTools().then((result)=>{                    
+                    data.hiddenTools = result;
                     cb(null, data)
                 }).catch((err)=>{ cb(null, data); })
             },
@@ -147,6 +154,8 @@ class BluePrints {
                         console.log('ToolsServices.getToolsOfDomain', result);
                         const list = result.tech;
                         data.blueprint['spend'] = result.spend;
+                        data.blueprint['errorCode'] = result.errorCode || null;
+                        data.blueprint['errorMessage'] = result.errorMessage || null;
                         console.log(data.blueprint);
                         this._bluePrints.updateOne(data.blueprint.id, { spend: result.spend }).then((result)=>{  }).catch(err=>console.log(err));
                         /* */
@@ -294,6 +303,12 @@ class BluePrints {
                     }).catch((err)=>{
                         cb(err, null);
                     });
+                },
+                (data, cb)=>{
+                    this._hiddenTools.getHiddenTools().then((result)=>{                        
+                        data.hiddenTools = result;
+                        cb(null, data)
+                    }).catch((err)=>{ cb(null, data); })
                 },
                 (data, cb) => {
                     async.map(data.nodes, (item, _cb) => { _cb(null, item.toolId) }, (err, docs) => {

@@ -20,10 +20,12 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 // import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { ShareUrlDialogComponent } from './components/share-url-dialog/share-url-dialog.component';
 import { InfoPopupDialogComponent } from './components/info-popup-dialog/info-popup-dialog.component';
 import { AddNewToolDialogComponent } from './components/add-new-tool-dialog/add-new-tool-dialog.component';
 import { SubdomainDetectComponent } from './components/subdomain-detect/subdomain-detect.component';
 import { InviteDialogComponent } from './components/invite-dialog/invite-dialog.component';
+import { LoadEmptyStackDialogComponent } from './components/load-empty-stack-dialog/load-empty-stack-dialog.component';
 import { CreateCustomToolDialogComponent } from './components/create-custom-tool-dialog/create-custom-tool-dialog.component';
 import { ToolIconCropperComponent } from './components/tool-icon-cropper/tool-icon-cropper.component';
 import { AdditionalDomainComponent } from './components/additional-domain/additional-domain.component';
@@ -41,9 +43,11 @@ import { AdditionalDomainComponent } from './components/additional-domain/additi
     AddNewToolDialogComponent,
     SubdomainDetectComponent,
     InviteDialogComponent,
+    LoadEmptyStackDialogComponent,
     CreateCustomToolDialogComponent,
     ToolIconCropperComponent,
-    AdditionalDomainComponent
+    AdditionalDomainComponent,
+    ShareUrlDialogComponent
   ],
   imports: [
     CommonModule,

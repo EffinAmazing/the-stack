@@ -1,0 +1,51 @@
+.mat-table.users-table{
+    width: 100%;
+}
+.mt-container{
+    padding: 0;
+}
+.my-stack-container {
+    h2{
+        text-align: left;
+        padding: 15px 24px;        
+    }
+}
+.divider-buttons {
+    margin-top: -5px;
+    vertical-align: middle;
+}
+.logo-tool {
+    width: 100%;
+}
+
+.tools-table {
+    width: 100%;
+}
+
+.tools-table th,
+.tools-table td {
+  min-width: 80px; 
+  padding: 0 0.5rem;
+}
+
+.tools-table td.tool-name {
+    min-width: 15%;
+}
+
+.tools-table td.description {
+    min-width: 70%;
+}
+
+.stack-container-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: solid 1px #dcdbdc;
+}
+
+.visibility-toggle {
+    cursor: pointer;
+}
+.search-full-width ::ng-deep .mat-form-field-wrapper {
+    padding-top: 1em;
+    padding-bottom: 0;
+}

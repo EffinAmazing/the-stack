@@ -7,12 +7,14 @@ import { Tool, BluePrintTool, BluePrint } from '../../../../shared/models/tool';
 import { User } from '../../../../shared/models/users';
 import { Pointer } from '../../../../shared/models/general';
 import { MatDialog } from '@angular/material/dialog';
+import { ShareUrlDialogComponent } from '../../components/share-url-dialog/share-url-dialog.component';
 import { DeleteStackDialogComponent } from '../../components/delete-stack-dialog/delete-stack-dialog.component';
 import { CreateNewStackDialogComponent } from '../../components/create-new-stack-dialog/create-new-stack-dialog.component';
 import { AdditionalDomainComponent } from '../../components/additional-domain/additional-domain.component';
 import { InfoPopupDialogComponent } from '../../components/info-popup-dialog/info-popup-dialog.component';
 import { AddNewToolDialogComponent } from '../../components/add-new-tool-dialog/add-new-tool-dialog.component';
 import { InviteDialogComponent } from '../../components/invite-dialog/invite-dialog.component';
+import { LoadEmptyStackDialogComponent } from '../../components/load-empty-stack-dialog/load-empty-stack-dialog.component';
 import { CreateCustomToolDialogComponent } from '../../components/create-custom-tool-dialog/create-custom-tool-dialog.component';
 import { Observable, BehaviorSubject, Subscription } from 'rxjs';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
@@ -43,6 +45,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   nodes: BluePrintTool[] = [];
   nodesList: string[] = [];
   showNodes: BluePrintTool[] = [];
+  globalHiddenTools: Tool[] = [];
+  toolsHiddenGlobally$: BehaviorSubject<any> = new BehaviorSubject({});
   categories: any = { 'None': [] };
   changedNodes$: BehaviorSubject<any> = new BehaviorSubject({});
   changedArrows$: BehaviorSubject<any> = new BehaviorSubject([]);
@@ -64,12 +68,16 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   errMessageReturned = '';
   isMultiSelectActive = false;
   showGrid =  false;
-  snapGrid = true;
+  snapGrid = false;
   toolsLoaded = false;
   authUser: User;
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   // subscriptions
   private stackRequest: Subscription;
+
+  /*
+   * Deprecated on unload listener
+   * 
   @HostListener('window:beforeunload', ['$event']) unloadHandler(event: Event) {
     if (!this.authUser && !window['requestToSignIn']) {
       const dialogText = 'Save Your Stack Before You Go';
@@ -79,6 +87,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       return dialogText;
     }
   }
+  */
 
 
   constructor(
@@ -107,7 +116,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   canDeactivate(): boolean {
-    if (!this.authUser && !window['requestToSignIn']) {
+    if (!this.authUser && !window['requestToSignIn']) {      
       if (confirm('Save Your Stack Before You Go')) {
         this.showPopupFoSignUp();
         return false;
@@ -123,10 +132,17 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     if (this.domain) {
       if (this.authUser) {
         this.stackRequest = this.service.postDomainTools(this.domain).subscribe((data) => {   
+
           if (typeof data === 'string' && String(data).includes('Error: ')) {
             this.errMessageReturned = data;
             this.emitErrorToDataLayer('service.postDomainTools',this.errMessageReturned);
-          }                
+          } else if (data.blueprint?.errorCode && data.blueprint?.errorMessage) {
+              //builtwith returned error, show popup for building custom stack
+              const dialogRef = this.inviteDialog.open(LoadEmptyStackDialogComponent, {
+                width: '520px',
+                data: { domain: this.domain, errorMessage: data.blueprint.errorMessage }
+              });            
+          }
           if (!this.toolsLoaded) {
             this.proceedBluePrintData(data);
             this.toolsLoaded = true;
@@ -176,9 +192,11 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     if (typeof data === 'string') {
       return this.isError = true;
     } 
-
+    
     let hidden = 0;
     this.blueprint = data.blueprint;
+    this.globalHiddenTools = data.hiddenTools;
+    this.toolsHiddenGlobally$.next({nodes: data.hiddenTools});
     data.nodes.forEach((item) => {  
       if (item.toolId) {
         const tool = data.tools.find((atool) =>  atool.id === item.toolId );
@@ -187,6 +205,11 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
            // console.log(tool);
            this.domainsList.push(tool.name);
         }    
+        if (this.globalHiddenTools.some(hiddenTool => hiddenTool.id === item.tool.id)) {
+          item.hiddenGlobally = true;
+        } else {
+          item.hiddenGlobally = false;
+        }
         this.nodes[item.id] = item;
         this.nodesList.push(item.id);
         if (item.hide ) { hidden++; }
@@ -253,13 +276,17 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
           || (item.tool.tag == 'domain' && !item.tool.name.replace(/^www\./i, "").toLowerCase().includes(this.blueprint.domain.replace(/^www\./i, "").toLowerCase()))  
           || forbiddenTools.includes(item.tool.name) 
           || forbiddenTags.includes(item.tool.tag) || oldTool 
+          || (this.globalHiddenTools.length > 0 && this.globalHiddenTools.some(tool => tool.name === item.tool.name))
+
         ) 
           && ( 
             item.tool.tag !== 'analytics' 
             || oldTool
             || (item.tool.tag == 'analytics' && forbiddenTools.includes(item.tool.name))
+            || (item.tool.tag == 'analytics' && (this.globalHiddenTools.length > 0 && this.globalHiddenTools.some(tool => tool.name === item.tool.name)))
             ) && all - hidden > 5) {
-
+          
+          //console.log('found',item.tool.name);
 
           item.hide = true;
           this.nodesForUpdate.push(item.id);
@@ -313,6 +340,27 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       console.log(result);
     });
   }
+
+  shareUrlPopup() {
+  const { origin, pathname, hash } = window.location;
+  const [path, queryString = ''] = hash.split('?');
+
+  const params = new URLSearchParams(queryString);
+  const domain = params.get('domain');
+
+  const cleanHash = domain ? `${path}?domain=${domain}` : path;
+  const shareUrl = `${origin}${pathname}${cleanHash}`;
+
+  const dialogRef = this.infoDialog.open(ShareUrlDialogComponent, {
+    width: '520px',
+    data: { url: shareUrl }
+  });
+
+  dialogRef.afterClosed().subscribe(() => {
+    console.log('Share URL dialog closed');
+  });
+}
+
 
   public handleUpdatedNodeData(result) {
     // console.log(result);
@@ -516,11 +564,13 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
     // Loop through each ID in nodesList
     this.nodesList.forEach(id => {
+     
 
       try {
         let node = this.nodes[id];
 
         if (node) {             
+
           // Check the hide property and push tool.name to the appropriate array
           if (node.tool && node.tool.name && node.tool.name !== this.domain) {
             if (node.hide) {
@@ -947,6 +997,36 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     });
   }
 
+
+
+  public handleGlobalHideNodeItem(data: { item: BluePrintTool, disableHistory?: boolean, isHidden?: boolean }) {
+        
+    let nodesArray = Object.values(this.nodes);
+    let nodeItem = nodesArray.find(node => node.toolId === data.item.tool.id);
+    if (nodeItem && this.nodes[nodeItem.id]) this.nodes[nodeItem.id].isUpdatingToolVisibility = true;
+
+    //update the tool in the database 
+    this.service.updateToolVisibility(data.item, !data.isHidden).subscribe((res) => {
+   
+      let tool = res;
+
+      console.log('updated tool',tool.id,tool.hidden);
+      //console.log('this.nodes',this.nodes);     
+      
+      let updatedNode = nodesArray.find(node => node.toolId === tool.id);
+      if (updatedNode) {
+        if (this.nodes[updatedNode.id]) {
+          this.nodes[updatedNode.id].isUpdatingToolVisibility = false;
+          this.nodes[updatedNode.id].hiddenGlobally = tool.hidden;
+        }
+      }  
+   
+      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain  });
+     
+    });
+
+  }
+
   public handleAddArrow(data) {
     console.log('handleAddArrow');
     // console.log(data);
@@ -1063,6 +1143,32 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     this.service.updateNodeTool(data.item.id, { hide: data.item.hide }, this.blueprint.id).subscribe((res) => {
       res.tool = this.nodes[data.item.id].tool;
       this.nodes[data.item.id] = res;
+    });
+  }
+
+  public handleGlobalHideNodeItemFromStack(data) {
+    window['dataLayer'].push({
+      event: 'stackbuilder.node.hide',
+      node: data.item,
+      tool: data.item.tool,
+      stack: this.blueprint
+    });
+    if (!data.disableHistory) {
+      this.history.addAction(this.blueprint.id, { name: 'hideNode', data });
+    }
+    console.log(' handleHideNodeFromStack - ', data);
+    this.service.updateNodeTool(data.item.id, { hide: data.item.hide }, this.blueprint.id).subscribe((res) => {
+      res.tool = this.nodes[data.item.id].tool;
+     /////this.nodes[data.item.id] = res;
+     //update the tool in the database 
+    this.service.updateToolVisibility(data.item, !data.isHidden).subscribe((res) => {
+   
+      this.nodes[data.item.id].hiddenGlobally = res.hidden;
+
+     
+    });
+
+     
     });
   }
 

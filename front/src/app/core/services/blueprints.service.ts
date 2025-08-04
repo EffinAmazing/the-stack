@@ -38,6 +38,10 @@ export class BlueprintsService {
     return this.mapper.mapResponse(this.http.put<BluePrintTool>(`${this.serverURI}toolsnodes/${nodeID}`, { data, blueprintId }));
   }
 
+  updateToolVisibility(node, flag): Observable<any> {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}tools/updateVisibility/${node.tool.id}`, { node, flag }));
+  }
+
   hideNodes(ids: string[]): Observable<any> {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolshide/`, { ids } ));
   }

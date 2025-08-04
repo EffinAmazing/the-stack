@@ -1,0 +1,10 @@
+<h1 mat-dialog-title>Unable to load domain  <button mat-icon-button class="close-button" [mat-dialog-close]><mat-icon>clear</mat-icon></button> </h1>
+<div mat-dialog-content>
+  <p>We were unable to load the domain {{data.domain}}.<br/><br/>
+    Error message: {{data.errorMessage}}<br/><br/>
+    You can still build your own custom stack by clicking Add Tool, search and add tools to your stack. <br/>
+</p>
+</div>
+<div mat-dialog-actions direction="right">
+  <button class="stack-button" (click)="onNoClick()" >Get Started</button> 
+</div>

@@ -36,7 +36,7 @@
     <div class="data">{{ data.node.tool.description }}</div>
   </div>
 </div>
-<div mat-dialog-content>
+<div mat-dialog-content class="mat-dialog-content-collapse">
   <div class="nodeData" *ngIf="data.node">
     <form [formGroup]="nodeForm">
       <div class="info-paragraph">
@@ -156,16 +156,17 @@
       </div>
     </form>
   </div>
+  <div mat-dialog-actions class="mat-dialog-actions-collapse" direction="right">
+    <button class="stack-button" (click)="onNoClick()">
+      <mat-icon>clear</mat-icon> Close
+    </button>
+    <button
+      class="stack-button"
+      color="primary"
+      [mat-dialog-close]="nodeForm.value"
+    >
+      <mat-icon>done</mat-icon> Update
+    </button>
+  </div>
 </div>
-<div mat-dialog-actions direction="right">
-  <button class="stack-button" (click)="onNoClick()">
-    <mat-icon>clear</mat-icon> Close
-  </button>
-  <button
-    class="stack-button"
-    color="primary"
-    [mat-dialog-close]="nodeForm.value"
-  >
-    <mat-icon>done</mat-icon> Update
-  </button>
-</div>
+

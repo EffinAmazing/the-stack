@@ -1,0 +1,18 @@
+<h2 mat-dialog-title>Share This Stack</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="fill" style="width: 100%;">
+    <mat-label>Shareable URL</mat-label>
+    <input matInput [value]="url" readonly>
+  </mat-form-field>
+
+  <!-- Show Copied message -->
+  <div *ngIf="copied" style="margin-top: 8px; color: green;">
+    Copied!
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button class="stack-button" (click)="close()" [disabled]="copied">Cancel</button>
+  <button mat-flat-button class="stack-button" color="primary" (click)="copyUrl()" [disabled]="copied">Copy</button>
+</mat-dialog-actions>

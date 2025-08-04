@@ -55,7 +55,11 @@
                 (mouseenter)="handleMouseOverPointer($event, node, 'Bottom')"
                 (mouseleave)="handleMouseOutPointer()"></div>
             </div>
+            
             <div class="hide-item-from-stack" (click)="hideNodeFormStack(node)"> <mat-icon>clear</mat-icon> </div>
+
+            <div *ngIf="isUserAdmin" class="admin-hide-tool-button" (click)="hideNodeGlobally(node)"> <mat-icon>block</mat-icon> </div>
+
     </div>
     <div #selectMany [ngClass]="{'select-many-elements': true, 'visible': isMultiselect }"> </div>
     <div #selectorArea class="seletor-area-box"> </div>

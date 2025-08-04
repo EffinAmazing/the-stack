@@ -254,3 +254,8 @@
     left: 50%;
     transform: translateX(-50%);
 }
+
+/* Custom style fix for overflow nodeDetails component */
+::ng-deep .node-details-custom-wrapper .mat-dialog-container {
+    padding-bottom: 0;
+}

@@ -1,10 +1,12 @@
-import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
 import { MatDialog } from '@angular/material/dialog';
 import { NodeDetailsComponent } from '../node-details/node-details.component';
 import { hiddenCategories, WhitelistCategories } from '../../../../core/config';
 import { environment } from '../../../../../environments/environment';
-import { Observable } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { ConfirmActionDialogComponent } from '../../../../shared/components/confirm-action-dialog/confirm-action-dialog.component';
 
 const host = environment.serverURI;
 
@@ -19,6 +21,7 @@ export class ToolsListComponent implements OnInit {
   @Input() updatedOutNodeData: Observable<BluePrintTool | null>;
   @Input() addedNewNode: Observable<BluePrintTool[] | null>;
   @Output() toogleVisibilityNode: EventEmitter<any> = new EventEmitter();
+  @Output() toogleGlobalVisibilityNode: EventEmitter<any> = new EventEmitter();
   @Output() closeTools: EventEmitter<any> = new EventEmitter();
   @Output() updatedNodeData: EventEmitter<{ nodeId: string, data: BluePrintTool }> = new EventEmitter();
   @Output() callEditNode: EventEmitter<string> = new EventEmitter();
@@ -30,17 +33,27 @@ export class ToolsListComponent implements OnInit {
     cost?: number,
     needToBeCollapsed: boolean
   }> = [];
-  nodes: any = {};
+  nodes: any = [];
   editStates: { [key: string]: { start: boolean, end: boolean, cost: boolean, owner: boolean } } = {};
   currentNodeEdit: BluePrintTool | null = null;
   copyBeforeStart: BluePrintTool | null = null;
+  isUserAdmin: Boolean;
+  globalHiddenTools: Tool[] = [];
 
-  constructor(private detailsDialog: MatDialog) { }
+  constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) { }
 
   ngOnInit(): void {
+    const user = this.auth.getCurrentUser();
+    if (user) this.isUserAdmin = user.role === 0;
     this.totalCost = 0;
     this.loadedNodes.subscribe((data) => {
+
       this.nodes = data.nodes;
+
+      for (const key in this.nodes) {
+        const node = this.nodes[key];        
+      }  
+
       for (const key in data.nodes) {
         if (data.nodes.hasOwnProperty(key)) {
           this.editStates[data.nodes[key].id] = { start: false, end: false, cost: false, owner: false };
@@ -78,7 +91,6 @@ export class ToolsListComponent implements OnInit {
     });
 
     const checkIsAdded: {[key: string]: boolean} = { };
-    console.log(this.categoriesList);
 
     this.loadedCategories.subscribe((data) => {
       const categories = Object.keys(data);
@@ -338,6 +350,38 @@ export class ToolsListComponent implements OnInit {
   public toggleNodeFormStack(node) {
     this.toogleVisibilityNode.emit({ item: node, disableHistory: true });
   }
+
+  public toggleNodeGlobally(node) {    
+
+    let label = "Hide";
+    let isHidden = false;
+    if (node.hiddenGlobally) {
+      label = "Show";
+      isHidden = true;
+    }
+
+    const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
+      width: '480px',
+      data: { title: label + ' tool globally',  content: 'This will ' + label.toLowerCase() + ' this tool for all users: ' + this.nodes[node.id].tool.name + '. Proceed?'}
+    });
+
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {   
+
+        node.hide = isHidden;
+
+        this.toogleVisibilityNode.emit({ item: node, disableHistory: true });  
+        this.toogleGlobalVisibilityNode.emit({ item: node, disableHistory: true, isHidden: isHidden });
+      }
+    });
+  }
+
+
+
+  
+
+  
 
   public close() {
     this.closeTools.emit(true);
