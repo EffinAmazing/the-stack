@@ -53,7 +53,7 @@
 
     .delete-arrow-action{
         background-color: #AA2211;
-        color: #ffffff;
+        color: #ffffff;        
     }
 
     .item-categories{
@@ -251,6 +251,56 @@
     top: 26px;
     line-height: 1;
     width: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.stack-button.delete-arrow-action {
+    position: relative;
+    width: 100px;
+    min-height: 38px;
+}
+
+.stack-button.delete-arrow-action span {
+    color: #ff2300;
+    font-size: 14px;
+    display: block;
+    font-size: 12px;
+    position: absolute;
+    top: 34px;
+    line-height: 1;
+    width: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.stack-button.position-arrow-action {
+    position: relative;
+}
+
+.stack-button.position-arrow-action span:not(.arrowPositionIcon) {
+    font-size: 14px;
+    display: block;
+    font-size: 12px;
+    position: absolute;
+    top: 28px;
+    line-height: 1;
+    width: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.stack-button.done-arrow-action {
+    position: relative;
+}
+
+.stack-button.done-arrow-action span {
+    font-size: 14px;
+    display: block;
+    font-size: 12px;
+    position: absolute;
+    top: 34px;
+    line-height: 1;
+    width: 100px;
     left: 50%;
     transform: translateX(-50%);
 }
