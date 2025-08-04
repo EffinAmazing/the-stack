@@ -112,7 +112,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   canDeactivate(): boolean {
-    if (!this.authUser && !window['requestToSignIn']) {
+    if (!this.authUser && !window['requestToSignIn']) {      
       if (confirm('Save Your Stack Before You Go')) {
         this.showPopupFoSignUp();
         return false;
@@ -338,25 +338,25 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   shareUrlPopup() {
-    const { origin } = window.location;
-    const hash = window.location.hash; // includes #/stack/build?domain=...
-    const [path, queryString = ''] = hash.split('?');
+  const { origin, pathname, hash } = window.location;
+  const [path, queryString = ''] = hash.split('?');
 
-    const params = new URLSearchParams(queryString);
-    const domain = params.get('domain');
+  const params = new URLSearchParams(queryString);
+  const domain = params.get('domain');
 
-    const cleanHash = domain ? `${path}?domain=${domain}` : path;
-    const shareUrl = `${origin}/${cleanHash}`;
+  const cleanHash = domain ? `${path}?domain=${domain}` : path;
+  const shareUrl = `${origin}${pathname}${cleanHash}`;
 
-    const dialogRef = this.infoDialog.open(ShareUrlDialogComponent, {
-      width: '520px',
-      data: { url: shareUrl }
-    });
+  const dialogRef = this.infoDialog.open(ShareUrlDialogComponent, {
+    width: '520px',
+    data: { url: shareUrl }
+  });
 
-    dialogRef.afterClosed().subscribe(() => {
-      console.log('Share URL dialog closed');
-    });
-  }
+  dialogRef.afterClosed().subscribe(() => {
+    console.log('Share URL dialog closed');
+  });
+}
+
 
   public handleUpdatedNodeData(result) {
     // console.log(result);
