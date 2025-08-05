@@ -9,9 +9,11 @@ let data = {
     PORT: 9000,
     PORT_V2: 4000,
     PORT_DEV: 4100,
+    PORT_STAGING: 4150,
     MONGOURI: 'mongodb://localhost:27017/',
     DB_NAME: 'marchtach',
-    DEV_DB_NAME: 'marchtachdev'
+    DEV_DB_NAME: 'marchtach_dev',
+    STAGING_DB_NAME: 'marchtach_staging'
 }
 
 if (process.env.NODE_ENV === "prod" || process.env.NODE_ENV === "production") {
