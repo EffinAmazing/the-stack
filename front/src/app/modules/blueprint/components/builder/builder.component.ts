@@ -709,16 +709,14 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public addHandleSelectArrow(ArrowId: string): void {
     const line = document.querySelector(`path#${ArrowId}`);
-    console.log('ArrowId',ArrowId);
-
+    
     line.addEventListener('click', (event) => {
       
       event.stopPropagation();
 
       const container = this.stackWorkFlow.nativeElement;
 
-      console.log('what is selected',this.selectedArrow);
-              
+      //deselect, we are reselecting
       if (this.selectedArrow) {          
           this.svgD3.select('path#' + this.selectedArrow.lineId).attr('stroke-width', 2);
           const adot1 = container.querySelector(`#dot-${this.selectedArrow.start.nodeId}`);
@@ -729,12 +727,14 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
           if (c1) { c1.remove(); }
           const c2 = container.querySelector(`#control2-${this.selectedArrow.lineId}`);
           if (c2) { c2.remove(); }          
-      }
+      }  
       
-
 
       this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === ArrowId);
       const old = this.oldArrowData = Object.assign({}, this.selectedArrow);
+
+      console.log('ArrowId',ArrowId);
+      console.log('selectedArrow',this.selectedArrow);
 
       // Extract path start and end points from the path data
       const pathData = line.getAttribute('d');
@@ -979,6 +979,7 @@ private getPointsFromPath(pathData) {
   }
 
   public handleMouseUp() {
+    console.log('handleup',this.selectedArrow);
     if (this.selectedArrow && this.dotForDrag) {
       this.dotForDrag = null;
       this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: this.oldArrowData, disableHistory: false});
@@ -1129,6 +1130,8 @@ private getPointsFromPath(pathData) {
 
         const container = this.stackWorkFlow.nativeElement;
         const position = this.dotForDrag.dataset.position;
+
+        //console.log('selectedArrow',this.selectedArrow);
         
         
         if (this.selectedArrow[position]?.nodeId) {
@@ -1159,14 +1162,38 @@ private getPointsFromPath(pathData) {
           //this updates selectedArrow controlPoints
           //expected number of control points array length is 2
 
-          
+          //if control points is not set, we can set
+          if (!this.selectedArrow.controlPoints) {
+            this.selectedArrow.controlPoints = [];
+          }
+
+          //handle control points and any that are missing
           if (position === 'control1') {
+            if (!this.selectedArrow.controlPoints[0]) {
+              this.selectedArrow.controlPoints[0] = {};
+            }
             this.selectedArrow.controlPoints[0].x = pos.x;
             this.selectedArrow.controlPoints[0].y = pos.y;
+
+            //set null points if needed
+            if (!this.selectedArrow.controlPoints[1]) {
+              this.selectedArrow.controlPoints[1] = {x:null,y:null};
+            }
           } else if (position === 'control2') {
+            if (!this.selectedArrow.controlPoints[1]) {
+              this.selectedArrow.controlPoints[1] = {};
+            }
             this.selectedArrow.controlPoints[1].x = pos.x;
             this.selectedArrow.controlPoints[1].y = pos.y;
+
+            //fix null points
+            if (!this.selectedArrow.controlPoints[0]) {
+              this.selectedArrow.controlPoints[0] = {x:null,y:null};
+            }
           }
+
+          
+
 
           //console.log('this.selectedArrow after move', this.selectedArrow);
           
