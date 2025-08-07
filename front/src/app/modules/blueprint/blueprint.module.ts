@@ -29,6 +29,7 @@ import { LoadEmptyStackDialogComponent } from './components/load-empty-stack-dia
 import { CreateCustomToolDialogComponent } from './components/create-custom-tool-dialog/create-custom-tool-dialog.component';
 import { ToolIconCropperComponent } from './components/tool-icon-cropper/tool-icon-cropper.component';
 import { AdditionalDomainComponent } from './components/additional-domain/additional-domain.component';
+import { AdditionalAppComponent } from './components/additional-app/additional-app.component';
 
 @NgModule({
   declarations: [
@@ -47,6 +48,7 @@ import { AdditionalDomainComponent } from './components/additional-domain/additi
     CreateCustomToolDialogComponent,
     ToolIconCropperComponent,
     AdditionalDomainComponent,
+    AdditionalAppComponent,
     ShareUrlDialogComponent
   ],
   imports: [

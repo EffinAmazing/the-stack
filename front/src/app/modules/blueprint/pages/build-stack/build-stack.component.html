@@ -31,7 +31,17 @@
             <div class="divider-buttons"></div> 
             <button class="stack-button" (click)="handleAddNewTool()"> <mat-icon>add</mat-icon> Add Tool </button>
             <div class="divider-buttons"></div> 
-            <button class="stack-button" (click)="handleAddAdditionalDomain()"> <mat-icon>add</mat-icon> Add Additional Domain </button>
+            <button [matMenuTriggerFor]="addMenu" class="stack-button"> <mat-icon>add</mat-icon> Add Domain or App </button>
+            <mat-menu #addMenu="matMenu">
+              <button mat-menu-item (click)="handleAddAdditionalDomain()">
+                <mat-icon>domain</mat-icon>
+                <span>Add Additional Domain</span>
+              </button>
+              <button mat-menu-item (click)="handleAddAdditionalApp()">
+                <mat-icon>apps</mat-icon>
+                <span>Add Additional App</span>
+              </button>
+            </mat-menu>
             <div *ngIf="!authUser" class="divider-buttons"></div>
             <!-- <button *ngIf="!authUser" class="stack-button" color="primary" (click)="showPopupFoSignUp()"> <mat-icon>save</mat-icon> Save your stack </button> -->
             <button *ngIf="!authUser" class="stack-button" color="primary" (click)="shareUrlPopup()"> <mat-icon>share</mat-icon> Share your stack </button>
