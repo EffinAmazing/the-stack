@@ -29,7 +29,31 @@ export class ArrowsHelper {
     public genrateDots(start, end, StartPos?, EndPos?, controlPoints?, isDragging?, arrowPosition = 'start') {
         if (isDragging) console.log('isDragging');
         const arr = [];
-        var cpArr = (controlPoints && controlPoints.length > 0) ? controlPoints.map(item => [item.x, item.y]) : [];
+        let cpArr = [];
+
+        if (controlPoints && controlPoints.length > 0) {
+            const diffX = end[0] - start[0];
+            const diffY = end[1] - start[1];
+
+            cpArr = controlPoints.map((item, index) => {
+                let defaultX: number;
+                let defaultY: number;
+
+                if (index === 0) {
+                    defaultX = (StartPos === 'Left' || StartPos === 'Right') ? start[0] + diffX * 0.35 : start[0] + diffX * 0.15;
+                    defaultY = (StartPos === 'Left' || StartPos === 'Right') ? start[1] + diffY * 0.15 : start[1] + diffY * 0.35;
+                } else {
+                    defaultX = (EndPos === 'Left' || EndPos === 'Right') ? start[0] + diffX * 0.75 : end[0] - diffX * 0.15;
+                    defaultY = (EndPos === 'Left' || EndPos === 'Right') ? end[1] - diffY * 0.15 : start[1] + diffY * 0.75;
+                }
+
+                return [
+                    item.x != null ? item.x : defaultX,
+                    item.y != null ? item.y : defaultY
+                ];
+            });
+        }
+        ////var cpArr = [];
 
         if (arrowPosition === 'start' || arrowPosition === 'both') {
             switch (EndPos) {
@@ -74,7 +98,7 @@ export class ArrowsHelper {
             // addoditional dot start;
             //TODO add || isDragging
             //IF you want to reset the control points while dragging a tool node
-            if (cpArr == 0) {
+            if (cpArr.length == 0) {
                 if (StartPos === 'Left' || StartPos === 'Right') {
                     cpArr.push([start[0] + diffX * 0.35, start[1] + diffY * 0.15] );
                 } else {

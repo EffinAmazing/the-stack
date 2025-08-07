@@ -63,6 +63,7 @@
               ]
             },
             "staging": {
+              "outputPath": "dist/merch-blueprint-front-staging",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
