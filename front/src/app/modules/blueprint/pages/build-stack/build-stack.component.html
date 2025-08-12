@@ -70,13 +70,13 @@
             <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
             <!-- <button [ngClass]="{'stack-button': true, 'icon-button': true, 'active-selection': isMultiSelectActive}" (click)="multiSelectHandler()"> <mat-icon>select_all</mat-icon> Multi Select {{isMultiSelectActive?'ON':'OFF'}} </button>
             <div class="divider-buttons" ></div> -->
-            <button class="stack-button icon-button" 
+            <button class="stack-button icon-button undo-action" 
                 [disabled]="history.isActivePrev(blueprint.id)"
-                (click)="handlePrevAction()"> <mat-icon><img [src]="getAssetsFolder() + 'assets/images/undo.svg'" /></mat-icon> </button>
+                (click)="handlePrevAction()"> <mat-icon><img [src]="getAssetsFolder() + 'assets/images/undo.svg'" /></mat-icon>  <span>Undo</span> </button>
             <div class="divider-buttons"></div>
-            <button class="stack-button icon-button" 
+            <button class="stack-button icon-button redo-action" 
                 [disabled]="history.isActiveNext(blueprint.id)"
-                (click)="handleNextAction()"> <mat-icon><img [src]="getAssetsFolder() + 'assets/images/redo.svg'" /> </mat-icon> </button>
+                (click)="handleNextAction()"> <mat-icon><img [src]="getAssetsFolder() + 'assets/images/redo.svg'" /> </mat-icon> <span>Redo</span> </button>
             
           </div>
         </div>

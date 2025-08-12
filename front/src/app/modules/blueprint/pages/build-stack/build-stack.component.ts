@@ -802,7 +802,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   public handleClickWorkspace(event) {
-    console.log('handleClickWorkspace');
+    console.log('handleClickWorkspace', event);
+    if (this.selectedArrow) this.handleDeselectArrow();
     //if (this.selectedArrow) this.handleDeselectArrow();
   }
 

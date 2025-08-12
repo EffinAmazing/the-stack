@@ -273,6 +273,44 @@
     transform: translateX(-50%);
 }
 
+.stack-button.undo-action {
+    position: relative;
+    width: 50px;
+    min-height: 38px;
+}
+
+.stack-button.undo-action span {
+    font-size: 12px;
+    display: block;
+    font-size: 12px;
+    position: absolute;
+    top: 34px;
+    line-height: 1;
+    width: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.stack-button.redo-action {
+    position: relative;
+    width: 50px;
+    min-height: 38px;
+}
+
+.stack-button.redo-action span {
+    font-size: 12px;
+    display: block;
+    font-size: 12px;
+    position: absolute;
+    top: 34px;
+    line-height: 1;
+    width: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+
+
 .stack-button.position-arrow-action {
     position: relative;
 }
