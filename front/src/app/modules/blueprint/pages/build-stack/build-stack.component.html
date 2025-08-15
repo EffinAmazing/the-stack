@@ -53,24 +53,43 @@
             <!-- <button *ngIf="snapGrid" class="stack-button" color="primary" (click)="toggleSnapGrid()"> <mat-icon>highlight_alt</mat-icon> Snap to Grid </button>
             <button *ngIf="!snapGrid" class="stack-button" (click)="toggleSnapGrid()"> <mat-icon>highlight_alt</mat-icon> Snap to Grid </button>
             <div class="divider-buttons" ></div> -->
-            <!--
-              <button *ngIf="snapGrid && showGrid" class="stack-button icon-button" color="primary" (click)="toggleShowGrid()"> <mat-icon>grid_on</mat-icon> </button>
+            <!--<button *ngIf="snapGrid && showGrid" class="stack-button icon-button" color="primary" (click)="toggleShowGrid()"> <mat-icon>grid_on</mat-icon> </button>
             <button *ngIf="snapGrid && !showGrid" class="stack-button icon-button" (click)="toggleShowGrid()"> <mat-icon>grid_off</mat-icon> </button>
-            <div *ngIf="snapGrid" class="divider-buttons" ></div>
-            -->
-            <button class="stack-button" *ngIf="selectedArrow" (click)="handleDeselectArrow()"> Cancel </button>
+            <div *ngIf="snapGrid" class="divider-buttons" ></div>-->
+            <button class="stack-button position-arrow-action arrow-stack-button" *ngIf="selectedArrow" (click)="handleChangeArrowPosition()"> 
+              <span class="arrowPositionIcon" [ngClass]="selectedArrow.arrowPosition">
+                <ng-container *ngIf="selectedArrow.arrowPosition === 'start'">
+                  <mat-icon>arrow_forward</mat-icon>
+                </ng-container>
+                <ng-container *ngIf="selectedArrow.arrowPosition === 'end'">
+                  <mat-icon>arrow_back</mat-icon>
+                </ng-container>
+                <ng-container *ngIf="selectedArrow.arrowPosition === 'both'">
+                  <mat-icon>arrow_forward</mat-icon>
+                  <mat-icon>arrow_back</mat-icon>
+                </ng-container>
+              </span>
+               <span>Line End</span>
+            </button>
             <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
-            <button class="stack-button delete-arrow-action" *ngIf="selectedArrow" (click)="handleRemoveArrow()"> <mat-icon>clear</mat-icon>  Delete Arrow </button>
+            <button class="stack-button arrow-stack-button" *ngIf="selectedArrow" (click)="handleResetControlPoints()"> 
+              <span class="resetPointsIcon"> <mat-icon>autorenew</mat-icon> </span>
+              <span>Reset</span>
+            </button>
+            <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
+            <button class="stack-button arrow-stack-button done-arrow-action" *ngIf="selectedArrow" (click)="handleDeselectArrow()"> <span><mat-icon>done</mat-icon></span> <span>Done</span> </button>
+            <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
+            <button class="stack-button arrow-stack-button delete-arrow-action" *ngIf="selectedArrow" (click)="handleRemoveArrow()"> <span><mat-icon>clear</mat-icon></span>  <span>Delete Arrow</span> </button>
             <div class="divider-buttons"  *ngIf="selectedArrow" ></div>
             <!-- <button [ngClass]="{'stack-button': true, 'icon-button': true, 'active-selection': isMultiSelectActive}" (click)="multiSelectHandler()"> <mat-icon>select_all</mat-icon> Multi Select {{isMultiSelectActive?'ON':'OFF'}} </button>
             <div class="divider-buttons" ></div> -->
-            <button class="stack-button icon-button" 
+            <button class="stack-button history-stack-button icon-button undo-action" 
                 [disabled]="history.isActivePrev(blueprint.id)"
-                (click)="handlePrevAction()"> <mat-icon><img [src]="getAssetsFolder() + 'assets/images/undo.svg'" /></mat-icon> </button>
+                (click)="handlePrevAction()"> <span><mat-icon><img [src]="getAssetsFolder() + 'assets/images/undo.svg'" /></mat-icon></span>  <span>Undo</span> </button>
             <div class="divider-buttons"></div>
-            <button class="stack-button icon-button" 
+            <button class="stack-button history-stack-button icon-button redo-action" 
                 [disabled]="history.isActiveNext(blueprint.id)"
-                (click)="handleNextAction()"> <mat-icon><img [src]="getAssetsFolder() + 'assets/images/redo.svg'" /> </mat-icon> </button>
+                (click)="handleNextAction()"> <span><mat-icon><img [src]="getAssetsFolder() + 'assets/images/redo.svg'" /> </mat-icon></span> <span>Redo</span> </button>
             
           </div>
         </div>
@@ -110,6 +129,9 @@
           (selectArrow)="handleSlectArrow($event)"
           (updatedNodeData)="handleUpdatedNodeData($event)"
           (callEditNode)="handleEditCustomTool($event)"
+          (clickNode)="handleClickNode($event)" 
+          (mouseoverNode)="handleMouseoverNode($event)" 
+          (clickWorkspace)="handleClickWorkspace($event)" 
           (groupMoveCompleted)="handleGroupMove($event)"
           ></app-builder>
 
