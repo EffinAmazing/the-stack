@@ -224,7 +224,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.arrowSubscription = this.loadedArrows.subscribe((list) => {
-      console.log('this.arrowSubscription',list);
+      //console.log('this.arrowSubscription',list);
       list.forEach((item) => {
         if ( document.querySelector(`path#${item.lineId}`) ) { } else {
           if (typeof item.start.offset === 'undefined') {
@@ -262,7 +262,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       // console.log(result);
       if (result) {
         const container = this.stackWorkFlow.nativeElement;
-        console.log('action:',result.action.name);
+        //console.log('action:',result.action.name);
         switch (result.action.name) {
           case 'updatePosition':
             const i = this.showNodes.findIndex((item) => item.id === result.action.data.nodeId);
@@ -418,7 +418,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
           if (item.hasOwnProperty('hide') && item.hide ) {
             return true;
           }
-          console.log(item);
+          //console.log(item);
           if (!existNode) {
             item.hide = false;
             if (typeof item.position.x !== 'number') {
@@ -489,7 +489,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private addNewArrow(item) {
-    console.log('item',item);
+    //console.log('item',item);
     this.listOfArrows.push(item);
     
     this.svgD3.append('path')
@@ -503,7 +503,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     .attr('fill', 'transparent')
     .attr('marker-end', 'url(#arrow-marker)');
 
-    console.log('addNewArrow');
+    //console.log('addNewArrow');
 
     setTimeout(() => {
       this.addHandleSelectArrow(item.lineId);
@@ -680,11 +680,6 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   public drawArrow(Arrow: DrawArrow) {
     this.listOfArrows.push(Arrow);
 
-    console.log('drawArrow');
-    //TODO
-    //This code must check for control points (expected 2)
-    //If there are none, then use defaults
-
     this.svgD3.append('path')
         .attr('id', Arrow.lineId)
         .attr('class', 'line')
@@ -696,7 +691,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         .attr('fill', 'transparent')
         .attr('marker-end', 'url(#arrow-marker)');
 
-        console.log('drawArrow');
+        //console.log('drawArrow');
 
     setTimeout(() => {
       // const line = document.querySelector(`path#${Arrow.lineId}`);
@@ -707,7 +702,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public deselectArrow() {
-    console.log('deselect in builder.component');
+    //console.log('deselect in builder.component');
     this.selectedArrow = null;
   }
 
@@ -775,7 +770,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       //console.log('old',old);
 
-      console.log('ArrowId',ArrowId);
+      //console.log('ArrowId',ArrowId);
       //console.log('selectedArrow',this.selectedArrow);
 
       // Extract path start and end points from the path data
@@ -790,7 +785,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       //console.log('pathData',pathData);    
 
       let currentPathPoints = this.getPointsFromPath(pathData);
-      console.log('getting curPath',currentPathPoints);
+      //console.log('getting curPath',currentPathPoints);
 
       // Calculate control points positions
       const control1 = currentPathPoints[1];
@@ -822,7 +817,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             this.lastActionDrag = true;            
           });
           dot1.addEventListener('mouseup', (event) => {
-            console.log('click',event.target);
+            //console.log('click',event.target);
               this.dotForDrag = null;
               this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });              
           });
@@ -1089,7 +1084,7 @@ private getPointsFromPath(pathData) {
   }
 
   public redrawArrows() {
-    console.log('redrawArrows',this.listOfArrows);
+   //console.log('redrawArrows',this.listOfArrows);
     const container = this.stackWorkFlow.nativeElement;
     const ids = [];
     this.listOfArrows.forEach((item) => {
@@ -1193,7 +1188,7 @@ private getPointsFromPath(pathData) {
         
         
         if (this.selectedArrow[position]?.nodeId) {
-          console.log(this.selectedArrow[position].nodeId);
+          //console.log(this.selectedArrow[position].nodeId);
 
           const nodeId = this.selectedArrow[position].nodeId;
           const result = this.getPosOfNodeByPoint(nodeId, container, { x: evt.x, y: evt.y});
@@ -1290,7 +1285,7 @@ private getPointsFromPath(pathData) {
 
   public hideNodeFormStack(node: BluePrintTool) {
     const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 );
-    console.log(arrowsToRemove);
+    //(arrowsToRemove);
     if (arrowsToRemove.length > 0) {
       const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
         width: '480px',
