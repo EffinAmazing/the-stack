@@ -3,7 +3,9 @@
     class="node-icon"
     crossorigin
     [src]="
-      data.node.tool.logo
+      data.node.tool.tag === 'customApp'
+      ? getAssetsFolder() + 'assets/images/mobileapp.png'
+      : data.node.tool.logo
         ? processImageSrc(data.node.tool.logo)
         : getAssetsFolder() + 'assets/images/layers.png'
     "

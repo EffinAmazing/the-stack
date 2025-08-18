@@ -89,6 +89,20 @@ exports.getDomainTool = async function(domain) {
     return tool;
 }
 
+exports.getAppTool = async function(app) {
+    
+    let tool = {
+            categories: ['CustomApp'],
+            name: app,
+            logo: '',
+            description: "CustomApp",
+            link: '',
+            tag: "customApp"
+        }
+
+    return tool;
+}
+
 exports.loadToolLogo = async function(name){
     let response = await axios({
         method: 'GET',

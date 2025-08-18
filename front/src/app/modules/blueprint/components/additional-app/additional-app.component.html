@@ -1,0 +1,13 @@
+<h1 mat-dialog-title> Add App  <button mat-icon-button class="close-button" [mat-dialog-close]><mat-icon>clear</mat-icon></button> </h1>
+<div mat-dialog-content>
+    <mat-form-field  class="input-full-width">
+        <mat-label>App name:</mat-label>
+        <input matInput (input)="handleInput($event)" cdkFocusInitial [disabled]="isProcced" />
+    </mat-form-field>
+    <mat-spinner *ngIf="isProcced" [diameter]="60"></mat-spinner>
+</div>
+<div mat-dialog-actions direction="right">
+    <button #cancelButton class="stack-button" (click)="onNoClick()"> <mat-icon>clear</mat-icon> Cancel</button> 
+    <div class="divider-buttons"></div>
+    <button class="stack-button" color="primary" (click)="proccedAddApp()" [disabled]="isProcced"> <mat-icon>add</mat-icon> Add App </button>
+</div>

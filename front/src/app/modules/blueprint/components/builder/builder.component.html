@@ -1,7 +1,8 @@
 <div>
     <div id="stackWorkflow" [ngClass]="{'stackWorkflow': true, 'drawingArrow': isDrawingArrow}" #stackWorkFlow (mousemove)="handleMouseMove($event)" 
       (click)="handleClickOnWorkspace()"
-      (mouseup)="handleMouseUp()" (mouselout)="handleMouseUp()">
+      (mouseup)="handleMouseUp()" 
+      (mouselout)="handleMouseUp()">
         <div class="for-svg-bg"></div>
         <svg #svgPaint id="paint"  width="1190" height="640">
           <defs>
@@ -20,21 +21,28 @@
               refY="6" 
               orient="auto-start-reverse" 
               markerUnits="userSpaceOnUse">
-                <path d="M2,0 L8,6 L2,12 L0,10 L4,6 L0,2 z" style="stroke-width: 1;z-index: 5;"></path>
+                <path d="M2,0 L8,6 L2,12 z" style="stroke-width: 1;z-index: 5;"></path>
               </marker>
           </defs>
         </svg>
-        <div *ngFor="let node of showNodes" [cdkDragDisabled]="disableTillDrawLine"  [ngClass]="{'toolNode': true, 'domain-tool': node.tool.tag === 'domain'}" [id]="'node-' + node.id"
+        <div *ngFor="let node of showNodes" [cdkDragDisabled]="disableTillDrawLine"  [ngClass]="{'toolNode': true, 'domain-tool': node.tool.tag === 'domain', 'custom-app-tool': node.tool.tag === 'customApp'}" [id]="'node-' + node.id"
           cdkDrag 
           cdkDragBoundary=".stackWorkflow"
           [cdkDragFreeDragPosition]="hasCoords(node.position)?node.position:{x: 0, y: 0}" 
           (cdkDragEnded)="relisedMove($event, node)"
-          (cdkDragMoved)="$event.event.stopPropagation();  handleNodeMove($event, node)"
-          (cdkDragStarted)="handleStartDrag($event, node)" >            
-
-            <img class="node-icon" crossorigin [src]="node.tool.logo?processImageSrc(node.tool.logo):getAssetsFolder() + 'assets/images/layers.png'"  />
+          (cdkDragMoved)="$event.event.stopPropagation();  handleNodeMove($event, node)"           
+          (cdkDragStarted)="handleStartDrag($event, node)" 
+          (mouseover)="handleNodeMouseover($event)" 
+          (mousedown)="handleNodeClick($event)">
+            <img class="node-icon" crossorigin [src]="
+                node.tool.tag === 'customApp'
+                  ? getAssetsFolder() + 'assets/images/mobileapp.png'
+                  : node.tool.logo
+                    ? processImageSrc(node.tool.logo)
+                    : getAssetsFolder() + 'assets/images/layers.png'
+              "  />
             {{ node.tool?.name }}
-            <button *ngIf="node.tool.tag !== 'domain'" mat-button class="icon-info-button"  (click)="handleClick(node)"><img [src]="getAssetsFolder() + 'assets/images/info.png'" /></button>
+            <button *ngIf="node.tool.tag !== 'domain' && node.tool.tag !== 'customApp'" mat-button class="icon-info-button"  (click)="handleClick(node)"><img [src]="getAssetsFolder() + 'assets/images/info.png'" /></button>
             <div class="pointers">
               <div class="pointer-Left" 
                 (click)="handleAddArrowClick($event, 'Left', node)"

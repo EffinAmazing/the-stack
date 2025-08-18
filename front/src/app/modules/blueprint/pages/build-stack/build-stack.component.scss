@@ -53,7 +53,7 @@
 
     .delete-arrow-action{
         background-color: #AA2211;
-        color: #ffffff;
+        color: #ffffff;        
     }
 
     .item-categories{
@@ -238,6 +238,137 @@
         display: none;
     }
 }
+.resetPointsIcon {
+    position: relative;
+}
+.resetPointsIcon mat-icon {
+    rotate: 40deg; 
+}
+.resetPointsIcon span {
+    display: block;
+    font-size: 12px;
+    position: absolute;
+    top: 26px;
+    line-height: 1;
+    width: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.stack-button.arrow-stack-button {    
+    display: flex;
+    font-size: 14px;
+    line-height: 1;
+    flex-direction: column;
+    padding: 0 5px;
+}
+
+.stack-button.history-stack-button {    
+    display: flex;
+    font-size: 14px;
+    line-height: 1;
+    flex-direction: column;    
+}
+
+.stack-button.arrow-stack-button span:nth-child(2),
+.stack-button.history-stack-button span:nth-child(2) {
+    padding-top: 6px;
+}
+
+
+.stack-button.position-arrow-action span {
+    width: 70px;
+}
+
+.stack-button.delete-arrow-action span {
+    width: 90px;
+}
+
+/*
+.stack-button.delete-arrow-action {
+    position: relative;
+    width: 100px;
+    min-height: 38px;
+}
+  
+
+.stack-button.delete-arrow-action span {
+    width: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+
+
+.stack-button.undo-action {
+    position: relative;
+    width: 50px;
+    min-height: 38px;
+}
+
+.stack-button.undo-action span {
+    font-size: 12px;
+    display: block;
+    font-size: 12px;
+    position: absolute;
+    top: 34px;
+    line-height: 1;
+    width: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.stack-button.redo-action {
+    position: relative;
+    width: 50px;
+    min-height: 38px;
+}
+
+.stack-button.redo-action span {
+    font-size: 12px;
+    display: block;
+    font-size: 12px;
+    position: absolute;
+    top: 34px;
+    line-height: 1;
+    width: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+
+
+.stack-button.position-arrow-action {
+    position: relative;
+}
+   
+
+.stack-button.position-arrow-action span:not(.arrowPositionIcon) {
+   
+    width: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+
+
+.stack-button.done-arrow-action {
+    position: relative;
+}
+
+.stack-button.done-arrow-action span {
+    font-size: 14px;
+    display: block;
+    font-size: 12px;
+    position: absolute;
+    top: 34px;
+    line-height: 1;
+    width: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+*/
+
 /* Custom style fix for overflow nodeDetails component */
 ::ng-deep .node-details-custom-wrapper .mat-dialog-container {
     padding-bottom: 0;

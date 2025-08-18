@@ -11,8 +11,10 @@ class ArrowsModel extends AbstaractModel {
         this.schema = mongoose.Schema({
             start: { nodeId: String, x: Number, y: Number, pos: String, offset: Number },
             end: { nodeId: String, x: Number, y: Number, pos: String, offset: Number },
+            controlPoints: [],
             lineId: String,
             blueprintId: ObjectId,
+            arrowPosition: String, //start,end,both
             created: { type: Date, default: Date.now },
             updated: { type: Date, default: Date.now}
         });
