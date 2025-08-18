@@ -25,18 +25,24 @@
               </marker>
           </defs>
         </svg>
-        <div *ngFor="let node of showNodes" [cdkDragDisabled]="disableTillDrawLine"  [ngClass]="{'toolNode': true, 'domain-tool': node.tool.tag === 'domain'}" [id]="'node-' + node.id"
+        <div *ngFor="let node of showNodes" [cdkDragDisabled]="disableTillDrawLine"  [ngClass]="{'toolNode': true, 'domain-tool': node.tool.tag === 'domain', 'custom-app-tool': node.tool.tag === 'customApp'}" [id]="'node-' + node.id"
           cdkDrag 
           cdkDragBoundary=".stackWorkflow"
           [cdkDragFreeDragPosition]="hasCoords(node.position)?node.position:{x: 0, y: 0}" 
           (cdkDragEnded)="relisedMove($event, node)"
-          (cdkDragMoved)="$event.event.stopPropagation();  handleNodeMove($event, node)"
+          (cdkDragMoved)="$event.event.stopPropagation();  handleNodeMove($event, node)"           
           (cdkDragStarted)="handleStartDrag($event, node)" 
           (mouseover)="handleNodeMouseover($event)" 
           (mousedown)="handleNodeClick($event)">
-            <img class="node-icon" crossorigin [src]="node.tool.logo?processImageSrc(node.tool.logo):getAssetsFolder() + 'assets/images/layers.png'"  />
+            <img class="node-icon" crossorigin [src]="
+                node.tool.tag === 'customApp'
+                  ? getAssetsFolder() + 'assets/images/mobileapp.png'
+                  : node.tool.logo
+                    ? processImageSrc(node.tool.logo)
+                    : getAssetsFolder() + 'assets/images/layers.png'
+              "  />
             {{ node.tool?.name }}
-            <button *ngIf="node.tool.tag !== 'domain'" mat-button class="icon-info-button"  (click)="handleClick(node)"><img [src]="getAssetsFolder() + 'assets/images/info.png'" /></button>
+            <button *ngIf="node.tool.tag !== 'domain' && node.tool.tag !== 'customApp'" mat-button class="icon-info-button"  (click)="handleClick(node)"><img [src]="getAssetsFolder() + 'assets/images/info.png'" /></button>
             <div class="pointers">
               <div class="pointer-Left" 
                 (click)="handleAddArrowClick($event, 'Left', node)"

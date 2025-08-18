@@ -313,6 +313,59 @@ class ToolsNodes {
         }
     }
 
+    addAppTool(req, res, next) {
+        const app = req.body.app;
+        const blueprintId = req.body.blueprintId;
+        console.log('addAppTool');
+
+        if (app || blueprintId) {
+            async.waterfall([
+                (cb)=>{
+                    console.log('cb')
+                    ToolsServices.getAppTool(app)
+                        .then((result)=>{  
+                            console.log('getAppTool',result);
+                            cb(null, result);
+                        })
+                        .catch((err) => {
+                            cb(err, null);
+                        })
+                }, (atool, cb) =>{
+                    console.log('atool');
+                    cb(null, [atool]);
+                }, (toolsList, cb) => {
+                    console.log('toolsList');
+                    this.tools.proceedTools(toolsList).then(pTools => {
+                        cb(null, pTools);
+                    }).catch(err => {
+                        cb(err, null);
+                    });
+                },(toolsList, cb) => {
+                    console.log('toolsList');
+                    this.model.filterToolsByNodes(blueprintId, toolsList, app).then(data=>{
+                        cb(null, data);
+                    }).catch(err=>{ cb(err, null); });
+                }
+            ], function(err, fulldata){
+                console.log('fulldata');
+                // 5. return data
+                if(err) {
+                    console.log(err);
+                    res.json({
+                        result: "Error",
+                        message: err.message
+                    });
+                } else {
+                    res.json({
+                        result: fulldata,
+                    });
+    
+                }
+            });
+
+        }
+    }
+
     addDomainTool(req, res, next) {
         const domain = req.body.domain;
         const blueprintId = req.body.blueprintId;

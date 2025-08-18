@@ -12,7 +12,13 @@
     <mat-list>
         <mat-list-item *ngFor="let toolItem of tools" [ngClass]="{'selected': isToolSlected(toolItem.id), 'is-already-in-stack': !!toolItem.nodeId}"  (click)="handleSelectTool(toolItem)">
             <mat-icon mat-list-icon><img class="logo-tool"
-                [src]="toolItem.logo?processImageSrc(toolItem.logo):getAssetsFolder() + 'assets/images/layers.png'"></mat-icon>
+                [src]="
+                    toolItem.tag === 'customApp'
+                      ? getAssetsFolder() + 'assets/images/custom-app.png'
+                      : toolItem.logo
+                        ? processImageSrc(toolItem.logo)
+                        : getAssetsFolder() + 'assets/images/layers.png'
+                  "></mat-icon>
             <div mat-line>{{toolItem.name}}</div>
             <div mat-line>{{toolItem.categories?.join(', ')}}</div>
         </mat-list-item>

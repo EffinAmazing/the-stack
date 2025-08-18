@@ -23,10 +23,12 @@
               <img
                 class="node-icon"
                 [src]="
-                  nodes[nodeId].tool.logo
-                    ? processImageSrc(nodes[nodeId].tool.logo)
-                    : getAssetsFolder() + 'assets/images/layers.png'
-                "
+                    nodes[nodeId].tool.tag === 'customApp'
+                      ? getAssetsFolder() + 'assets/images/mobileapp.png'
+                      : nodes[nodeId].tool.logo
+                        ? processImageSrc(nodes[nodeId].tool.logo)
+                        : getAssetsFolder() + 'assets/images/layers.png'
+                  "
               />
               {{ nodes[nodeId].tool.name }}
               <button

@@ -80,6 +80,8 @@ export class CreateCustomToolDialogComponent {
   public getImageUrl() {
     if (this.data.node && this.data.node.tool && this.data.node.tool.logo) {
       return host + this.data.node.tool.logo;
+    } else if (this.data.node && this.data.node.tool && this.data.node.tool.tag && this.data.node.tool.tag == 'customApp') {
+      return this.getAssetsFolder() + 'assets/images/mobileapp.png';
     } else {
       return this.getAssetsFolder() + 'assets/images/layers.png';
     }

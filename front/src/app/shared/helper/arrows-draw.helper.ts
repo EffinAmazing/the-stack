@@ -95,10 +95,11 @@ export class ArrowsHelper {
             // start
             arr.push(start);
 
-            // addoditional dot start;
-            //TODO add || isDragging
-            //IF you want to reset the control points while dragging a tool node
-            if (cpArr.length == 0) {
+            
+            if (cpArr.length == 0 || isDragging) { //isDragging means we reset middle control points
+
+                cpArr = []; //reset middle control points
+
                 if (StartPos === 'Left' || StartPos === 'Right') {
                     cpArr.push([start[0] + diffX * 0.35, start[1] + diffY * 0.15] );
                 } else {
@@ -121,7 +122,7 @@ export class ArrowsHelper {
         }                     
          
         let finalArr = [arr[0], ...cpArr, arr[1]]
-        //console.log('dots', finalArr);
+        console.log('dots', finalArr);
         return finalArr;
     }
 

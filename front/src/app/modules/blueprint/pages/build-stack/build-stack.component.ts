@@ -11,6 +11,7 @@ import { ShareUrlDialogComponent } from '../../components/share-url-dialog/share
 import { DeleteStackDialogComponent } from '../../components/delete-stack-dialog/delete-stack-dialog.component';
 import { CreateNewStackDialogComponent } from '../../components/create-new-stack-dialog/create-new-stack-dialog.component';
 import { AdditionalDomainComponent } from '../../components/additional-domain/additional-domain.component';
+import { AdditionalAppComponent } from '../../components/additional-app/additional-app.component';
 import { InfoPopupDialogComponent } from '../../components/info-popup-dialog/info-popup-dialog.component';
 import { AddNewToolDialogComponent } from '../../components/add-new-tool-dialog/add-new-tool-dialog.component';
 import { InviteDialogComponent } from '../../components/invite-dialog/invite-dialog.component';
@@ -59,6 +60,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   nodesForUpdate: any = [];
   selectedArrow: DrawArrow;
   domainsList: String[] = [];
+  appsList: String[] = [];
   hideList = true;
   loaded = false;
   domain = '';
@@ -205,6 +207,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
            // console.log(tool);
            this.domainsList.push(tool.name);
         }    
+        if (tool.tag && tool.tag === 'customApp') {
+           // console.log(tool);
+           this.appsList.push(tool.name);
+        }   
         if (this.globalHiddenTools.some(hiddenTool => hiddenTool.id === item.tool.id)) {
           item.hiddenGlobally = true;
         } else {
@@ -590,6 +596,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       hiddenTools: hiddenTools,
       categories: Object.keys(this.categories),
       domainsList: this.domainsList,
+      appsList: this.appsList,
       domain: this.domain,
       isError: this.isError,
       errMessageReturned: this.errMessageReturned
@@ -802,7 +809,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   public handleClickWorkspace(event) {
-    console.log('handleClickWorkspace');
+    console.log('handleClickWorkspace', event);
+    if (this.selectedArrow) this.handleDeselectArrow();
     //if (this.selectedArrow) this.handleDeselectArrow();
   }
 
@@ -1122,6 +1130,52 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       }
     });
   }
+
+public handleAddAdditionalApp() {
+  const dialogRef = this.deleteDialog.open(AdditionalAppComponent, {
+      width: '570px',
+      data: { blueprint: this.blueprint }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        //result is an app node
+
+        result.forEach(nodeItem => {
+
+          if (nodeItem.tool.tag && nodeItem.tool.tag === 'customApp') {
+              this.appsList.push(nodeItem.tool.name);
+              window['dataLayer'].push({
+                event: 'stackbuilder.app.add',
+                node: nodeItem,
+                tool: nodeItem.tool,
+              });
+            }
+
+            this.nodes[nodeItem.id] = nodeItem;
+            window['dataLayer'].push({
+              event: 'stackbuilder.node.loaded',
+              node: nodeItem,
+              tool: nodeItem.tool,
+            });
+
+            if (!nodeItem.hide) {
+              window['dataLayer'].push({
+                event: 'stackbuilder.node.added',
+                node: result,
+                tool: result.tool,
+                stack: this.blueprint
+              });
+            }
+
+          });
+
+          this.addedNewNode$.next(result);
+      }
+
+    });
+}
+
 
   public handleUpdateArrow(data) {
     if (!data.disableHistory) {  this.history.addAction(this.blueprint.id, { name: 'updateArrow', data: Object.assign({}, data) }); }
