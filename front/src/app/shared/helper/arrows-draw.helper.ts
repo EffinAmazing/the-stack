@@ -122,7 +122,7 @@ export class ArrowsHelper {
         }                     
          
         let finalArr = [arr[0], ...cpArr, arr[1]]
-        console.log('dots', finalArr);
+        //console.log('dots', finalArr);
         return finalArr;
     }
 
