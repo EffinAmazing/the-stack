@@ -277,6 +277,9 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             item.end.nodeId === result.action.data.nodeId );
             setTimeout(() => {
                 lines.forEach((item) => {
+                  //TODO
+                  //clear control points since we are doing undo position on a node?
+                  //edge case?
                   this.arrowHelper.updateExistedArrow(item, container);
                 });
               }, 100);
@@ -397,6 +400,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             });
             if (arrowLines) {
               const updatedLines = arrowLines.map(async (item) => {
+                item.controlPoints = []; //reset control points since we are moving node
                 this.arrowHelper.updateExistedArrow(item, container);
                 return this.arrowUpdated.emit({ newData: item, disableHistory: true });
               });
@@ -490,6 +494,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private addNewArrow(item) {
     //console.log('item',item);
+    
     this.listOfArrows.push(item);
     
     this.svgD3.append('path')
@@ -504,6 +509,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     .attr('marker-end', 'url(#arrow-marker)');
 
     //console.log('addNewArrow');
+    //console.log('list',this.listOfArrows);
 
     setTimeout(() => {
       this.addHandleSelectArrow(item.lineId);
@@ -706,6 +712,22 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedArrow = null;
   }
 
+  public updateControlPointPositionArrow(ArrowId: string): void {
+    const container = this.stackWorkFlow.nativeElement;
+    const line = document.querySelector(`path#${ArrowId}`);
+    const pathData = line.getAttribute('d');  
+    
+    let currentPathPoints = this.getPointsFromPath(pathData);
+
+    const control1 = currentPathPoints[1];
+    const control2 = currentPathPoints[2];
+
+    console.log(currentPathPoints);
+
+    document.getElementById('control1-' + this.selectedArrow.lineId).style.transform = `translate3d(${control1.x - 25}px, ${control1.y - 25}px, 0px)`;
+    document.getElementById('control2-' + this.selectedArrow.lineId).style.transform = `translate3d(${control2.x - 25}px, ${control2.y - 25}px, 0px)`; 
+  }
+  
   public updatePointPositionArrow(ArrowId: string): void {
 
     //TODO
@@ -762,6 +784,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
           if (c2) { c2.remove(); }          
       }  
       
+      //console.log('list',this.listOfArrows);
 
       this.selectedArrow = this.listOfArrows.find((arrow) => arrow.lineId === ArrowId);
 
@@ -772,6 +795,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       //console.log('ArrowId',ArrowId);
       //console.log('selectedArrow',this.selectedArrow);
+
+      
 
       // Extract path start and end points from the path data
       const pathData = line.getAttribute('d');
@@ -793,11 +818,13 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       //console.log('control1,control2',control1,control2,this.selectedArrow.controlPoints);
 
+      /*
       if (!this.selectedArrow.controlPoints || this.selectedArrow.controlPoints.length == 0) {
         if (!this.selectedArrow.controlPoints) this.selectedArrow.controlPoints = [];
         this.selectedArrow.controlPoints.push(control1);
         this.selectedArrow.controlPoints.push(control2);
       }
+        */
       
 
       // 1. Add start dot
@@ -1073,6 +1100,8 @@ private getPointsFromPath(pathData) {
       const dot = container.querySelector('#dot-' + node.id) as HTMLElement;
 
       this.connectedLines.forEach((item) => {
+        console.log('reset', item);
+        item.controlPoints = []; //reset control points since we are moving node
         this.arrowHelper.updateExistedArrow(item, container,this.isMoving);
         if (dot && dot.dataset.line === item.lineId) {
           const pos = dot.dataset.position;
@@ -1201,6 +1230,8 @@ private getPointsFromPath(pathData) {
           this.selectedArrow[position].offset = data.offset;
           this.arrowHelper.updateExistedArrow(this.selectedArrow);
           this.dotForDrag.style.transform = `translate3d(${data.pointer.x - 20}px, ${data.pointer.y - 20}px, 0px)`;
+
+          this.updateControlPointPositionArrow(this.selectedArrow.lineId);
         } else if (position === 'control1' || position === 'control2') {
           //control point   
           const rectContainer = container.getBoundingClientRect();
