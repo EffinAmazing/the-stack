@@ -1,8 +1,13 @@
-<div>
-    <div id="stackWorkflow" [ngClass]="{'stackWorkflow': true, 'drawingArrow': isDrawingArrow}" #stackWorkFlow (mousemove)="handleMouseMove($event)" 
-      (click)="handleClickOnWorkspace()"
-      (mouseup)="handleMouseUp()" 
-      (mouselout)="handleMouseUp()">
+<div id="stackWorkflowWrapper" class="stackWorkflowWrapper">
+    <div id="stackWorkflow" 
+          [ngClass]="{'stackWorkflow': true, 'drawingArrow': isDrawingArrow}" 
+          #stackWorkFlow 
+          (mousemove)="handleMouseMove($event)" 
+          (click)="handleClickOnWorkspace()"
+          (mouseup)="handleMouseUp()" 
+          (mouselout)="handleMouseUp()"
+          [style.transform]="'translate(' + cameraOffset.x + 'px,' + cameraOffset.y + 'px) scale(' + zoomLevel + ')'"
+    >
         <div class="for-svg-bg"></div>
         <svg #svgPaint id="paint"  width="1190" height="640">
           <defs>

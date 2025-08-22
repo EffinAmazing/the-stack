@@ -91,6 +91,9 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   gridSubscription: Subscription;
   snapSubscription: Subscription;
   globalHiddenTools: Tool[] = [];
+  cameraOffset: Pointer = { x: 0, y: 0 };
+  zoomLevel: number = 1;
+
 
   constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) {  }
 
@@ -1399,7 +1402,58 @@ private getPointsFromPath(pathData) {
   }
 
   ngAfterViewInit() {
+    let isMiddleMouseDown = false;
+    let lastX = 0;
+    let lastY = 0;
+
     const container = this.stackWorkFlow.nativeElement;
+
+    //Zoom control
+    container.addEventListener('wheel', (event: WheelEvent) => {
+      if (event.ctrlKey) {
+        event.preventDefault();
+        const delta = Math.sign(event.deltaY); // 1 or -1
+        const zoomFactor = 0.1;
+
+        const newZoom = this.zoomLevel - delta * zoomFactor;
+        
+
+        this.zoomLevel = Math.min(2, Math.max(0.25, newZoom)); // clamp between 0.25x and 2x
+
+        this.arrowHelper.setZoomLevel(this.zoomLevel);
+      }
+    }, { passive: false });
+
+    //TODO
+    //This conflicts with drag/select, need to integrate there instead
+    container.addEventListener('mousedown', (event: MouseEvent) => {
+      if (event.button === 1) { // Middle mouse
+        event.preventDefault();
+        isMiddleMouseDown = true;
+        lastX = event.clientX;
+        lastY = event.clientY;
+      }
+    });
+
+    window.addEventListener('mousemove', (event: MouseEvent) => {
+      if (!isMiddleMouseDown) return;
+
+      const dx = event.clientX - lastX;
+      const dy = event.clientY - lastY;
+
+      this.cameraOffset.x += dx;
+      this.cameraOffset.y += dy;
+
+      lastX = event.clientX;
+      lastY = event.clientY;
+    });
+
+    window.addEventListener('mouseup', (event: MouseEvent) => {
+      if (event.button === 1) {
+        isMiddleMouseDown = false;
+      }
+    });
+
     this.svgPaint.nativeElement.addEventListener('mousedown', (evt) => {
       // console.log(evt.target['id']);
       if ((evt.target === evt.currentTarget) || evt.target['id'] === 'builder_grid_rect') {

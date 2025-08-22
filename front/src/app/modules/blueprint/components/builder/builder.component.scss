@@ -1,13 +1,18 @@
+.stackWorkflowWrapper {
+    overflow: hidden;
+    border: 1px solid #eee;
+    background-color: #efefef;
+}
 .stackWorkflow {
     position: relative;
     border-radius: 3px;
     -webkit-transition: .3s;
     transition: .3s;
     padding: 20px 20px;
-    width: 1170px;
+    width: 4000px; //original, 1170
     margin-bottom: 20px;
     background-color: #fff;
-    height: 660px;
+    height: 3000px; //original, 660
     overflow: hidden;
     box-sizing: border-box;
 }

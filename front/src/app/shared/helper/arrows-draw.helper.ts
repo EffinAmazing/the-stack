@@ -12,9 +12,15 @@ const offsetContainer = 0;
 export class ArrowsHelper {
     private SVG: any;
     public lineGenerator: any;
+    public zoomLevel = 1;
+
 
     constructor() {
         this.lineGenerator = d3.line().curve(d3.curveCardinal);
+    }
+
+    public setZoomLevel(zoom: number) {
+        this.zoomLevel = zoom;
     }
 
     public initSvg(selector: string): any {
@@ -214,7 +220,10 @@ export class ArrowsHelper {
             pos.y += dotRadius;
         }
 
-        return pos;
+        return {
+            x: pos.x / this.zoomLevel,
+            y: pos.y / this.zoomLevel
+        };
     }
 
     public getArrowPointer(
@@ -254,7 +263,13 @@ export class ArrowsHelper {
                 offset = Math.floor( (cursorPointer.x - pos.x) / rect.width * 100);
             }
         }
-        return  { pointer: dotPointer, offset };
+        return {
+            pointer: {
+                x: dotPointer.x / this.zoomLevel,
+                y: dotPointer.y / this.zoomLevel
+            },
+            offset
+            };
     }
 
     public updateExistedArrow(arrow: DrawArrow, container?: HTMLElement, isDragging?: boolean): void {
@@ -298,13 +313,23 @@ export class ArrowsHelper {
     }
 
     public updateExistedArrowBezier(arrow: DrawArrow, container: HTMLElement, ctrlX: Number, ctrlY: Number, bezCtrl: String, currentPathPoints: any[]): void {
-        //console.log(arrow, ctrlX, ctrlY, bezCtrl, currentPathPoints);
-        //console.log('currentPathPoints', currentPathPoints);
-
-        //TODO
-        //pass control points
+        const scaledStart = [arrow.start.x / this.zoomLevel, arrow.start.y / this.zoomLevel];
+        const scaledEnd = [arrow.end.x / this.zoomLevel, arrow.end.y / this.zoomLevel];
+        const scaledCtrlX = Number(ctrlX) / this.zoomLevel;
+        const scaledCtrlY = Number(ctrlY) / this.zoomLevel;
+        const scaledCurrentPathPoints = currentPathPoints.map(p => ({
+            x: p.x / this.zoomLevel,
+            y: p.y / this.zoomLevel
+        }));
         
-        const dots = this.generateDotsWithBez([arrow.start.x, arrow.start.y], [arrow.end.x, arrow.end.y], ctrlX, ctrlY, bezCtrl, currentPathPoints);
+        const dots = this.generateDotsWithBez(
+            scaledStart,
+            scaledEnd,
+            scaledCtrlX,
+            scaledCtrlY,
+            bezCtrl,
+            scaledCurrentPathPoints
+        );
         this.SVG.select(`path#${arrow.lineId}`)
             .attr('d', this.lineGenerator(dots));
     }
