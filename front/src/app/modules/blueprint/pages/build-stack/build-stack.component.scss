@@ -373,3 +373,9 @@
 ::ng-deep .node-details-custom-wrapper .mat-dialog-container {
     padding-bottom: 0;
 }
+
+::ng-deep #addMenu .mat-menu-item.cdk-focused,
+::ng-deep #addMenu .mat-menu-item.cdk-program-focused,
+::ng-deep #addMenu .mat-menu-item:hover {
+  color: black !important;
+}
