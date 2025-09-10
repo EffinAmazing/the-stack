@@ -29,6 +29,7 @@ import { environment } from 'src/environments/environment';
 import { DrawArrow } from 'src/app/shared/models/draws-item';
 import { ArrowsHelper } from '../../../../shared/helper/arrows-draw.helper';
 import { BuilderComponent } from '../../components/builder/builder.component';
+import { toBlob } from 'html-to-image';
 
 const maxNewVisibleItems = 40;
 
@@ -1279,5 +1280,95 @@ public handleAddAdditionalApp() {
       this.stackRequest.unsubscribe();
     }
   }
+
+  /* Image Export support */
+
+    // Hide transient UI inside the export root while capturing
+  private toggleEphemeral(root: HTMLElement, hide: boolean) {
+    const cls = 'export-hide';
+    if (hide) root.classList.add(cls);
+    else root.classList.remove(cls);
+  }
+
+  private downloadBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Main API. type = 'png' | 'jpeg'. scale is DPR multiplier.
+  public async exportStackSnapshot(type: 'png'|'jpeg' = 'png', scale = 2) {
+    // The element you want to capture lives in <app-builder>. It renders #stackWorkflow.
+    const el = document.querySelector('#stackWorkflow') as HTMLElement;
+    if (!el) {
+      console.error('exportStackSnapshot: #stackWorkflow not found');
+      alert('Unable to find the stack surface to export.');
+      return;
+    }
+
+    
+
+    // Hide drag handles, selection boxes, and hover affordances while exporting
+    this.toggleEphemeral(el, true);
+
+    try {
+      // For JPEG we must set a solid background
+      const W = 1170, H = 660;
+      const backgroundColor = type === 'jpeg' ? '#ffffff' : undefined;
+
+      // Try html-to-image first. It is more robust across complex DOM + SVG mixes.
+      const blob = await toBlob(el, {
+        pixelRatio: 1,
+        width: W,
+        height: H,        
+        backgroundColor,                 // only if JPEG
+        cacheBust: true,
+        // If you have custom fonts, keep this false so it inlines properly
+        //skipFonts: false,
+      });
+
+      if (!blob) throw new Error('html-to-image returned null');
+
+      this.downloadBlob(blob, `${this.domain}-${new Date().toISOString()}-StackBuilder-Export.${type}`);
+    } catch (err) {
+      // Fallback to html2canvas if canvas gets tainted or serialization fails
+      console.warn('html-to-image failed. Falling back to html2canvas.', err);
+      try {
+        const canvas = await html2canvas(el, {
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true,
+          useCORS: true,
+          // Scale to get sharper output
+          scale,
+          // Ensure full element is captured even if scrolled
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: document.documentElement.clientWidth,
+          windowHeight: document.documentElement.clientHeight,
+        });
+
+        const blob: Blob | null = await new Promise((resolve) =>
+          canvas.toBlob(
+            b => resolve(b),
+            type === 'png' ? 'image/png' : 'image/jpeg',
+            type === 'jpeg' ? 0.92 : undefined // quality for JPEG
+          )
+        );
+
+        if (!blob) throw new Error('html2canvas toBlob failed');
+        this.downloadBlob(blob, `${this.domain}-${new Date().toISOString()}-StackBuilder-Export.${type}`);
+      } catch (fallbackErr) {
+        console.error('Both html-to-image and html2canvas failed', fallbackErr);
+        alert('Export failed. If this persists, use the server export path.');
+      }
+    } finally {
+      this.toggleEphemeral(el, false);
+    }
+  }
+
 
 }

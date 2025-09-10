@@ -153,6 +153,13 @@
             <button *ngIf="authUser" class="stack-button" color="primary" (click)="handleClickInviteUser()"> <mat-icon>person_add</mat-icon> Invite users </button>
             <div *ngIf="authUser" class="divider-buttons"></div>
             <button *ngIf="authUser" class="stack-button" (click)="removeStack()"> <mat-icon>delete</mat-icon> Delete stack </button>
+          
+          
+            <div class="divider-buttons"></div>
+            <button class="stack-button" (click)="exportStackSnapshot('png', 2)">
+              <mat-icon>download</mat-icon> Export to Image
+            </button>         
+          
           </div>
         </div>
       </div>
