@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
 import { MatDialog } from '@angular/material/dialog';
 import { NodeDetailsComponent } from '../node-details/node-details.component';
@@ -40,7 +40,7 @@ export class ToolsListComponent implements OnInit {
   isUserAdmin: Boolean;
   globalHiddenTools: Tool[] = [];
 
-  constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService, private cdr: ChangeDetectorRef) { }
+  constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) { }
 
   ngOnInit(): void {
     const user = this.auth.getCurrentUser();
@@ -101,8 +101,6 @@ export class ToolsListComponent implements OnInit {
         }
       });
 
-      // 3. Force Angular to detect changes so all new subcomponents render
-      this.cdr.detectChanges();
 
       // 4. Recalculate costs for any categories that changed
       if (categoriesChanged) {
