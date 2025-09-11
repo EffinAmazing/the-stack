@@ -29,6 +29,7 @@ import { environment } from 'src/environments/environment';
 import { DrawArrow } from 'src/app/shared/models/draws-item';
 import { ArrowsHelper } from '../../../../shared/helper/arrows-draw.helper';
 import { BuilderComponent } from '../../components/builder/builder.component';
+import { ToolsListComponent } from '../../components/tools-list/tools-list.component';
 
 const maxNewVisibleItems = 40;
 
@@ -41,6 +42,7 @@ const maxNewVisibleItems = 40;
 export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeactivate {
   @ViewChild('categoriesList') categoriesList: ElementRef;
   @ViewChild(BuilderComponent) builderComponent!: BuilderComponent;
+  @ViewChild(ToolsListComponent) toolsListComponent: ToolsListComponent;
   id: string | null = null;
   blueprint: BluePrint;
   nodes: BluePrintTool[] = [];
@@ -812,7 +814,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   public handleClickWorkspace(event) {
-    console.log('handleClickWorkspace', event);
+    //console.log('handleClickWorkspace', event);
     if (this.selectedArrow) this.handleDeselectArrow();
     //if (this.selectedArrow) this.handleDeselectArrow();
   }
@@ -847,7 +849,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
           this.proceedAddNewNodes(listToCreate, listToUnhide, result).then(nodes => {
             if (nodes.length) {
               this.addedNewNode$.next(nodes);
-            }
+            }            
           }).catch(err => console.log(err));
 
 
@@ -892,9 +894,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     let nodes = [];
     let unhideNodes = [];
 
-    //TODO
     //check if any node in this list is already unhidden. if so, remove it from listToUnhide and add to listToCreate
-    /*if (listToUnhide.length) {       
+    if (listToUnhide.length) {       
       let processingArray = [];
       listToUnhide.forEach(tool_id => {
         if (this.nodes[tool_id] && !this.nodes[tool_id].hide) {
@@ -911,7 +912,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       });
 
       listToUnhide = [...processingArray];      
-    }*/
+    }
 
     if (listToCreate.length) {
       nodes = await this.service.addNewNodeItems(listToCreate).toPromise();
@@ -948,6 +949,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       });
       console.log(unhideNodes, res);
     }
+
+    //if (this.toolsListComponent) {
+    //  this.toolsListComponent.reload();
+    //}
 
     return [...nodes, ...unhideNodes];
   }

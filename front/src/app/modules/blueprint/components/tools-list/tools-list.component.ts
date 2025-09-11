@@ -1,11 +1,11 @@
-import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
 import { MatDialog } from '@angular/material/dialog';
 import { NodeDetailsComponent } from '../node-details/node-details.component';
 import { hiddenCategories, WhitelistCategories } from '../../../../core/config';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/services/auth.service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ConfirmActionDialogComponent } from '../../../../shared/components/confirm-action-dialog/confirm-action-dialog.component';
 
 const host = environment.serverURI;
@@ -40,7 +40,7 @@ export class ToolsListComponent implements OnInit {
   isUserAdmin: Boolean;
   globalHiddenTools: Tool[] = [];
 
-  constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) { }
+  constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     const user = this.auth.getCurrentUser();
@@ -63,32 +63,57 @@ export class ToolsListComponent implements OnInit {
     });
 
     this.addedNewNode.subscribe((nodes) => {
-      if (nodes) {
-        nodes.forEach(item => {
-          if (this.nodes[item.id]) {
-            this.nodes.hide = false;
-          } else {
-            this.nodes[item.id] = item;
-            if (item.tool.categories && item.tool.categories.length) {
-              item.tool.categories.forEach((cat) => {
-                const index = this.categoriesList.findIndex(ctItem => ctItem.name === cat);
-                if (index !== -1) {
-                  this.categoriesList[index].nodes.push(item.id);
-                } else {
-                  this.categoriesList.push({
-                    name: cat,
-                    nodes: [item.id],
-                    cost: 0,
-                    needToBeCollapsed: false
-                  });
-                }
+      if (!nodes || !nodes.length) return;
+
+      let categoriesChanged = false;
+
+      nodes.forEach(item => {
+        // 1. Ensure node exists in nodes
+        if (!this.nodes[item.id]) {
+          this.nodes[item.id] = item;
+
+          // Initialize editStates for the new node
+          this.editStates[item.id] = { start: false, end: false, cost: false, owner: false };
+        } else {
+          // If node was already loaded, make sure it's visible
+          this.nodes[item.id].hide = false;
+        }
+
+        // 2. Update categoriesList
+        if (item.tool.categories && item.tool.categories.length) {
+          item.tool.categories.forEach(cat => {
+            const index = this.categoriesList.findIndex(ctItem => ctItem.name === cat);
+            if (index !== -1) {
+              if (!this.categoriesList[index].nodes.includes(item.id)) {
+                this.categoriesList[index].nodes.push(item.id);
+                categoriesChanged = true;
+              }
+            } else {
+              this.categoriesList.push({
+                name: cat,
+                nodes: [item.id],
+                cost: 0,
+                needToBeCollapsed: false
               });
+              categoriesChanged = true;
             }
-            this.editStates[item.id] = { start: false, end: false, cost: false, owner: false };
-          }
-        });
+          });
+        }
+      });
+
+      // 3. Force Angular to detect changes so all new subcomponents render
+      this.cdr.detectChanges();
+
+      // 4. Recalculate costs for any categories that changed
+      if (categoriesChanged) {
+        this.categoriesList.forEach(cat => this.reculcCategoryCost(cat.name));
       }
+
+      // 5. Recalculate total cost
+      this.reculcAllCost();
     });
+
+
 
     const checkIsAdded: {[key: string]: boolean} = { };
 
@@ -380,7 +405,7 @@ export class ToolsListComponent implements OnInit {
 
 
   
-
+  
   
 
   public close() {
