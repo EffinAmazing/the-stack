@@ -63,6 +63,7 @@ export class ToolsListComponent implements OnInit {
     });
 
     this.addedNewNode.subscribe((nodes) => {
+      console.log('addedNodes', nodes)
       if (!nodes || !nodes.length) return;
 
       let categoriesChanged = false;
@@ -81,47 +82,47 @@ export class ToolsListComponent implements OnInit {
         this.editStates[item.id] = { start: false, end: false, cost: false, owner: false };
 
         // Update categoriesList
-        if (item.tool.categories && item.tool.categories.length) {
-          item.tool.categories.forEach(cat => {
-            const index = this.categoriesList.findIndex(ctItem => ctItem.name === cat);
-            if (index !== -1) {
-              if (!this.categoriesList[index].nodes.includes(item.id)) {
-                const nodesArr = this.categoriesList[index].nodes;
-                const newId = item.id;
-                const newName = item.tool?.name || '';
+        // Update categoriesList
+        const nodeCategories = (item.tool.categories && item.tool.categories.length) 
+          ? item.tool.categories 
+          : ['None'];
 
-                // find the LAST index whose node's tool.name matches newName
-                let lastMatchIndex = -1;
-                for (let i = nodesArr.length - 1; i >= 0; i--) {
-                  const existingNode = this.nodes[nodesArr[i]];
-                  if (existingNode?.tool?.name === newName) {
-                    lastMatchIndex = i;
-                    break;
-                  }
+        nodeCategories.forEach(cat => {
+          const index = this.categoriesList.findIndex(ctItem => ctItem.name === cat);
+          if (index !== -1) {
+            if (!this.categoriesList[index].nodes.includes(item.id)) {
+              const nodesArr = this.categoriesList[index].nodes;
+              const newId = item.id;
+              const newName = item.tool?.name || '';
+
+              // find the LAST index whose node's tool.name matches newName
+              let lastMatchIndex = -1;
+              for (let i = nodesArr.length - 1; i >= 0; i--) {
+                const existingNode = this.nodes[nodesArr[i]];
+                if (existingNode?.tool?.name === newName) {
+                  lastMatchIndex = i;
+                  break;
                 }
-
-                if (lastMatchIndex === -1) {
-                  // no match found — push to end
-                  nodesArr.push(newId);
-                } else {
-                  // insert AFTER the last matching item
-                  nodesArr.splice(lastMatchIndex + 1, 0, newId);
-                }
-
-                categoriesChanged = true;
               }
-            } else {
-              this.categoriesList.push({
-                name: cat,
-                nodes: [item.id],
-                cost: 0,
-                needToBeCollapsed: false
-              });
-              
+
+              if (lastMatchIndex === -1) {
+                nodesArr.push(newId);
+              } else {
+                nodesArr.splice(lastMatchIndex + 1, 0, newId);
+              }
+
               categoriesChanged = true;
             }
-          });
-        }
+          } else {
+            this.categoriesList.push({
+              name: cat,
+              nodes: [item.id],
+              cost: 0,
+              needToBeCollapsed: cat !== 'None' && hiddenCategories.includes(cat)
+            });
+            categoriesChanged = true;
+          }
+        });
       });
 
       
@@ -141,6 +142,7 @@ export class ToolsListComponent implements OnInit {
     const checkIsAdded: {[key: string]: boolean} = { };
 
     this.loadedCategories.subscribe((data) => {
+      console.log('cats',data);
       const categories = Object.keys(data);
       const collapsedArray = [];
       const whitelist = [];
