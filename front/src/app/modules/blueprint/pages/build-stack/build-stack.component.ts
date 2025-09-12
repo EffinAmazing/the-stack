@@ -826,22 +826,31 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log(result);
+      console.log('res',result);
       const listToCreate = [];
       const listToUnhide = [];
       if (result) {
         if (typeof result === 'object') {
           for (const key in result) {
             if (result.hasOwnProperty(key)) {
-              if (!result[key].nodeId) {
-                listToCreate.push({
-                    blueprintId: this.blueprint.id,
-                    toolId: result[key].id,
-                    hide: false,
-                    dependencies: []
-                });
+              const item = result[key];
+
+              // Find all hidden nodes of this tool type
+              const hiddenNodes = Object.values(this.nodes)
+                .filter(node => node.toolId === item.id && node.hide)
+                .map(node => node.id);
+
+              if (hiddenNodes.length > 0) {
+                // Unhide all existing hidden nodes
+                listToUnhide.push(...hiddenNodes);
               } else {
-                listToUnhide.push(result[key].nodeId);
+                // No hidden nodes, create a new one
+                listToCreate.push({
+                  blueprintId: this.blueprint.id,
+                  toolId: item.id,
+                  hide: false,
+                  dependencies: []
+                });
               }
             }
           }
@@ -890,7 +899,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   async proceedAddNewNodes(listToCreate, listToUnhide, tools) {
-    console.log(listToCreate, listToUnhide, tools);
+    console.log('data', listToCreate, listToUnhide, tools);
     let nodes = [];
     let unhideNodes = [];
 
@@ -901,9 +910,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
         if (this.nodes[tool_id] && !this.nodes[tool_id].hide) {
           console.log('tool exists and unhidden');
           console.log(this.nodes[tool_id]);
-          let clonedTool = this.nodes[tool_id];
-          clonedTool.position.x = 0;
-          clonedTool.position.y = 600;
+          let clonedTool = { 
+            ...this.nodes[tool_id],                 // copy all top-level properties
+            position: { ...this.nodes[tool_id].position, x: 0, y: 600 } // copy position and override x/y
+          };
           listToCreate.push(clonedTool);
         } else if (this.nodes[tool_id] && this.nodes[tool_id].hide) {
           console.log('tool exists and hidden');

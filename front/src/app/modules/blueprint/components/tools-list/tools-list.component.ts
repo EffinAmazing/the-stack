@@ -58,7 +58,7 @@ export class ToolsListComponent implements OnInit {
         if (data.nodes.hasOwnProperty(key)) {
           this.editStates[data.nodes[key].id] = { start: false, end: false, cost: false, owner: false };
         }
-      }
+      }      
 
     });
 
@@ -68,24 +68,46 @@ export class ToolsListComponent implements OnInit {
       let categoriesChanged = false;
 
       nodes.forEach(item => {
-        // 1. Ensure node exists in nodes
-        if (!this.nodes[item.id]) {
-          this.nodes[item.id] = item;
 
-          // Initialize editStates for the new node
-          this.editStates[item.id] = { start: false, end: false, cost: false, owner: false };
+        // Ensure node exists in nodes
+        if (!this.nodes[item.id]) {
+          this.nodes[item.id] = item;          
         } else {
           // If node was already loaded, make sure it's visible
           this.nodes[item.id].hide = false;
         }
 
-        // 2. Update categoriesList
+        // Initialize editStates for the new node
+        this.editStates[item.id] = { start: false, end: false, cost: false, owner: false };
+
+        // Update categoriesList
         if (item.tool.categories && item.tool.categories.length) {
           item.tool.categories.forEach(cat => {
             const index = this.categoriesList.findIndex(ctItem => ctItem.name === cat);
             if (index !== -1) {
               if (!this.categoriesList[index].nodes.includes(item.id)) {
-                this.categoriesList[index].nodes.push(item.id);
+                const nodesArr = this.categoriesList[index].nodes;
+                const newId = item.id;
+                const newName = item.tool?.name || '';
+
+                // find the LAST index whose node's tool.name matches newName
+                let lastMatchIndex = -1;
+                for (let i = nodesArr.length - 1; i >= 0; i--) {
+                  const existingNode = this.nodes[nodesArr[i]];
+                  if (existingNode?.tool?.name === newName) {
+                    lastMatchIndex = i;
+                    break;
+                  }
+                }
+
+                if (lastMatchIndex === -1) {
+                  // no match found — push to end
+                  nodesArr.push(newId);
+                } else {
+                  // insert AFTER the last matching item
+                  nodesArr.splice(lastMatchIndex + 1, 0, newId);
+                }
+
                 categoriesChanged = true;
               }
             } else {
@@ -95,11 +117,14 @@ export class ToolsListComponent implements OnInit {
                 cost: 0,
                 needToBeCollapsed: false
               });
+              
               categoriesChanged = true;
             }
           });
         }
       });
+
+      
 
 
       // 4. Recalculate costs for any categories that changed
@@ -129,6 +154,8 @@ export class ToolsListComponent implements OnInit {
           cost: 0,
           needToBeCollapsed
         };
+
+        this.sortCategoryNodes(item.nodes);
 
         let catCost = 0;
         data[iterator].forEach(nodeId => {
@@ -180,6 +207,14 @@ export class ToolsListComponent implements OnInit {
       }
     });
 
+  }
+
+  private sortCategoryNodes(nodesArr: string[]): void {
+    nodesArr.sort((a, b) => {
+      const nameA = this.nodes[a]?.tool?.name?.toLowerCase() || '';
+      const nameB = this.nodes[b]?.tool?.name?.toLowerCase() || '';
+      return nameA.localeCompare(nameB);
+    });
   }
 
   public handleClickToEdit(nodeId: string, field: string) {
