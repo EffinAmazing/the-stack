@@ -1,18 +1,55 @@
 <h2 mat-dialog-title>Share This Stack</h2>
 
 <mat-dialog-content>
+
+  <!-- Loading state -->
+  <div class="loading-data-section" *ngIf="!loaded && !isError">
+    <mat-spinner></mat-spinner>
+    <p class="loading-message">Loading Stack Image...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-loading-alert" *ngIf="loaded && isError">
+    <mat-icon color="warn">warning</mat-icon>
+    <p class="error-message">Failed to create preview image.</p>
+  </div>
+
+  <!-- Preview image, sits ABOVE the URL input -->
+  <div class="preview" *ngIf="loaded && !isError">
+    <div class="image-wrapper">
+      <img
+        [src]="imageSafeUrl"
+        alt="Stack preview"
+        class="preview-image"
+        decoding="async"
+      />
+      <button
+          mat-icon-button
+          class="download-btn"
+          (click)="downloadImage()"
+          aria-label="Download PNG"
+          matTooltip="Download PNG"
+        >
+          <mat-icon>download</mat-icon>
+        </button>
+      </div>
+  </div>
+
+  <!-- URL input -->
   <mat-form-field appearance="fill" style="width: 100%;">
     <mat-label>Shareable URL</mat-label>
-    <input matInput [value]="url" readonly>
+    <input matInput [value]="url" readonly (click)="$event.target.select()" />
   </mat-form-field>
 
-  <!-- Show Copied message -->
+  <!-- Copied message -->
   <div *ngIf="copied" style="margin-top: 8px; color: green;">
     Copied!
   </div>
+
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button class="stack-button" (click)="close()" [disabled]="copied">Cancel</button>
-  <button mat-flat-button class="stack-button" color="primary" (click)="copyUrl()" [disabled]="copied">Copy</button>
+  <button mat-flat-button class="stack-button" color="primary" (click)="copyUrl()" [disabled]="copied">Copy Share URL</button>
+  <button mat-flat-button class="stack-button" color="secondary" (click)="downloadImage()">Download Image</button>
 </mat-dialog-actions>
