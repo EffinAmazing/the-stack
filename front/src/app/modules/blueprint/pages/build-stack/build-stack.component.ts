@@ -29,6 +29,7 @@ import { environment } from 'src/environments/environment';
 import { DrawArrow } from 'src/app/shared/models/draws-item';
 import { ArrowsHelper } from '../../../../shared/helper/arrows-draw.helper';
 import { BuilderComponent } from '../../components/builder/builder.component';
+import { ToolsListComponent } from '../../components/tools-list/tools-list.component';
 import { toBlob } from 'html-to-image';
 
 const maxNewVisibleItems = 40;
@@ -42,6 +43,7 @@ const maxNewVisibleItems = 40;
 export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeactivate {
   @ViewChild('categoriesList') categoriesList: ElementRef;
   @ViewChild(BuilderComponent) builderComponent!: BuilderComponent;
+  @ViewChild(ToolsListComponent) toolsListComponent: ToolsListComponent;
   id: string | null = null;
   blueprint: BluePrint;
   nodes: BluePrintTool[] = [];
@@ -814,7 +816,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   public handleClickWorkspace(event) {
-    console.log('handleClickWorkspace', event);
+    //console.log('handleClickWorkspace', event);
     if (this.selectedArrow) this.handleDeselectArrow();
     //if (this.selectedArrow) this.handleDeselectArrow();
   }
@@ -826,22 +828,31 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log(result);
+      console.log('res',result);
       const listToCreate = [];
       const listToUnhide = [];
       if (result) {
         if (typeof result === 'object') {
           for (const key in result) {
             if (result.hasOwnProperty(key)) {
-              if (!result[key].nodeId) {
-                listToCreate.push({
-                    blueprintId: this.blueprint.id,
-                    toolId: result[key].id,
-                    hide: false,
-                    dependencies: []
-                });
+              const item = result[key];
+
+              // Find all hidden nodes of this tool type
+              const hiddenNodes = Object.values(this.nodes)
+                .filter(node => node.toolId === item.id && node.hide)
+                .map(node => node.id);
+
+              if (hiddenNodes.length > 0) {
+                // Unhide all existing hidden nodes
+                listToUnhide.push(...hiddenNodes);
               } else {
-                listToUnhide.push(result[key].nodeId);
+                // No hidden nodes, create a new one
+                listToCreate.push({
+                  blueprintId: this.blueprint.id,
+                  toolId: item.id,
+                  hide: false,
+                  dependencies: []
+                });
               }
             }
           }
@@ -849,7 +860,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
           this.proceedAddNewNodes(listToCreate, listToUnhide, result).then(nodes => {
             if (nodes.length) {
               this.addedNewNode$.next(nodes);
-            }
+            }            
           }).catch(err => console.log(err));
 
 
@@ -890,21 +901,21 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   async proceedAddNewNodes(listToCreate, listToUnhide, tools) {
-    console.log(listToCreate, listToUnhide, tools);
+    console.log('data', listToCreate, listToUnhide, tools);
     let nodes = [];
     let unhideNodes = [];
 
-    //TODO
     //check if any node in this list is already unhidden. if so, remove it from listToUnhide and add to listToCreate
-    /*if (listToUnhide.length) {       
+    if (listToUnhide.length) {       
       let processingArray = [];
       listToUnhide.forEach(tool_id => {
         if (this.nodes[tool_id] && !this.nodes[tool_id].hide) {
           console.log('tool exists and unhidden');
           console.log(this.nodes[tool_id]);
-          let clonedTool = this.nodes[tool_id];
-          clonedTool.position.x = 0;
-          clonedTool.position.y = 600;
+          let clonedTool = { 
+            ...this.nodes[tool_id],                 // copy all top-level properties
+            position: { ...this.nodes[tool_id].position, x: 0, y: 600 } // copy position and override x/y
+          };
           listToCreate.push(clonedTool);
         } else if (this.nodes[tool_id] && this.nodes[tool_id].hide) {
           console.log('tool exists and hidden');
@@ -913,7 +924,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       });
 
       listToUnhide = [...processingArray];      
-    }*/
+    }
 
     if (listToCreate.length) {
       nodes = await this.service.addNewNodeItems(listToCreate).toPromise();
@@ -950,6 +961,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       });
       console.log(unhideNodes, res);
     }
+
+    //if (this.toolsListComponent) {
+    //  this.toolsListComponent.reload();
+    //}
 
     return [...nodes, ...unhideNodes];
   }
