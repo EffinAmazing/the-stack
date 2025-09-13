@@ -845,11 +845,15 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
                 listToUnhide.push(...hiddenNodes);
               } else {
                 // No hidden nodes, create a new one
+                const referenceNode = Object.values(this.nodes).find(node => node.toolId === item.id);
+
                 listToCreate.push({
                   blueprintId: this.blueprint.id,
                   toolId: item.id,
                   hide: false,
-                  dependencies: []
+                  dependencies: [],
+                  start: referenceNode?.start || null,
+                  end: referenceNode?.end || null
                 });
               }
             }
@@ -906,17 +910,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     //check if any node in this list is already unhidden. if so, remove it from listToUnhide and add to listToCreate
     if (listToUnhide.length) {       
       let processingArray = [];
-      listToUnhide.forEach(tool_id => {
-        if (this.nodes[tool_id] && !this.nodes[tool_id].hide) {
-          console.log('tool exists and unhidden');
-          console.log(this.nodes[tool_id]);
-          let clonedTool = { 
-            ...this.nodes[tool_id],                 // copy all top-level properties
-            position: { ...this.nodes[tool_id].position, x: 0, y: 600 } // copy position and override x/y
-          };
-          listToCreate.push(clonedTool);
-        } else if (this.nodes[tool_id] && this.nodes[tool_id].hide) {
-          console.log('tool exists and hidden');
+      listToUnhide.forEach(tool_id => {        
+        if (this.nodes[tool_id] && this.nodes[tool_id].hide) {
           processingArray.push(tool_id);
         }
       });
