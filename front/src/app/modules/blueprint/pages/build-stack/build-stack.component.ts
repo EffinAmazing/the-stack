@@ -924,11 +924,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       });
       console.log(unhideNodes, res);
     }
-
-    //if (this.toolsListComponent) {
-    //  this.toolsListComponent.reload();
-    //}
-
+    
     return [...nodes, ...unhideNodes];
   }
 
