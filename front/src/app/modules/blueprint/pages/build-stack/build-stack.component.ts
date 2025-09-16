@@ -840,8 +840,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
                 .filter(node => node.toolId === item.id && node.hide)
                 .map(node => node.id);
 
-              if (hiddenNodes.length > 0) {
-                // Unhide all existing hidden nodes
+              if (hiddenNodes.length > 0) {                
                 listToUnhide.push(...hiddenNodes);
               } else {
                 // No hidden nodes, create a new one
@@ -862,52 +861,23 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
           this.proceedAddNewNodes(listToCreate, listToUnhide, result).then(nodes => {
             if (nodes.length) {
               this.addedNewNode$.next(nodes);
-            }            
+            }
           }).catch(err => console.log(err));
 
 
         } else if (typeof result === 'string' && result === 'create') {
           this.handleCeateCustomTool();
         }
-        /*if (listToCreate.length > 0) {
-          this.service.addNewNodeItems(listToCreate).toPromise().then(nodes => {
-            const nodesIds: string[] = [];
-            nodes.map((node) => {
-              node.tool = result[node.toolId];
-              nodesIds.push(node.id);
-              this.nodes[node.id] = node;
-              return node;
-            });
-            this.nodesList = [...this.nodesList, ...nodesIds];
-            this.addedNewNode$.next(nodes);
-            // this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList  });
-          }).catch(err => {
-            console.log(err);
-          });
-        }
-
-        if (listToUnhide.length > 0) {
-          this.service.unhideNodes(listToUnhide).toPromise()
-            .then(res => {
-              const nodes = listToUnhide.map((nodeId) => {
-                this.nodes[nodeId].hide = false;
-                return this.nodes[nodeId];
-              });
-
-              this.addedNewNode$.next(nodes);
-            })
-            .catch(err => console.log(err));
-        }*/
+        
       }
     });
   }
 
   async proceedAddNewNodes(listToCreate, listToUnhide, tools) {
-    console.log('data', listToCreate, listToUnhide, tools);
+    //console.log(listToCreate, listToUnhide, tools);
     let nodes = [];
     let unhideNodes = [];
-
-    //check if any node in this list is already unhidden. if so, remove it from listToUnhide and add to listToCreate
+    
     if (listToUnhide.length) {       
       let processingArray = [];
       listToUnhide.forEach(tool_id => {        

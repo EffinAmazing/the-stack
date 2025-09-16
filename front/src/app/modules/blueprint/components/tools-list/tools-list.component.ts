@@ -5,7 +5,7 @@ import { NodeDetailsComponent } from '../node-details/node-details.component';
 import { hiddenCategories, WhitelistCategories } from '../../../../core/config';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/services/auth.service';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { ConfirmActionDialogComponent } from '../../../../shared/components/confirm-action-dialog/confirm-action-dialog.component';
 
 const host = environment.serverURI;
@@ -58,7 +58,7 @@ export class ToolsListComponent implements OnInit {
         if (data.nodes.hasOwnProperty(key)) {
           this.editStates[data.nodes[key].id] = { start: false, end: false, cost: false, owner: false };
         }
-      }      
+      }
 
     });
 
@@ -69,20 +69,16 @@ export class ToolsListComponent implements OnInit {
       let categoriesChanged = false;
 
       nodes.forEach(item => {
-
-        // Ensure node exists in nodes
+        
         if (!this.nodes[item.id]) {
           this.nodes[item.id] = item;          
-        } else {
-          // If node was already loaded, make sure it's visible
+        } else {          
           this.nodes[item.id].hide = false;
         }
 
         // Initialize editStates for the new node
         this.editStates[item.id] = { start: false, end: false, cost: false, owner: false };
-
-        // Update categoriesList
-        // Update categoriesList
+        
         const nodeCategories = (item.tool.categories && item.tool.categories.length) 
           ? item.tool.categories 
           : ['None'];
@@ -123,17 +119,14 @@ export class ToolsListComponent implements OnInit {
             categoriesChanged = true;
           }
         });
-      });
+      }); 
 
-      
-
-
-      // 4. Recalculate costs for any categories that changed
+      //Recalculate costs for any categories that changed
       if (categoriesChanged) {
         this.categoriesList.forEach(cat => this.reculcCategoryCost(cat.name));
       }
 
-      // 5. Recalculate total cost
+      //Recalculate total cost
       this.reculcAllCost();
     });
 
@@ -440,7 +433,7 @@ export class ToolsListComponent implements OnInit {
 
 
   
-  
+
   
 
   public close() {
