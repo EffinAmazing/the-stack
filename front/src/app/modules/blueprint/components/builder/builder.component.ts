@@ -1679,6 +1679,44 @@ private getPointsFromPath(pathData) {
     return JSON.parse(JSON.stringify(a));
   }
 
+  enableEdit(node: any, el: HTMLElement) {
+    node.isEditing = true;
+
+    // Wait for DOM update
+    setTimeout(() => {
+      el.focus();
+
+      // Select all text
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+    });
+  }
+
+  handleKeyDown(node: any, event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();  // prevent line break
+      this.finishEdit(node, event);
+    }
+  }
+
+  finishEdit(node: any, event: Event) {
+    const el = event.target as HTMLElement;
+    const newValue = el.textContent?.trim() || '';
+
+    node.nickname = newValue;
+    node.isEditing = false; // re-enable drag
+
+    this.updateNodeNickname(node.id, newValue);
+  }
+
+  updateNodeNickname(nodeId: string, nickname: string) {
+    console.log("Saving nickname", { nodeId, nickname });
+    // this.apiService.updateNickname(nodeId, nickname).subscribe(...)
+  }
+
 }
 
   /* private generatePosition( startX, endX, startY, endY ) {

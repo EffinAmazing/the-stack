@@ -67,6 +67,46 @@
     -ms-user-select: none;
     user-select: none;
 
+    .node-title-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 200;
+
+        .node-title {
+            outline: none;
+            cursor: text;
+            user-select: text;
+            white-space: nowrap;
+            padding: 2px 4px;
+
+            &[contenteditable="true"] {
+                cursor: text; // editing mode
+            }
+
+            &[contenteditable="false"] {
+                cursor: pointer; // not editing, acts like clickable text
+            }
+        }
+
+        .edit-pencil {
+            background: none;
+            border: none;
+            margin-left: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-user-select: all;
+            -khtml-user-select: all;
+            -moz-user-select: all;
+            -ms-user-select: all;
+            user-select: all;
+            cursor: all;
+        }
+    }
+
     &.cdk-drag-dragging{
         z-index: 99;
     }
@@ -279,4 +319,11 @@
         stroke: #1c57a4;
         fill: #1c57a4;
     }
+}
+
+.node-title input {
+  width: 100%;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  padding: 2px 4px;
 }
