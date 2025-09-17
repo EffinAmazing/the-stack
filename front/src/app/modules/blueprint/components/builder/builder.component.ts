@@ -44,6 +44,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() mouseoverNode: EventEmitter<string> = new EventEmitter();
   @Output() clickWorkspace: EventEmitter<any> = new EventEmitter();
   @Output() groupMoveCompleted: EventEmitter<{ nodeIds: string[], diff: Pointer }> = new EventEmitter();
+  @Output() nicknameUpdated = new EventEmitter<{ nodeId: string; nickname: string }>();
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
   @Input() historyEmit: Observable<any>;
@@ -1699,12 +1700,15 @@ private getPointsFromPath(pathData) {
     if (event.key === 'Enter') {
       event.preventDefault();  // prevent line break
       this.finishEdit(node, event);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      this.cancelEdit(node, event); // 👈 new
     }
   }
 
   finishEdit(node: any, event: Event) {
     const el = event.target as HTMLElement;
-    const newValue = el.textContent?.trim() || '';
+    const newValue = this.sanitizeText(el.innerText);
 
     node.nickname = newValue;
     node.isEditing = false; // re-enable drag
@@ -1712,9 +1716,27 @@ private getPointsFromPath(pathData) {
     this.updateNodeNickname(node.id, newValue);
   }
 
+  cancelEdit(node: any, event: Event) {
+    const el = event.target as HTMLElement;
+    el.textContent = node.nickname || node.tool?.name; // revert
+    node.isEditing = false;
+  }
+
+  revertNickname(node: any, nodeTitle: HTMLElement) {
+    node.nickname = null; // clear nickname
+    this.nicknameUpdated.emit({ nodeId: node.id, nickname: null }); // notify parent
+    nodeTitle.textContent = node.tool?.name || ''; // restore UI text
+  }
+
   updateNodeNickname(nodeId: string, nickname: string) {
     console.log("Saving nickname", { nodeId, nickname });
-    // this.apiService.updateNickname(nodeId, nickname).subscribe(...)
+    this.nicknameUpdated.emit({ nodeId, nickname });    
+  }
+
+  sanitizeText(input: string): string {
+    const div = document.createElement('div');
+    div.textContent = input; // automatically escapes HTML
+    return div.innerText.trim(); // return plain text
   }
 
 }

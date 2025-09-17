@@ -1274,6 +1274,12 @@ public handleAddAdditionalApp() {
     this.history.addAction(this.blueprint.id, { name: 'groupMove', data  });
   }
 
+  handleNicknameUpdated(event: { nodeId: string; nickname: string }) {
+    this.service.updateNodeTool(event.nodeId, {nickname: event.nickname}, this.blueprint.id).subscribe((res) => {
+          //
+    });  
+  }
+
   ngOnDestroy() {
     if (this.stackRequest) {
       this.stackRequest.unsubscribe();

@@ -76,7 +76,7 @@
 
         .node-title {
             outline: none;
-            cursor: text;
+            
             user-select: text;
             white-space: nowrap;
             padding: 2px 4px;
@@ -86,7 +86,7 @@
             }
 
             &[contenteditable="false"] {
-                cursor: pointer; // not editing, acts like clickable text
+                cursor: move; // not editing, acts like clickable text
             }
         }
 
@@ -95,7 +95,7 @@
             border: none;
             margin-left: 4px;
             cursor: pointer;
-            display: flex;
+            display: none;            
             align-items: center;
             justify-content: center;
             -webkit-user-select: all;
@@ -104,6 +104,54 @@
             -ms-user-select: all;
             user-select: all;
             cursor: all;
+            color: #666;
+            
+            .mat-icon {
+                max-width: 100%;
+                font-size: 16px;
+            }
+        }
+
+        &:hover .edit-pencil {
+            display: inline-flex; 
+            position: absolute;
+            right: -6px;            
+            width: 10px;
+            height: 10px;
+            
+            &:hover {
+                color: #ff4100;
+            }
+        }
+
+          .revert-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: none; // hidden by default
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            margin-top: 5px;
+
+            .mat-icon {
+            max-width: 100%;
+            font-size: 16px;
+            }
+        }
+
+        &:hover .revert-btn {
+            display: inline-flex; 
+            position: absolute;
+            right: -6px;   // same as pencil
+            top: 18px;     // stacked under pencil
+            width: 10px;
+            height: 10px;
+            
+            &:hover {
+                color: #ff4100;
+            }
+            
         }
     }
 
@@ -142,7 +190,7 @@
         color: #333333;
         font-weight: bold;
         border-width: 2px;
-        padding: 10px;
+        padding: 10px 18px 10px;
     }
 
     &.custom-app-tool{
