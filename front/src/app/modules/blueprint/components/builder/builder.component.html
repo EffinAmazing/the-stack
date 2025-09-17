@@ -25,23 +25,54 @@
               </marker>
           </defs>
         </svg>
-        <div *ngFor="let node of showNodes" [cdkDragDisabled]="disableTillDrawLine"  [ngClass]="{'toolNode': true, 'domain-tool': node.tool.tag === 'domain', 'custom-app-tool': node.tool.tag === 'customApp'}" [id]="'node-' + node.id"
-          cdkDrag 
+       <div *ngFor="let node of showNodes"
+          [cdkDragDisabled]="disableTillDrawLine || node.isEditing"
+          [ngClass]="{
+            'toolNode': true,
+            'domain-tool': node.tool.tag === 'domain',
+            'custom-app-tool': node.tool.tag === 'customApp'
+          }"
+          [id]="'node-' + node.id"
+          cdkDrag
           cdkDragBoundary=".stackWorkflow"
           [cdkDragFreeDragPosition]="hasCoords(node.position)?node.position:{x: 0, y: 0}" 
           (cdkDragEnded)="relisedMove($event, node)"
-          (cdkDragMoved)="$event.event.stopPropagation();  handleNodeMove($event, node)"           
+          (cdkDragMoved)="$event.event.stopPropagation(); handleNodeMove($event, node)"           
           (cdkDragStarted)="handleStartDrag($event, node)" 
           (mouseover)="handleNodeMouseover($event)" 
           (mousedown)="handleNodeClick($event)">
-            <img class="node-icon" crossorigin [src]="
-                node.tool.tag === 'customApp'
-                  ? getAssetsFolder() + 'assets/images/mobileapp.png'
-                  : node.tool.logo
-                    ? processImageSrc(node.tool.logo)
-                    : getAssetsFolder() + 'assets/images/layers.png'
-              "  />
-            {{ node.tool?.name }}
+
+        <img class="node-icon" crossorigin [src]="
+            node.tool.tag === 'customApp'
+              ? getAssetsFolder() + 'assets/images/mobileapp.png'
+              : node.tool.logo
+                ? processImageSrc(node.tool.logo)
+                : getAssetsFolder() + 'assets/images/layers.png'
+          " />
+
+        <!-- Domain node -->
+        <div *ngIf="node.tool.tag === 'domain'" class="node-title-wrapper">
+          <div #nodeTitle
+            class="node-title"
+            [attr.contenteditable]="node.isEditing"
+            [textContent]="node.nickname || node.tool?.name"
+            (blur)="finishEdit(node, $event)" 
+            (keydown)="handleKeyDown(node, $event)">
+        </div>
+
+          <button class="edit-pencil" (click)="enableEdit(node, nodeTitle)">
+            <mat-icon>edit</mat-icon>
+          </button>
+
+          <button *ngIf="node.nickname" class="revert-btn" (click)="revertNickname(node, nodeTitle)">
+            <mat-icon>undo</mat-icon>
+          </button>
+        </div>
+
+        <!-- Non-domain nodes -->
+        <span *ngIf="node.tool.tag !== 'domain'">
+          {{ node.tool?.name }}
+        </span>
             <button *ngIf="node.tool.tag !== 'domain' && node.tool.tag !== 'customApp'" mat-button class="icon-info-button"  (click)="handleClick(node)"><img [src]="getAssetsFolder() + 'assets/images/info.png'" /></button>
             <div class="pointers">
               <div class="pointer-Left" 
