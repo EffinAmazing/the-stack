@@ -93,7 +93,11 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   globalHiddenTools: Tool[] = [];
   cameraOffset: Pointer = { x: 0, y: 0 };
   zoomLevel: number = 1;
-
+  isMiddleMouseDown = false;
+  isDraggingMiddle = false;
+  dragStartPosition: Pointer = { x: 0, y: 0 };
+  lastPointerPosition: Pointer = { x: 0, y: 0 };
+  
 
   constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) {  }
 
@@ -1067,6 +1071,10 @@ private getPointsFromPath(pathData) {
   }
 
   public handleStartDrag(data, node) {
+    console.log('dragging');
+    if (this.isMiddleMouseDown) {
+      return; // Don't engage drag logic on middle mouse
+    }
     const lines = this.listOfArrows.filter((item) => item.start.nodeId === node.id || item.end.nodeId === node.id );
     this.activeNode = node;
     this.startPositionNode = data.source.element.nativeElement.style.transform;
@@ -1401,12 +1409,22 @@ private getPointsFromPath(pathData) {
     }
   }
 
+  updateCameraTransform(): void {
+  const container = this.stackWorkFlow?.nativeElement;
+  if (container) {
+    const { x, y } = this.cameraOffset;
+    container.style.transform = `translate3d(${x}px, ${y}px, 0px)`;
+  }
+}
+
+
   ngAfterViewInit() {
-    let isMiddleMouseDown = false;
+    this.isMiddleMouseDown = false;
     let lastX = 0;
     let lastY = 0;
 
     const container = this.stackWorkFlow.nativeElement;
+    const workspaceEl = document.getElementById('stackWorkflowWrapper');
 
     //Zoom control
     container.addEventListener('wheel', (event: WheelEvent) => {
@@ -1424,37 +1442,57 @@ private getPointsFromPath(pathData) {
       }
     }, { passive: false });
 
-    //TODO
-    //This conflicts with drag/select, need to integrate there instead
+    
+
     container.addEventListener('mousedown', (event: MouseEvent) => {
       if (event.button === 1) { // Middle mouse
         event.preventDefault();
-        isMiddleMouseDown = true;
-        lastX = event.clientX;
-        lastY = event.clientY;
+        this.isMiddleMouseDown = true;
+        workspaceEl?.classList.add('grabbing');
+        this.isDraggingMiddle = false; // reset drag state
+        this.dragStartPosition = { x: event.clientX, y: event.clientY };
+        this.lastPointerPosition = { ...this.dragStartPosition };
       }
     });
 
     window.addEventListener('mousemove', (event: MouseEvent) => {
-      if (!isMiddleMouseDown) return;
+      if (!this.isMiddleMouseDown) return;
 
-      const dx = event.clientX - lastX;
-      const dy = event.clientY - lastY;
+      const dx = event.clientX - this.lastPointerPosition.x;
+      const dy = event.clientY - this.lastPointerPosition.y;
+
+      const dragThreshold = 2;
+      if (!this.isDraggingMiddle) {
+        const totalDelta = Math.sqrt(
+          Math.pow(event.clientX - this.dragStartPosition.x, 2) +
+          Math.pow(event.clientY - this.dragStartPosition.y, 2)
+        );
+
+        if (totalDelta > dragThreshold) {
+          this.isDraggingMiddle = true;
+        } else {
+          return; // too little movement, don't pan yet
+        }
+      }
+
+      this.lastPointerPosition = { x: event.clientX, y: event.clientY };
 
       this.cameraOffset.x += dx;
       this.cameraOffset.y += dy;
-
-      lastX = event.clientX;
-      lastY = event.clientY;
+      this.updateCameraTransform();
     });
 
     window.addEventListener('mouseup', (event: MouseEvent) => {
-      if (event.button === 1) {
-        isMiddleMouseDown = false;
+      if (event.button === 1 && this.isMiddleMouseDown) {
+        this.isMiddleMouseDown = false;
+        this.isDraggingMiddle = false;
+        workspaceEl?.classList.remove('grabbing');
       }
     });
 
     this.svgPaint.nativeElement.addEventListener('mousedown', (evt) => {
+
+      if (evt.button === 1 || evt.button === 2) return; //ignore middle and right click
       // console.log(evt.target['id']);
       if ((evt.target === evt.currentTarget) || evt.target['id'] === 'builder_grid_rect') {
         // console.log(evt.target, evt.currentTarget);
@@ -1486,6 +1524,10 @@ private getPointsFromPath(pathData) {
 
     this.selectMany.nativeElement.addEventListener('mousedown', (evt) => {
 
+      if (evt.button === 1 || evt.button === 2) return; //ignore middle and right click
+
+      console.log('this select many down');
+
       this.startSelecting = true;
       this.selectorArea.nativeElement.style.display = 'block';
       const offsetParent = this.stackWorkFlow.nativeElement.offsetParent as HTMLDivElement;
@@ -1509,6 +1551,9 @@ private getPointsFromPath(pathData) {
     });
 
     this.selectMany.nativeElement.addEventListener('mousemove', (evt) => {
+
+      if (evt.button === 1 || evt.button === 2) return; //ignore middle and right click
+
       // console.log(evt);
       if (this.startSelecting) {
         const X = evt.pageX - this.selectOffsetData.x;
@@ -1535,6 +1580,9 @@ private getPointsFromPath(pathData) {
     });
 
     this.selectMany.nativeElement.addEventListener('mouseup', (evt) => {
+
+      if (evt.button === 1 || evt.button === 2) return; //ignore middle and right click
+
       this.startSelecting = false;
       this.selectorArea.nativeElement.style.display = 'none';
 
@@ -1566,6 +1614,9 @@ private getPointsFromPath(pathData) {
     });
 
     this.selectMany.nativeElement.addEventListener('mouseout', (evt) => {
+
+      if (evt.button === 1 || evt.button === 2) return; //ignore middle and right click
+      
       if (this.startSelecting) {
         this.startSelecting = false;
         this.selectorArea.nativeElement.style.display = 'none';

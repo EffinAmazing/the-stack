@@ -285,3 +285,8 @@
         fill: #1c57a4;
     }
 }
+
+.grabbing {
+  cursor: grabbing !important;
+  user-select: none;
+}
