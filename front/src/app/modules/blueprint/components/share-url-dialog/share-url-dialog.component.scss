@@ -43,3 +43,9 @@ mat-form-field {
   right: 8px; /* distance from right */
   z-index: 10; /* make sure it’s on top of the image */
 }
+
+.copied-wrapper {
+  margin-top: 8px;
+  color: green;
+  margin-right: auto;
+}
