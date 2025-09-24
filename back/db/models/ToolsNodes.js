@@ -114,6 +114,7 @@ class ToolsNodesModel extends AbstaractModel {
             owner: String,
             trainedOn: String,
             hide: Boolean,
+            nickname: String,
             dependencies: [{
                 input: { type: String, enum: [ 'Left', 'Right', 'LeftTop', 'RightTop', 'MiddleTop', 'LeftBottom', 'RightBottom', 'MiddleBottom' ] },
                 itemId: ObjectId,
