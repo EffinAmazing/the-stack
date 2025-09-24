@@ -1,3 +1,51 @@
 mat-form-field {
   margin-top: 12px;
 }
+.preview {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 16px;
+}
+.preview-image {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  display: block;
+}
+.loading-data-section {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+.error-loading-alert {
+  display: grid;
+  grid-auto-flow: column;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+.image-wrapper {
+  position: relative; /* Needed for absolute positioning of the button */
+  display: inline-block; /* Shrinks wrapper to image size */
+}
+
+.image {
+  display: block;
+  width: 100%; /* or your desired width */
+  height: auto;
+}
+
+.download-btn {
+  position: absolute;
+  top: 8px;   /* distance from top */
+  right: 8px; /* distance from right */
+  z-index: 10; /* make sure it’s on top of the image */
+}
+
+.copied-wrapper {
+  margin-top: 8px;
+  color: green;
+  margin-right: auto;
+}

@@ -59,6 +59,9 @@
 .app-container .stack-button[color="primary"], .cdk-global-overlay-wrapper .stack-button[color="primary"]{
     color: rgb(255, 65, 0);
 }
+.app-container .stack-button[color="secondary"], .cdk-global-overlay-wrapper .stack-button[color="secondary"]{
+    color: rgb(246, 148, 9);
+}
 .mat-form-field {
     .mat-form-field-label {
         padding-left: 0;

@@ -280,3 +280,19 @@
         fill: #1c57a4;
     }
 }
+
+/* Hide ephemeral chrome while .export-hide is applied on #stackWorkflow */
+#stackWorkflow.export-hide .icon-info-button,
+#stackWorkflow.export-hide .pointers,
+#stackWorkflow.export-hide .hide-item-from-stack,
+#stackWorkflow.export-hide .select-many-elements,
+#stackWorkflow.export-hide .seletor-area-box,
+#stackWorkflow.export-hide .moved-selected-area {
+  visibility: hidden;
+}
+
+/* If any canvas highlight or drag overlay uses higher z-index, force-hide it too */
+#stackWorkflow.export-hide .cdk-drag-preview,
+#stackWorkflow.export-hide .cdk-drag-placeholder {
+  display: none;
+}

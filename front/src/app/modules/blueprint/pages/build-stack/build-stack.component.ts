@@ -29,7 +29,9 @@ import { environment } from 'src/environments/environment';
 import { DrawArrow } from 'src/app/shared/models/draws-item';
 import { ArrowsHelper } from '../../../../shared/helper/arrows-draw.helper';
 import { BuilderComponent } from '../../components/builder/builder.component';
+import { toBlob } from 'html-to-image';
 import { ToolsListComponent } from '../../components/tools-list/tools-list.component';
+
 
 const maxNewVisibleItems = 40;
 
@@ -350,24 +352,25 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   }
 
   shareUrlPopup() {
-  const { origin, pathname, hash } = window.location;
-  const [path, queryString = ''] = hash.split('?');
+    const { origin, pathname, hash } = window.location;
+    const [path, queryString = ''] = hash.split('?');
 
-  const params = new URLSearchParams(queryString);
-  const domain = params.get('domain');
+    const params = new URLSearchParams(queryString);
+    const domain = params.get('domain');
 
-  const cleanHash = domain ? `${path}?domain=${domain}` : path;
-  const shareUrl = `${origin}${pathname}${cleanHash}`;
+    const cleanHash = domain ? `${path}?domain=${domain}` : path;
+    const shareUrl = `${origin}${pathname}${cleanHash}`;
 
-  const dialogRef = this.infoDialog.open(ShareUrlDialogComponent, {
-    width: '520px',
-    data: { url: shareUrl }
-  });
+    const dialogRef = this.infoDialog.open(ShareUrlDialogComponent, {
+      width: '800px',   // or '90vw' to use 90% of the viewport width
+      maxWidth: '80vw', // prevent overflow on small screens
+      data: { url: shareUrl, domain }
+    });
 
-  dialogRef.afterClosed().subscribe(() => {
-    console.log('Share URL dialog closed');
-  });
-}
+    dialogRef.afterClosed().subscribe(() => {
+      //
+    });
+  }
 
 
   public handleUpdatedNodeData(result) {
