@@ -63,36 +63,79 @@ export class ToolsListComponent implements OnInit {
     });
 
     this.addedNewNode.subscribe((nodes) => {
-      if (nodes) {
-        nodes.forEach(item => {
-          if (this.nodes[item.id]) {
-            this.nodes.hide = false;
-          } else {
-            this.nodes[item.id] = item;
-            if (item.tool.categories && item.tool.categories.length) {
-              item.tool.categories.forEach((cat) => {
-                const index = this.categoriesList.findIndex(ctItem => ctItem.name === cat);
-                if (index !== -1) {
-                  this.categoriesList[index].nodes.push(item.id);
-                } else {
-                  this.categoriesList.push({
-                    name: cat,
-                    nodes: [item.id],
-                    cost: 0,
-                    needToBeCollapsed: false
-                  });
+      console.log('addedNodes', nodes)
+      if (!nodes || !nodes.length) return;
+
+      let categoriesChanged = false;
+
+      nodes.forEach(item => {
+        
+        if (!this.nodes[item.id]) {
+          this.nodes[item.id] = item;          
+        } else {          
+          this.nodes[item.id].hide = false;
+        }
+
+        // Initialize editStates for the new node
+        this.editStates[item.id] = { start: false, end: false, cost: false, owner: false };
+        
+        const nodeCategories = (item.tool.categories && item.tool.categories.length) 
+          ? item.tool.categories 
+          : ['None'];
+
+        nodeCategories.forEach(cat => {
+          const index = this.categoriesList.findIndex(ctItem => ctItem.name === cat);
+          if (index !== -1) {
+            if (!this.categoriesList[index].nodes.includes(item.id)) {
+              const nodesArr = this.categoriesList[index].nodes;
+              const newId = item.id;
+              const newName = item.tool?.name || '';
+
+              // find the LAST index whose node's tool.name matches newName
+              let lastMatchIndex = -1;
+              for (let i = nodesArr.length - 1; i >= 0; i--) {
+                const existingNode = this.nodes[nodesArr[i]];
+                if (existingNode?.tool?.name === newName) {
+                  lastMatchIndex = i;
+                  break;
                 }
-              });
+              }
+
+              if (lastMatchIndex === -1) {
+                nodesArr.push(newId);
+              } else {
+                nodesArr.splice(lastMatchIndex + 1, 0, newId);
+              }
+
+              categoriesChanged = true;
             }
-            this.editStates[item.id] = { start: false, end: false, cost: false, owner: false };
+          } else {
+            this.categoriesList.push({
+              name: cat,
+              nodes: [item.id],
+              cost: 0,
+              needToBeCollapsed: cat !== 'None' && hiddenCategories.includes(cat)
+            });
+            categoriesChanged = true;
           }
         });
+      }); 
+
+      //Recalculate costs for any categories that changed
+      if (categoriesChanged) {
+        this.categoriesList.forEach(cat => this.reculcCategoryCost(cat.name));
       }
+
+      //Recalculate total cost
+      this.reculcAllCost();
     });
+
+
 
     const checkIsAdded: {[key: string]: boolean} = { };
 
     this.loadedCategories.subscribe((data) => {
+      console.log('cats',data);
       const categories = Object.keys(data);
       const collapsedArray = [];
       const whitelist = [];
@@ -106,6 +149,8 @@ export class ToolsListComponent implements OnInit {
           cost: 0,
           needToBeCollapsed
         };
+
+        this.sortCategoryNodes(item.nodes);
 
         let catCost = 0;
         data[iterator].forEach(nodeId => {
@@ -157,6 +202,14 @@ export class ToolsListComponent implements OnInit {
       }
     });
 
+  }
+
+  private sortCategoryNodes(nodesArr: string[]): void {
+    nodesArr.sort((a, b) => {
+      const nameA = this.nodes[a]?.tool?.name?.toLowerCase() || '';
+      const nameB = this.nodes[b]?.tool?.name?.toLowerCase() || '';
+      return nameA.localeCompare(nameB);
+    });
   }
 
   public handleClickToEdit(nodeId: string, field: string) {
