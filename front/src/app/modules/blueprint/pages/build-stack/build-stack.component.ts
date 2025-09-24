@@ -365,7 +365,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     });
 
     dialogRef.afterClosed().subscribe(() => {
-      console.log('Share URL dialog closed');
+      //
     });
   }
 
