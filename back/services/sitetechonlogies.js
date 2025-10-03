@@ -6,6 +6,8 @@ const download = require('./download');
 const configs = require('../config');
 
 const API_KEY = configs.BUILTWIDTH_API_KEY;
+const LOGODEV_API_KEY = configs.LOGODEV_API_KEY;
+ 
 
 async function getTestDataFromFile(domain){
     let url = `https://api.builtwith.com/v14/api.json?KEY=${API_KEY}&LOOKUP=${domain}`;
@@ -64,7 +66,7 @@ exports.getDomainTool = async function(domain) {
     const _path = path.resolve(__dirname, '../public/domain-logos', domain + '.png');
     let tool;
 
-    const token = 'pk_HWOavYVtRKanKvZ9cc47sQ'; // Replace with your actual logo.dev token
+    const token = LOGODEV_API_KEY; // Replace with your actual logo.dev token
     const logoUrl = `https://img.logo.dev/${domain}?token=${token}`;
 
     try {
