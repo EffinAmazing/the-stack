@@ -6,6 +6,8 @@ const download = require('./download');
 const configs = require('../config');
 
 const API_KEY = configs.BUILTWIDTH_API_KEY;
+const LOGODEV_API_KEY = configs.LOGODEV_API_KEY;
+ 
 
 async function getTestDataFromFile(domain){
     let url = `https://api.builtwith.com/v14/api.json?KEY=${API_KEY}&LOOKUP=${domain}`;
@@ -62,10 +64,13 @@ async function getTestDataFromFile(domain){
 
 exports.getDomainTool = async function(domain) {
     const _path = path.resolve(__dirname, '../public/domain-logos', domain + '.png');
-    let  tool;
-    
+    let tool;
+
+    const token = LOGODEV_API_KEY; // Replace with your actual logo.dev token
+    const logoUrl = `https://img.logo.dev/${domain}?token=${token}`;
+
     try {
-        let data = await download.downloadImage(_path, 'https://logo.clearbit.com/' + domain);
+        let data = await download.downloadImage(_path, logoUrl);
         
         tool = {
             categories: ['WebSite'],
@@ -74,8 +79,8 @@ exports.getDomainTool = async function(domain) {
             description: "WebSite",
             link: 'http://' + domain,
             tag: "domain"
-        }
-    } catch(err){
+        };
+    } catch (err) {
         tool = {
             categories: ['WebSite'],
             name: domain,
@@ -83,11 +88,12 @@ exports.getDomainTool = async function(domain) {
             description: "WebSite",
             link: 'http://' + domain,
             tag: "domain"
-        }
+        };
     }
 
     return tool;
-}
+};
+
 
 exports.getAppTool = async function(app) {
     
@@ -112,12 +118,14 @@ exports.loadToolLogo = async function(name){
 
     let tech = response.data.Tech;
 
-    return tech.Icon;
+    return tech.Icon || tech.icon || '';
 }
 
 exports.saveLogo = async function(id, url) {
     const _path = path.resolve(__dirname, '../public/tools-logos', id + '.png');
     let  tool;
+
+    //console.log('save logo: ', _path, url);
     
     let data = await download.downloadImage(_path, url);
 
