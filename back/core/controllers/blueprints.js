@@ -151,7 +151,7 @@ class BluePrints {
                 } else {
                     // 2. get tools of domain
                     ToolsServices.getToolsOfDomain(domain).then((result) => {
-                        console.log('ToolsServices.getToolsOfDomain', result);
+                        //console.log('ToolsServices.getToolsOfDomain', result);
                         const list = result.tech;
                         data.blueprint['spend'] = result.spend;
                         data.blueprint['errorCode'] = result.errorCode || null;
