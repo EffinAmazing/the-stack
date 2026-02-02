@@ -92,11 +92,14 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   snapSubscription: Subscription;
   globalHiddenTools: Tool[] = [];
   cameraOffset: Pointer = { x: 0, y: 0 };
-  zoomLevel: number = 1;
   isMiddleMouseDown = false;
   isDraggingMiddle = false;
   dragStartPosition: Pointer = { x: 0, y: 0 };
   lastPointerPosition: Pointer = { x: 0, y: 0 };
+  private panVelocity: Pointer = { x: 0, y: 0 };
+  private panNeedsRender = false;
+  private panRafId: number | null = null;
+  
   
 
   constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) {  }
@@ -1072,9 +1075,7 @@ private getPointsFromPath(pathData) {
 
   public handleStartDrag(data, node) {
     console.log('dragging');
-    if (this.isMiddleMouseDown) {
-      return; // Don't engage drag logic on middle mouse
-    }
+    if (this.isMiddleMouseDown) return;
     const lines = this.listOfArrows.filter((item) => item.start.nodeId === node.id || item.end.nodeId === node.id );
     this.activeNode = node;
     this.startPositionNode = data.source.element.nativeElement.style.transform;
@@ -1099,6 +1100,7 @@ private getPointsFromPath(pathData) {
   }
 
   public handleNodeMove(evt, node) {
+    if (this.isMiddleMouseDown) return;
     this.isMoving = true;
     if (this.connectedLines.length) {
       const container = this.stackWorkFlow.nativeElement;
@@ -1142,6 +1144,7 @@ private getPointsFromPath(pathData) {
   }
 
   public handleMouseOverPointer(evt, node, pos) {
+    if (this.isMiddleMouseDown) return;
     if ( this.activeArrow ) {
       // console.log(evt.x, evt.y);
       const container = this.stackWorkFlow.nativeElement;
@@ -1164,6 +1167,7 @@ private getPointsFromPath(pathData) {
   }
 
   public handleMouseOutPointer() {
+    if (this.isMiddleMouseDown) return;
     if (this.activeArrow) {
       // console.log('out');
       this.activeArrow.end.nodeId = null;
@@ -1187,6 +1191,7 @@ private getPointsFromPath(pathData) {
   }
 
   public handleMouseMove(evt) {
+    if (this.isMiddleMouseDown) return;
     if (this.activeArrow) {      
 
       if (!this.activeArrow.end.nodeId) {
@@ -1410,39 +1415,43 @@ private getPointsFromPath(pathData) {
   }
 
   updateCameraTransform(): void {
-  const container = this.stackWorkFlow?.nativeElement;
-  if (container) {
-    const { x, y } = this.cameraOffset;
-    container.style.transform = `translate3d(${x}px, ${y}px, 0px)`;
+    const container = this.stackWorkFlow?.nativeElement;
+    if (container) {
+      const { x, y } = this.cameraOffset;
+      container.style.transform = `translate3d(${x}px, ${y}px, 0px)`;
+    }    
   }
-}
+
+  private startPanLoop(): void {
+    const tick = () => {
+      if (this.panNeedsRender) {
+        this.cameraOffset.x += this.panVelocity.x;
+        this.cameraOffset.y += this.panVelocity.y;
+
+        // reset velocity after applying
+        this.panVelocity.x = 0;
+        this.panVelocity.y = 0;
+
+        this.updateCameraTransform();
+        this.panNeedsRender = false;
+      }
+
+      this.panRafId = requestAnimationFrame(tick);
+    };
+
+    this.panRafId = requestAnimationFrame(tick);
+  }
 
 
   ngAfterViewInit() {
+    this.startPanLoop();
+
     this.isMiddleMouseDown = false;
     let lastX = 0;
     let lastY = 0;
 
     const container = this.stackWorkFlow.nativeElement;
-    const workspaceEl = document.getElementById('stackWorkflowWrapper');
-
-    //Zoom control
-    container.addEventListener('wheel', (event: WheelEvent) => {
-      if (event.ctrlKey) {
-        event.preventDefault();
-        const delta = Math.sign(event.deltaY); // 1 or -1
-        const zoomFactor = 0.1;
-
-        const newZoom = this.zoomLevel - delta * zoomFactor;
-        
-
-        this.zoomLevel = Math.min(2, Math.max(0.25, newZoom)); // clamp between 0.25x and 2x
-
-        this.arrowHelper.setZoomLevel(this.zoomLevel);
-      }
-    }, { passive: false });
-
-    
+    const workspaceEl = document.getElementById('stackWorkflowWrapper'); 
 
     container.addEventListener('mousedown', (event: MouseEvent) => {
       if (event.button === 1) { // Middle mouse
@@ -1463,23 +1472,23 @@ private getPointsFromPath(pathData) {
 
       const dragThreshold = 2;
       if (!this.isDraggingMiddle) {
-        const totalDelta = Math.sqrt(
-          Math.pow(event.clientX - this.dragStartPosition.x, 2) +
-          Math.pow(event.clientY - this.dragStartPosition.y, 2)
+        const totalDelta = Math.hypot(
+          event.clientX - this.dragStartPosition.x,
+          event.clientY - this.dragStartPosition.y
         );
 
-        if (totalDelta > dragThreshold) {
-          this.isDraggingMiddle = true;
-        } else {
-          return; // too little movement, don't pan yet
-        }
+        if (totalDelta <= dragThreshold) return;
+        this.isDraggingMiddle = true;
       }
 
-      this.lastPointerPosition = { x: event.clientX, y: event.clientY };
+      // mutate instead of replace (GC-friendly)
+      this.lastPointerPosition.x = event.clientX;
+      this.lastPointerPosition.y = event.clientY;
 
-      this.cameraOffset.x += dx;
-      this.cameraOffset.y += dy;
-      this.updateCameraTransform();
+      // accumulate velocity, do NOT render here
+      this.panVelocity.x += dx;
+      this.panVelocity.y += dy;
+      this.panNeedsRender = true;
     });
 
     window.addEventListener('mouseup', (event: MouseEvent) => {

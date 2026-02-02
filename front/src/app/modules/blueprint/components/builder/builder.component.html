@@ -6,7 +6,7 @@
           (click)="handleClickOnWorkspace()"
           (mouseup)="handleMouseUp()" 
           (mouselout)="handleMouseUp()"
-          [style.transform]="'translate(' + cameraOffset.x + 'px,' + cameraOffset.y + 'px) scale(' + zoomLevel + ')'"
+          [style.transform]="'translate(' + cameraOffset.x + 'px,' + cameraOffset.y + 'px)'"
     >
         <div class="for-svg-bg"></div>
         <svg #svgPaint id="paint"  width="1190" height="640">
