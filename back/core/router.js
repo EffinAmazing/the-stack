@@ -33,6 +33,7 @@ router.get("/blueprints/tools", blueprints.getDomainTools.bind(blueprints));
 router.post("/blueprints/tools", passport.authenticate('jwt', { session: false }), blueprints.getDomainTools.bind(blueprints));
 router.post("/blueprints/", blueprints.updateBlueprint);
 router.put("/blueprints/:id", blueprints.updateBlueprint);
+router.put("/blueprints/:id/pan", blueprints.updateBlueprintPan.bind(blueprints));
 router.get("/blueprints/tools/:id", passport.authenticate('jwt', { session: false }), blueprints.getBluePrint.bind(blueprints));
 router.delete('/blueprints/:id', blueprints.removeBluePrint.bind(blueprints));
 router.get('/blueprints/list', passport.authenticate('jwt', { session: false }), blueprints.getBluePrintsForUser.bind(blueprints));

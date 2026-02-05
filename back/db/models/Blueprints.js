@@ -13,6 +13,10 @@ class BluePrintModel extends AbstaractModel {
             domain: String,
             uniqCode: String,
             spend: Number,
+            pan: {
+                x: { type: Number, default: null },
+                y: { type: Number, default: null }
+            },
             created: { type: Date, default: Date.now },
             updated: { type: Date, default: Date.now}
         })

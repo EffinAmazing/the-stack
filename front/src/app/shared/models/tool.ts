@@ -42,6 +42,7 @@ export interface BluePrint {
     updated?: string;
     errorCode?: number;
     errorMessage?: string;
+    pan?: { x: number, y: number };
 }
 
 export interface BluePrintResp {

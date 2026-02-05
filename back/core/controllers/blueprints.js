@@ -356,6 +356,33 @@ class BluePrints {
         })
     }
 
+    //TODO
+    //In the future we might want a more generalized "update" method
+    updateBlueprintPan(req, res, next) {
+        const blueprintId = req.params.id;
+        const pan = req.body?.pan;
+
+        if (!blueprintId || !pan) {
+            return res.status(400).json({
+            result: "Error",
+            message: "Bad Request"
+            });
+        }
+
+        this._bluePrints
+            .updateOne(blueprintId, { pan })
+            .then(result => {
+            res.json({ result });
+            })
+            .catch(err => {
+            console.error(err);
+            res.status(500).json({
+                result: "Error",
+                message: "Server Error"
+            });
+            });
+        }
+
     getBluePrintsForUser(req, res, next) {
         const userId = req.query.userId;
         if (userId) {

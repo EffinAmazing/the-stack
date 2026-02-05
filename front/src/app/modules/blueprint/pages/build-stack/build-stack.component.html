@@ -120,6 +120,7 @@
           [showGrid]="toggleShowGrid$"
           [snapGrid]="toggleSnapGrid$"
           [domainsList]="domainsList"
+          [initialPan]="blueprint?.pan" 
           (positionNodeChanged)="updatedNodePosiotion($event)"
           (arrowAdded)="handleAddArrow($event)"
           (arrowUpdated)="handleUpdateArrow($event)"
@@ -132,7 +133,8 @@
           (clickNode)="handleClickNode($event)" 
           (mouseoverNode)="handleMouseoverNode($event)" 
           (clickWorkspace)="handleClickWorkspace($event)" 
-          (groupMoveCompleted)="handleGroupMove($event)"
+          (groupMoveCompleted)="handleGroupMove($event)" 
+          (panChanged)="handlePanChanged($event)" 
           ></app-builder>
 
       </div>

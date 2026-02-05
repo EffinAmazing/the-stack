@@ -44,6 +44,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() mouseoverNode: EventEmitter<string> = new EventEmitter();
   @Output() clickWorkspace: EventEmitter<any> = new EventEmitter();
   @Output() groupMoveCompleted: EventEmitter<{ nodeIds: string[], diff: Pointer }> = new EventEmitter();
+  @Output() panChanged = new EventEmitter<Pointer>();
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
   @Input() historyEmit: Observable<any>;
@@ -53,7 +54,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() showGrid: Observable<boolean>;
   @Input() snapGrid: Observable<boolean>;
   @Input() domainsList: String[];
-  @Input() toolsHiddenGlobally: Observable<any>;
+  @Input() toolsHiddenGlobally: Observable<any>; 
+  @Input() initialPan?: Pointer; 
   isMultiselect = false;
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
@@ -150,8 +152,10 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.nodesSubscription = this.loadedNodes.subscribe((data) => {
       this.showNodes = [];
-      // console.log(' *** loadedNodes ****');
+      console.log(' *** loadedNodes ****', data);
       /*  */
+
+
       if (data.list) {
         let isNewStack = true;
         data.list.forEach((nodeId) => {
@@ -196,6 +200,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           }
 
+          ////
+
         });
 
         this.nodes = data.nodes;
@@ -230,7 +236,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
           this.removeArrows.emit(ids);
         }
-      }
+      }      
     });
 
     this.arrowSubscription = this.loadedArrows.subscribe((list) => {
@@ -1415,11 +1421,34 @@ private getPointsFromPath(pathData) {
   }
 
   updateCameraTransform(): void {
+    //console.log('updateCameraTransform');
     const container = this.stackWorkFlow?.nativeElement;
     if (container) {
       const { x, y } = this.cameraOffset;
       container.style.transform = `translate3d(${x}px, ${y}px, 0px)`;
     }    
+  }
+
+  //TODO
+  private applyPan(pan: Pointer): void {
+    console.log('applyPan');
+    this.cameraOffset.x = pan.x;
+    this.cameraOffset.y = pan.y;
+    this.updateCameraTransform();
+  }
+
+  private centerPanOnContent(): void {
+    const content = this.stackWorkFlow.nativeElement;
+    const wrapper = content.parentElement;
+    if (!wrapper) return;
+
+    const contentRect = content.getBoundingClientRect();
+    const wrapperRect = wrapper.getBoundingClientRect();
+
+    const x = Math.floor((wrapperRect.width - contentRect.width) / 2);
+    const y = Math.floor((wrapperRect.height - contentRect.height) / 2);
+
+    this.applyPan({ x, y });
   }
 
   private startPanLoop(): void {
@@ -1445,6 +1474,13 @@ private getPointsFromPath(pathData) {
 
   ngAfterViewInit() {
     this.startPanLoop();
+
+    //initial pan
+    if (this.initialPan) {
+      Promise.resolve().then(() => {
+        this.applyPan(this.initialPan);
+      });
+    }
 
     this.isMiddleMouseDown = false;
     let lastX = 0;
@@ -1496,6 +1532,7 @@ private getPointsFromPath(pathData) {
         this.isMiddleMouseDown = false;
         this.isDraggingMiddle = false;
         workspaceEl?.classList.remove('grabbing');
+        this.panChanged.emit({ ...this.cameraOffset });
       }
     });
 

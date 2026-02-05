@@ -105,4 +105,8 @@ export class BlueprintsService {
   addAppTool(app, blueprintId): Observable<{tools: Tool, nodes: BluePrintTool}> {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolsnodes/app`, { app, blueprintId }));
   }
+
+  updateBlueprintPan(blueprintId: string, pan: { x: number; y: number }): Observable<any> {
+    return this.mapper.mapResponse(this.http.put(`${this.serverURI}blueprints/${blueprintId}/pan`, { pan }));
+  }
 }

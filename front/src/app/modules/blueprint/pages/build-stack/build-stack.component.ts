@@ -199,6 +199,9 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     this.blueprint = data.blueprint;
     this.globalHiddenTools = data.hiddenTools;
     this.toolsHiddenGlobally$.next({nodes: data.hiddenTools});
+
+    console.log('Loaded blueprint:', this.blueprint);
+    
     data.nodes.forEach((item) => {  
       if (item.toolId) {
         const tool = data.tools.find((atool) =>  atool.id === item.toolId );
@@ -1269,6 +1272,18 @@ public handleAddAdditionalApp() {
 
   public handleGroupMove(data: { nodeIds: string[], diff: Pointer }) {
     this.history.addAction(this.blueprint.id, { name: 'groupMove', data  });
+  }
+
+  public handlePanChanged(pan: Pointer): void {
+    if (!this.blueprint?.id) return;
+
+    // Update local blueprint state
+    this.blueprint.pan = pan;
+
+    // Persist to backend
+    this.service.updateBlueprintPan(this.blueprint.id, pan).subscribe({
+      error: (err) => console.error('Failed to update pan', err)
+    });
   }
 
   ngOnDestroy() {
