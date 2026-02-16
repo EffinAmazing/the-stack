@@ -56,6 +56,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() domainsList: String[];
   @Input() toolsHiddenGlobally: Observable<any>; 
   @Input() initialPan?: Pointer; 
+  @Input() isNewBlueprint = false;
   isMultiselect = false;
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
@@ -101,6 +102,12 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   private panVelocity: Pointer = { x: 0, y: 0 };
   private panNeedsRender = false;
   private panRafId: number | null = null;
+  private panInitialized = false;
+  private readonly CANVAS_WIDTH = 4000;
+  private readonly CANVAS_HEIGHT = 2250;
+  private readonly VIEWPORT_W = 1170;
+  private readonly VIEWPORT_H = 660;
+  private lastPanFrameTime = 0;
   
   
 
@@ -163,15 +170,24 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
           //
           if (!item.hide) {
-            if (typeof item.position.x !== 'number') {
+            if (typeof item.position.x !== 'number') {              
+
+              // shift so the cluster appears centered in the viewport after centering pan
+              const LAYOUT_BIAS_X = this.VIEWPORT_W / 8;
+              const LAYOUT_BIAS_Y = this.VIEWPORT_H / 8;
+
+              const centerX = (this.CANVAS_WIDTH / 2) - LAYOUT_BIAS_X;
+              const centerY = (this.CANVAS_HEIGHT / 2) - LAYOUT_BIAS_Y;
+
               if (item.tool.tag === 'domain') {
-                item.position.y = 0;
-                item.position.x = Math.floor(maxItems / 2) * offsetX;
+                item.position.x = Math.floor(centerX);
+                item.position.y = Math.floor(centerY - 200);
               } else {
                 const yIndex = Math.floor(this.indexNode / maxItems);
                 const xIndex = (this.indexNode - yIndex * maxItems);
-                item.position.y = (yIndex + 1) * offsetY + Math.floor(offsetY * 0.5);
-                item.position.x = xIndex * offsetX;
+
+                item.position.x = Math.floor(centerX + (xIndex - 2) * offsetX);
+                item.position.y = Math.floor(centerY + (yIndex - 1) * offsetY);
                 window['dataLayer'].push({
                   event: 'stackbuilder.node.loaded',
                   node: item,
@@ -438,21 +454,31 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
           if (item.hasOwnProperty('hide') && item.hide ) {
             return true;
           }
+
+
           //console.log(item);
           if (!existNode) {
             item.hide = false;
             if (typeof item.position.x !== 'number') {
-              item.position.y = 0;
-              const yIndex = Math.floor(this.indexNode / maxItems);
-              let xIndex = (this.indexNode - yIndex * maxItems);
-              if (xIndex === Math.floor(maxItems / 2) && yIndex === 0) {
-                xIndex++;
-              }
-              item.position.y = (start - yIndex) * offsetY + Math.floor(offsetY * 0.5);
-              item.position.x = xIndex * offsetX;
-              
-              arrToChange.push({nodeId: item.id, position: item.position});
-              // console.log(yIndex, xIndex);
+
+              const wrapper = document.getElementById('stackWorkflowWrapper');
+              const wrapperRect = wrapper?.getBoundingClientRect();
+
+              // fallback to your known viewport size
+              const wrapperWidth = wrapperRect?.width || 1170;
+              const wrapperHeight = wrapperRect?.height || 660;
+
+              // viewport center in WORLD coordinates
+              const worldCenterX = -this.cameraOffset.x + wrapperWidth / 2;
+              const worldCenterY = -this.cameraOffset.y + wrapperHeight / 2;
+
+              // spread multiple new nodes so they don't overlap
+              const spread = 90;
+
+              item.position.x = Math.floor(worldCenterX + (index * spread));
+              item.position.y = Math.floor(worldCenterY + (index * spread));
+
+              arrToChange.push({ nodeId: item.id, position: item.position });
             }
 
             this.showNodes.push(item);
@@ -501,6 +527,20 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });
+  }
+
+  private getCenteredPan(): Pointer {
+    const content = this.stackWorkFlow.nativeElement;
+    const wrapper = content.parentElement as HTMLElement | null;
+    if (!wrapper) return { x: 0, y: 0 };
+
+    const contentRect = content.getBoundingClientRect();
+    const wrapperRect = wrapper.getBoundingClientRect();
+
+    return {
+      x: Math.floor((wrapperRect.width - contentRect.width) / 2),
+      y: Math.floor((wrapperRect.height - contentRect.height) / 2),
+    };
   }
 
   private restoreArrow(item) {
@@ -1426,10 +1466,12 @@ private getPointsFromPath(pathData) {
     if (container) {
       const { x, y } = this.cameraOffset;
       container.style.transform = `translate3d(${x}px, ${y}px, 0px)`;
+
+      window['cameraOffset'] = { x, y };
+      
     }    
   }
 
-  //TODO
   private applyPan(pan: Pointer): void {
     console.log('applyPan');
     this.cameraOffset.x = pan.x;
@@ -1437,27 +1479,25 @@ private getPointsFromPath(pathData) {
     this.updateCameraTransform();
   }
 
-  private centerPanOnContent(): void {
-    const content = this.stackWorkFlow.nativeElement;
-    const wrapper = content.parentElement;
-    if (!wrapper) return;
-
-    const contentRect = content.getBoundingClientRect();
-    const wrapperRect = wrapper.getBoundingClientRect();
-
-    const x = Math.floor((wrapperRect.width - contentRect.width) / 2);
-    const y = Math.floor((wrapperRect.height - contentRect.height) / 2);
-
-    this.applyPan({ x, y });
+  private viewportToWorld(p: Pointer): Pointer {
+    return {
+      x: p.x - this.cameraOffset.x,
+      y: p.y - this.cameraOffset.y
+    };
   }
 
   private startPanLoop(): void {
-    const tick = () => {
+    const tick = (t: number) => {
+
+      if (!this.lastPanFrameTime) this.lastPanFrameTime = t;
+      const dt = Math.min(32, t - this.lastPanFrameTime); // cap dt
+      this.lastPanFrameTime = t;
+
       if (this.panNeedsRender) {
+        // apply scaled by dt
         this.cameraOffset.x += this.panVelocity.x;
         this.cameraOffset.y += this.panVelocity.y;
 
-        // reset velocity after applying
         this.panVelocity.x = 0;
         this.panVelocity.y = 0;
 
@@ -1472,15 +1512,34 @@ private getPointsFromPath(pathData) {
   }
 
 
+
   ngAfterViewInit() {
     this.startPanLoop();
 
     //initial pan
-    if (this.initialPan) {
-      Promise.resolve().then(() => {
+    Promise.resolve().then(() => {
+    // saved pan apply only
+      if (this.initialPan && typeof this.initialPan.x === 'number' && typeof this.initialPan.y === 'number') {
         this.applyPan(this.initialPan);
-      });
-    }
+        this.panInitialized = true;
+        return;
+      }
+
+      // new blueprint with no pan center + persist once
+      if (this.isNewBlueprint) {
+        const centered = this.getCenteredPan();
+        this.applyPan(centered);
+
+        this.panInitialized = true;
+
+        // persist
+        this.panChanged.emit({ ...this.cameraOffset });
+
+        return;
+      }
+
+      // old blueprint with no pan → do nothing
+    });
 
     this.isMiddleMouseDown = false;
     let lastX = 0;
@@ -1525,15 +1584,31 @@ private getPointsFromPath(pathData) {
       this.panVelocity.x += dx;
       this.panVelocity.y += dy;
       this.panNeedsRender = true;
+
+      // --- FAST DRAG CATCH-UP ---
+      // If the user moves quickly, render immediately so the camera doesn't "lag"
+      const speed = Math.abs(dx) + Math.abs(dy);
+      if (speed > 30) {
+        this.cameraOffset.x += this.panVelocity.x;
+        this.cameraOffset.y += this.panVelocity.y;
+
+        // reset velocity after applying
+        this.panVelocity.x = 0;
+        this.panVelocity.y = 0;
+
+        this.updateCameraTransform();
+        this.panNeedsRender = false;
+      }
     });
 
-    window.addEventListener('mouseup', (event: MouseEvent) => {
-      if (event.button === 1 && this.isMiddleMouseDown) {
-        this.isMiddleMouseDown = false;
-        this.isDraggingMiddle = false;
-        workspaceEl?.classList.remove('grabbing');
-        this.panChanged.emit({ ...this.cameraOffset });
-      }
+    window.addEventListener('mouseup', () => {
+      if (!this.isMiddleMouseDown) return;
+
+      this.isMiddleMouseDown = false;
+      this.isDraggingMiddle = false;
+      workspaceEl?.classList.remove('grabbing');
+
+      this.panChanged.emit({ ...this.cameraOffset });
     });
 
     this.svgPaint.nativeElement.addEventListener('mousedown', (evt) => {

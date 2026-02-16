@@ -25,26 +25,34 @@ class BluePrintModel extends AbstaractModel {
     }
 
     async getByDomain(domain, userId = null){
-        try {
-          let params = { domain: domain, userId: { $exists: false } };
-          if (userId) {
-            params['userId'] = userId
-          }
+        let params = { domain: domain, userId: { $exists: false } };
+        if (userId) {
+            params['userId'] = userId;
+        }
 
-          let blueprint = await this.modelDB.findOne(params).exec();
-          // console.log(blueprint);
-          return this.mapDocument( blueprint );
-        } catch (err) {
+        let blueprint = await this.modelDB.findOne(params).exec();
+
+        // If not found, create it (this is the "new blueprint" case)
+        if (!blueprint) {
             let data = {
                 domain: domain,
                 uniqCode: ""
-            }
+            };
             if (userId) {
-                data['userId'] = userId
+                data['userId'] = userId;
             }
-            let blueprint = await this.create(data); 
-            return this.mapDocument( blueprint );
+
+            blueprint = await this.create(data);
+
+            const mapped = this.mapDocument(blueprint);
+            mapped.isNew = true;
+            return mapped;
         }
+
+        // Existing blueprint
+        const mapped = this.mapDocument(blueprint);
+        mapped.isNew = false;
+        return mapped;
     }
 
     async signBluePrintToUser(blueprintId, userId){

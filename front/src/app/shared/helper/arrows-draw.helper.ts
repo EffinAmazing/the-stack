@@ -189,6 +189,8 @@ export class ArrowsHelper {
             id: null
         };
 
+        console.log('culcStartPosition', Arrow);
+
         return Arrow;
     }
 

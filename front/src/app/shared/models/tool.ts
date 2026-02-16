@@ -43,6 +43,7 @@ export interface BluePrint {
     errorCode?: number;
     errorMessage?: string;
     pan?: { x: number, y: number };
+    isNew?: boolean;
 }
 
 export interface BluePrintResp {
