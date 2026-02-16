@@ -98,6 +98,9 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private isMiddleMouseDown = false;
   private lastPointer = { x: 0, y: 0 };
+  //helper offsets for control points
+  endCtrlOffsetPoint = 0;
+  midCtrlOffsetPoint = 5;
 
 
   constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) {  }
@@ -732,8 +735,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     console.log(currentPathPoints);
 
-    document.getElementById('control1-' + this.selectedArrow.lineId).style.transform = `translate3d(${control1.x - 25}px, ${control1.y - 25}px, 0px)`;
-    document.getElementById('control2-' + this.selectedArrow.lineId).style.transform = `translate3d(${control2.x - 25}px, ${control2.y - 25}px, 0px)`; 
+    document.getElementById('control1-' + this.selectedArrow.lineId).style.transform = `translate3d(${control1.x - this.midCtrlOffsetPoint}px, ${control1.y - this.midCtrlOffsetPoint}px, 0px)`;
+    document.getElementById('control2-' + this.selectedArrow.lineId).style.transform = `translate3d(${control2.x - this.midCtrlOffsetPoint}px, ${control2.y - this.midCtrlOffsetPoint}px, 0px)`; 
   }
   
   public updatePointPositionArrow(ArrowId: string): void {
@@ -833,6 +836,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.selectedArrow.controlPoints.push(control2);
       }
         */
+
+      
       
 
       // 1. Add start dot
@@ -856,7 +861,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
               this.dotForDrag = null;
               this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });              
           });
-          dot1.style.transform = `translate3d(${poiterStart.x - 20}px, ${poiterStart.y - 20}px, 0px)`;
+          dot1.style.transform = `translate3d(${poiterStart.x - this.endCtrlOffsetPoint}px, ${poiterStart.y - this.endCtrlOffsetPoint}px, 0px)`;
           document.querySelector(`#node-${this.selectedArrow.start.nodeId}`).classList.add('has-selected-arrow');
           document.querySelector(`#node-${this.selectedArrow.end.nodeId}`).classList.add('has-selected-arrow');
       }
@@ -879,7 +884,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
               this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
               event.stopPropagation();
           });
-          dot2.style.transform = `translate3d(${poiterEnd.x - 20}px, ${poiterEnd.y - 20}px, 0px)`;
+          dot2.style.transform = `translate3d(${poiterEnd.x - this.endCtrlOffsetPoint}px, ${poiterEnd.y - this.endCtrlOffsetPoint}px, 0px)`;
 
           // 3. Add start control point
           const controlPoint1 = document.createElement('div');
@@ -901,7 +906,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
               this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
               event.stopPropagation();
           });
-          controlPoint1.style.transform = `translate3d(${control1.x - 25}px, ${control1.y - 25}px, 0px)`;
+          controlPoint1.style.transform = `translate3d(${control1.x - this.midCtrlOffsetPoint}px, ${control1.y - this.midCtrlOffsetPoint}px, 0px)`;
 
           // 4. Add end control point
           const controlPoint2 = document.createElement('div');
@@ -923,7 +928,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
               this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
               event.stopPropagation();
           });
-          controlPoint2.style.transform = `translate3d(${control2.x - 25}px, ${control2.y - 25}px, 0px)`;
+          controlPoint2.style.transform = `translate3d(${control2.x - this.midCtrlOffsetPoint}px, ${control2.y - this.midCtrlOffsetPoint}px, 0px)`;
 
           this.selectArrow.emit(this.selectedArrow);
           line.setAttribute('stroke-width', '4');
@@ -1113,7 +1118,7 @@ private getPointsFromPath(pathData) {
         this.arrowHelper.updateExistedArrow(item, container,this.isMoving);
         if (dot && dot.dataset.line === item.lineId) {
           const pos = dot.dataset.position;
-          dot.style.transform = `translate3d(${item[pos].x - 20}px, ${item[pos].y - 20}px, 0px)`;
+          dot.style.transform = `translate3d(${item[pos].x - this.endCtrlOffsetPoint}px, ${item[pos].y - this.endCtrlOffsetPoint}px, 0px)`;
         }
         /* */
       });
@@ -1142,8 +1147,8 @@ private getPointsFromPath(pathData) {
     const rect = container.getBoundingClientRect();
 
     return {
-      x: evt.clientX - rect.left - containerOffset - this.pan.x,
-      y: evt.clientY - rect.top - containerOffset - this.pan.y
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
     };
   }
 
@@ -1248,7 +1253,7 @@ private getPointsFromPath(pathData) {
           this.selectedArrow[position].pos = result.pos;
           this.selectedArrow[position].offset = data.offset;
           this.arrowHelper.updateExistedArrow(this.selectedArrow);
-          this.dotForDrag.style.transform = `translate3d(${data.pointer.x - 20}px, ${data.pointer.y - 20}px, 0px)`;
+          this.dotForDrag.style.transform = `translate3d(${data.pointer.x - this.endCtrlOffsetPoint}px, ${data.pointer.y - this.endCtrlOffsetPoint}px, 0px)`;
 
           this.updateControlPointPositionArrow(this.selectedArrow.lineId);
         } else if (position === 'control1' || position === 'control2') {
@@ -1305,7 +1310,7 @@ private getPointsFromPath(pathData) {
 
           this.arrowHelper.updateExistedArrowBezier(this.selectedArrow, container, pos.x, pos.y, position, this.currentPathPoints);
 
-          this.dotForDrag.style.transform = `translate3d(${pos.x - 25}px, ${pos.y - 25}px, 0px)`;
+          this.dotForDrag.style.transform = `translate3d(${pos.x - this.midCtrlOffsetPoint}px, ${pos.y - this.midCtrlOffsetPoint}px, 0px)`;
         }
       
     
