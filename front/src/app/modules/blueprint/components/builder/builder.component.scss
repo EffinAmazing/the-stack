@@ -390,3 +390,7 @@
 #stackWorkflow.export-hide .cdk-drag-placeholder {
   display: none;
 }
+
+.workflow-canvas {
+  will-change: transform;
+}

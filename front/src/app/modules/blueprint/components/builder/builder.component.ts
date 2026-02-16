@@ -26,7 +26,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('selectMany') selectMany: ElementRef<HTMLDivElement>;
   @ViewChild('selectorArea') selectorArea: ElementRef<HTMLDivElement>;
   @ViewChild('moveSelectedArea') moveSelectedArea: ElementRef<HTMLDivElement>;
-  @ViewChild('svgPaint') svgPaint: ElementRef<HTMLElement>;
+  @ViewChild('svgPaint') svgPaint: ElementRef<HTMLElement>; 
+  @ViewChild('workflowCanvas') workflowCanvas: ElementRef<HTMLDivElement>; 
   @Output() positionNodeChanged: EventEmitter<{
     nodeId: string,
     position: Pointer,
@@ -92,6 +93,12 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   gridSubscription: Subscription;
   snapSubscription: Subscription;
   globalHiddenTools: Tool[] = [];
+
+  pan = { x: 0, y: 0 };
+
+  private isMiddleMouseDown = false;
+  private lastPointer = { x: 0, y: 0 };
+
 
   constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) {  }
 
@@ -262,7 +269,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.historySubscription = this.historyEmit.subscribe((result) => {
       // console.log(result);
       if (result) {
-        const container = this.stackWorkFlow.nativeElement;
+        const container = this.workflowCanvas.nativeElement;
         //console.log('action:',result.action.name);
         switch (result.action.name) {
           case 'updatePosition':
@@ -714,7 +721,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public updateControlPointPositionArrow(ArrowId: string): void {
-    const container = this.stackWorkFlow.nativeElement;
+    const container = this.workflowCanvas.nativeElement;
     const line = document.querySelector(`path#${ArrowId}`);
     const pathData = line.getAttribute('d');  
     
@@ -770,7 +777,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       
       event.stopPropagation();
 
-      const container = this.stackWorkFlow.nativeElement;
+      const container = this.workflowCanvas.nativeElement;
 
       //deselect, we are reselecting
       if (this.selectedArrow) {          
@@ -1091,7 +1098,7 @@ private getPointsFromPath(pathData) {
   public handleNodeMove(evt, node) {
     this.isMoving = true;
     if (this.connectedLines.length) {
-      const container = this.stackWorkFlow.nativeElement;
+      const container = this.workflowCanvas.nativeElement;
 
       let pointers = evt.event.target;
       if (!pointers.classList.contains('pointers')) {
@@ -1115,7 +1122,7 @@ private getPointsFromPath(pathData) {
 
   public redrawArrows() {
    //console.log('redrawArrows',this.listOfArrows);
-    const container = this.stackWorkFlow.nativeElement;
+    const container = this.workflowCanvas.nativeElement;
     const ids = [];
     this.listOfArrows.forEach((item) => {
       const startNode = this.nodes[item.start.nodeId];
@@ -1131,10 +1138,19 @@ private getPointsFromPath(pathData) {
     }
   }
 
+  private toWorkflowPoint(evt: MouseEvent, container: HTMLElement) {
+    const rect = container.getBoundingClientRect();
+
+    return {
+      x: evt.clientX - rect.left - containerOffset - this.pan.x,
+      y: evt.clientY - rect.top - containerOffset - this.pan.y
+    };
+  }
+
   public handleMouseOverPointer(evt, node, pos) {
     if ( this.activeArrow ) {
       // console.log(evt.x, evt.y);
-      const container = this.stackWorkFlow.nativeElement;
+      const container = this.workflowCanvas.nativeElement;
       const data = this.arrowHelper.getArrowPointer(evt.target, container, pos, { x: evt.x, y: evt.y});
       this.activeArrow.end.nodeId = node.id;
       this.activeArrow.end.x = data.pointer.x;
@@ -1169,7 +1185,7 @@ private getPointsFromPath(pathData) {
 
     if (!this.activeArrow) {
       const target = evt.target;
-      const container = this.stackWorkFlow.nativeElement;
+      const container = this.workflowCanvas.nativeElement;
       this.isDrawingArrow = true;
       /* */
       this.activeArrow = this.arrowHelper.culcStartPosition(target, container, node, direction);
@@ -1180,13 +1196,15 @@ private getPointsFromPath(pathData) {
     if (this.activeArrow) {      
 
       if (!this.activeArrow.end.nodeId) {
-        const container = this.stackWorkFlow.nativeElement;
+        const container = this.workflowCanvas.nativeElement;
         const rectContainer = container.getBoundingClientRect();
 
         const X = rectContainer.x;
         const Y = rectContainer.y;
 
-        const pos = { y: evt.y - Y - containerOffset, x: evt.x - X - containerOffset };
+        //TEST PAN
+        //const pos = { y: evt.y - Y - containerOffset, x: evt.x - X - containerOffset };
+        const pos = this.toWorkflowPoint(evt, container);
 
         this.activeArrow.end.x = pos.x;
         this.activeArrow.end.y = pos.y;
@@ -1195,7 +1213,7 @@ private getPointsFromPath(pathData) {
         this.svgD3.select('path#' + this.activeArrow.lineId)
           .attr('d', lineGenerator([ [this.activeArrow.start.x, this.activeArrow.start.y], [pos.x, pos.y] ]));
       } else {
-        const container = this.stackWorkFlow.nativeElement;
+        const container = this.workflowCanvas.nativeElement;
         const data = this.arrowHelper.getArrowPointer(
           this.activeArrow.end.elRef, container, this.activeArrow.end.pos, { x: evt.x, y: evt.y});
         this.activeArrow.end.x = data.pointer.x;
@@ -1211,7 +1229,7 @@ private getPointsFromPath(pathData) {
 
       //console.log('this.dotForDrag',this.dotForDrag);
 
-        const container = this.stackWorkFlow.nativeElement;
+        const container = this.workflowCanvas.nativeElement;
         const position = this.dotForDrag.dataset.position;
 
         //console.log('selectedArrow',this.selectedArrow);       
@@ -1240,7 +1258,9 @@ private getPointsFromPath(pathData) {
           const X = rectContainer.x;
           const Y = rectContainer.y;
 
-          const pos = { y: evt.y - Y - containerOffset, x: evt.x - X - containerOffset };
+          //TEST PAN
+          //const pos = { y: evt.y - Y - containerOffset, x: evt.x - X - containerOffset };
+          const pos = this.toWorkflowPoint(evt, container);
           //console.log(pos.x,pos.y,evt.x,evt.y);
 
 
@@ -1400,8 +1420,11 @@ private getPointsFromPath(pathData) {
   }
 
   ngAfterViewInit() {
-    const container = this.stackWorkFlow.nativeElement;
+    const container = this.workflowCanvas.nativeElement;
     this.svgPaint.nativeElement.addEventListener('mousedown', (evt) => {
+      //don't responde to middle mouse button
+      if (evt.button == 1) return;
+
       // console.log(evt.target['id']);
       if ((evt.target === evt.currentTarget) || evt.target['id'] === 'builder_grid_rect') {
         // console.log(evt.target, evt.currentTarget);
@@ -1559,6 +1582,36 @@ private getPointsFromPath(pathData) {
         this.completeGroupMove({ x: dx, y: dy });
       }
     });
+
+    //panning 
+
+    container.addEventListener('mousedown', (event: MouseEvent) => {
+      if (event.button !== 1) return; // middle mouse only
+      event.preventDefault();
+
+      this.isMiddleMouseDown = true;
+      this.lastPointer.x = event.clientX;
+      this.lastPointer.y = event.clientY;
+    });
+
+    window.addEventListener('mousemove', (event: MouseEvent) => {
+      if (!this.isMiddleMouseDown) return;
+
+      const dx = event.clientX - this.lastPointer.x;
+      const dy = event.clientY - this.lastPointer.y;
+
+      this.lastPointer.x = event.clientX;
+      this.lastPointer.y = event.clientY;
+
+      this.pan.x += dx;
+      this.pan.y += dy;
+    });
+
+    window.addEventListener('mouseup', (event: MouseEvent) => {
+      if (event.button !== 1) return;
+      this.isMiddleMouseDown = false;
+    });
+
   }
 
   private completeGroupMove(different: Pointer): void {
