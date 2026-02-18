@@ -1110,6 +1110,14 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
           }
 
           if (nodeItem.tool.tag && nodeItem.tool.tag === 'domain') {
+
+            //center new node relative to viewport
+            const center = this.getViewportCenterWorldPosition();
+            nodeItem.position = {
+              x: center.x,
+              y: center.y
+            };
+
             this.domainsList.push(nodeItem.tool.name);
             window['dataLayer'].push({
               event: 'stackbuilder.domain.add',
@@ -1179,6 +1187,14 @@ public handleAddAdditionalApp() {
         result.forEach(nodeItem => {
 
           if (nodeItem.tool.tag && nodeItem.tool.tag === 'customApp') {
+
+            //center new node relative to viewport
+            const center = this.getViewportCenterWorldPosition();
+            nodeItem.position = {
+              x: center.x,
+              y: center.y
+            };
+            
               this.appsList.push(nodeItem.tool.name);
               window['dataLayer'].push({
                 event: 'stackbuilder.app.add',

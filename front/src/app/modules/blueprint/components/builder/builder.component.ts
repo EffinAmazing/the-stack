@@ -96,6 +96,10 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   snapSubscription: Subscription;
   globalHiddenTools: Tool[] = [];
 
+  public smoothPan = true;
+
+ private rafId: number | null = null;
+  private pendingPan = false;
   pan = { x: 0, y: 0 };
 
   private isMiddleMouseDown = false;
@@ -103,6 +107,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   //helper offsets for control points
   endCtrlOffsetPoint = 0;
   midCtrlOffsetPoint = 5;
+
+
 
 
   constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) {  }
@@ -1435,38 +1441,53 @@ private getPointsFromPath(pathData) {
         x: this.initialPan.x ?? 0,
         y: this.initialPan.y ?? 0
       };
+
+      this.applyPan();
     }
   
-    this.svgPaint.nativeElement.addEventListener('mousedown', (evt) => {
-      //don't responde to middle mouse button
-      if (evt.button == 1) return;
+    const stackViewport = this.stackWorkFlow.nativeElement;
 
-      // console.log(evt.target['id']);
-      if ((evt.target === evt.currentTarget) || evt.target['id'] === 'builder_grid_rect') {
-        // console.log(evt.target, evt.currentTarget);
-        this.isMultiselect = true;
+    stackViewport.addEventListener('mousedown', (evt: MouseEvent) => {
+      // ignore middle mouse (pan)
+      if (evt.button === 1) return;
 
-        this.startSelecting = true;
-        this.selectorArea.nativeElement.style.display = 'block';
-        this.selectorArea.nativeElement.style.visibility = 'hidden';
-        const offsetParent = this.stackWorkFlow.nativeElement.offsetParent as HTMLDivElement;
-        this.selectOffsetData = { x: offsetParent.offsetLeft,
-          y: offsetParent.offsetTop };
+      // ignore clicks on nodes
+      const target = evt.target as HTMLElement;
 
-        this.startPointer = { x: evt.pageX - this.selectOffsetData.x, y: evt.pageY - this.selectOffsetData.y };
-        if ( this.selectedNodes.length > 0 ) {
-          this.selectedNodes.forEach(item => {
-            item.elRef.style.transform = `translate3d(${item.node.position.x}px, ${item.node.position.y}px, 0px)`;
-            item.elRef.classList.remove('selected');
-          });
+      if (target.closest('.node')) return;
+      if (target.closest('.dot-drag-arrow')) return;
+      if (target.closest('.control-drag-arrow')) return;
 
-          this.connectedLines.forEach((itemArrow) => {
-            this.arrowHelper.updateExistedArrow(itemArrow, container);
-          });
+      this.isMultiselect = true;
+      this.startSelecting = true;
 
-          this.selectedNodes = [];
-        }
+      this.selectorArea.nativeElement.style.display = 'block';
+      this.selectorArea.nativeElement.style.visibility = 'hidden';
 
+      const offsetParent = this.stackWorkFlow.nativeElement.offsetParent as HTMLDivElement;
+      this.selectOffsetData = {
+        x: offsetParent.offsetLeft,
+        y: offsetParent.offsetTop
+      };
+
+      this.startPointer = {
+        x: evt.pageX - this.selectOffsetData.x,
+        y: evt.pageY - this.selectOffsetData.y
+      };
+
+      // Clear previous selection
+      if (this.selectedNodes.length > 0) {
+        this.selectedNodes.forEach(item => {
+          item.elRef.style.transform =
+            `translate3d(${item.node.position.x}px, ${item.node.position.y}px, 0px)`;
+          item.elRef.classList.remove('selected');
+        });
+
+        this.connectedLines.forEach(itemArrow => {
+          this.arrowHelper.updateExistedArrow(itemArrow, this.workflowCanvas.nativeElement);
+        });
+
+        this.selectedNodes = [];
       }
     });
 
@@ -1559,6 +1580,8 @@ private getPointsFromPath(pathData) {
     });
 
     this.moveSelectedArea.nativeElement.addEventListener('mousedown', (evt) => {
+      evt.stopPropagation();
+      evt.preventDefault();
       this.moveSelectStart = { x: evt.pageX - this.selectOffsetData.x - containerOffset,
         y: evt.pageY - this.selectOffsetData.y - containerOffset };
       this.starMoveSelected = true;
@@ -1581,6 +1604,8 @@ private getPointsFromPath(pathData) {
       //
     });
     this.moveSelectedArea.nativeElement.addEventListener('mouseup', (evt) => {
+      evt.stopPropagation();
+      evt.preventDefault();
       this.starMoveSelected = false;
       const X = evt.pageX - this.selectOffsetData.x - containerOffset;
       const Y = evt.pageY - this.selectOffsetData.y - containerOffset;
@@ -1624,6 +1649,8 @@ private getPointsFromPath(pathData) {
 
       this.pan.x += dx;
       this.pan.y += dy;
+
+      this.schedulePanRender();
     });
 
     window.addEventListener('mouseup', (event: MouseEvent) => {
@@ -1633,6 +1660,22 @@ private getPointsFromPath(pathData) {
       viewport.classList.remove('is-panning');
     });
 
+  }
+
+  private schedulePanRender() {
+    if (this.rafId !== null) return; // already scheduled
+
+    this.rafId = requestAnimationFrame(() => {
+      this.rafId = null;
+
+      const canvas = this.workflowCanvas.nativeElement;
+      canvas.style.transform = `translate3d(${this.pan.x}px, ${this.pan.y}px, 0)`;
+    });
+  }
+
+  private applyPan() {
+    const canvas = this.workflowCanvas.nativeElement;
+    canvas.style.transform = `translate(${this.pan.x}px, ${this.pan.y}px)`;
   }
 
   private completeGroupMove(different: Pointer): void {
