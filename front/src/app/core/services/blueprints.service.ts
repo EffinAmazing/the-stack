@@ -94,6 +94,10 @@ export class BlueprintsService {
     return this.mapper.mapResponse(this.http.put(`${this.serverURI}toolsnodes/custom/${nodeId}`, data));
   }
 
+  updateBlueprintPan(blueprintId: string, pan: { x: number; y: number }) {
+    return this.mapper.mapResponse(this.http.put(`${this.serverURI}blueprints/${blueprintId}/pan`, { pan }));
+  }
+
   getCategories(name): Observable<any> {
     return this.mapper.mapResponse(this.http.get(`${this.serverURI}tools/categories?name=${name}`));
   }

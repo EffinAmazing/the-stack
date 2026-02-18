@@ -2,7 +2,15 @@
     <div id="stackWorkflow" [ngClass]="{'stackWorkflow': true, 'drawingArrow': isDrawingArrow}" #stackWorkFlow (mousemove)="handleMouseMove($event)" 
       (click)="handleClickOnWorkspace()"
       (mouseup)="handleMouseUp()" 
-      (mouselout)="handleMouseUp()">
+      (mouselout)="handleMouseUp()"      
+      >
+
+        <div
+          #workflowCanvas 
+          class="workflow-canvas"
+          [style.transform]="'translate(' + pan.x + 'px,' + pan.y + 'px)'"           
+        >
+
         <div class="for-svg-bg"></div>
         <svg #svgPaint id="paint"  width="1190" height="640">
           <defs>
@@ -97,7 +105,10 @@
 
             <div *ngIf="isUserAdmin" class="admin-hide-tool-button" (click)="hideNodeGlobally(node)"> <mat-icon>block</mat-icon> </div>
 
-    </div>
+          </div>
+
+          </div>
+          
     <div #selectMany [ngClass]="{'select-many-elements': true, 'visible': isMultiselect }"> </div>
     <div #selectorArea class="seletor-area-box"> </div>
     <div #moveSelectedArea class="moved-selected-area"></div>

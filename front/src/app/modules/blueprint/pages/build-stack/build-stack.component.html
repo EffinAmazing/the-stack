@@ -133,7 +133,9 @@
           (mouseoverNode)="handleMouseoverNode($event)" 
           (clickWorkspace)="handleClickWorkspace($event)" 
           (groupMoveCompleted)="handleGroupMove($event)" 
-          (nicknameUpdated)="handleNicknameUpdated($event)"
+          (nicknameUpdated)="handleNicknameUpdated($event)" 
+          (panChanged)="handlePanChanged($event)" 
+          [initialPan]="blueprint?.pan" 
           ></app-builder>
 
       </div>
@@ -154,10 +156,6 @@
             <button *ngIf="authUser" class="stack-button" color="primary" (click)="handleClickInviteUser()"> <mat-icon>person_add</mat-icon> Invite users </button>
             <div *ngIf="authUser" class="divider-buttons"></div>
             <button *ngIf="authUser" class="stack-button" (click)="removeStack()"> <mat-icon>delete</mat-icon> Delete stack </button>
-          
-          
-              
-          
           </div>
         </div>
       </div>

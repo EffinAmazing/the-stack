@@ -356,6 +356,30 @@ class BluePrints {
         })
     }
 
+    updateBlueprintPan(req, res) {
+        const id = req.params.id;
+        const pan = req.body.pan;
+
+        if (!id || !pan || typeof pan.x !== "number" || typeof pan.y !== "number") {
+            return res.status(400).json({ result: "Error", message: "Bad Request" });
+        }
+
+        this._bluePrints.modelDB.updateOne(
+            { _id: id },
+            {
+            $set: {
+                pan: { x: pan.x, y: pan.y },
+                updated: new Date()
+            }
+            }
+        )
+        .then(() => res.json({ result: "Ok" }))
+        .catch((err) => {
+            console.log(err);
+            res.status(500).json({ result: "Error", message: "Server Error" });
+        });
+        }
+
     getBluePrintsForUser(req, res, next) {
         const userId = req.query.userId;
         if (userId) {

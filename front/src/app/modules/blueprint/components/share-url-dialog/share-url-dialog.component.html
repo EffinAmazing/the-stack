@@ -41,14 +41,17 @@
     <input matInput [value]="url" readonly (click)="$event.target.select()" />
   </mat-form-field>
 
-  <!-- Copied message -->
-  <div *ngIf="copied" style="margin-top: 8px; color: green;">
-    Copied!
-  </div>
+
 
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
+
+    <!-- Copied message -->
+  <div *ngIf="copied" class="copied-wrapper">
+    Copied!
+  </div>
+
   <button mat-button class="stack-button" (click)="close()" [disabled]="copied">Cancel</button>
   <button mat-flat-button class="stack-button" color="primary" (click)="copyUrl()" [disabled]="copied">Copy Share URL</button>
   <button mat-flat-button class="stack-button" color="secondary" (click)="downloadImage()">Download Image</button>

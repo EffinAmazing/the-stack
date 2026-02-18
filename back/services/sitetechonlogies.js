@@ -66,8 +66,8 @@ exports.getDomainTool = async function(domain) {
     const _path = path.resolve(__dirname, '../public/domain-logos', domain + '.png');
     let tool;
 
-    const token = LOGODEV_API_KEY; // Replace with your actual logo.dev token
-    const logoUrl = `https://img.logo.dev/${domain}?token=${token}`;
+    const token = LOGODEV_API_KEY;
+    const logoUrl = `https://img.logo.dev/${domain}?token=${token}&format=png`;
 
     try {
         let data = await download.downloadImage(_path, logoUrl);

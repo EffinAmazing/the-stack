@@ -26,7 +26,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('selectMany') selectMany: ElementRef<HTMLDivElement>;
   @ViewChild('selectorArea') selectorArea: ElementRef<HTMLDivElement>;
   @ViewChild('moveSelectedArea') moveSelectedArea: ElementRef<HTMLDivElement>;
-  @ViewChild('svgPaint') svgPaint: ElementRef<HTMLElement>;
+  @ViewChild('svgPaint') svgPaint: ElementRef<HTMLElement>; 
+  @ViewChild('workflowCanvas') workflowCanvas: ElementRef<HTMLDivElement>; 
   @Output() positionNodeChanged: EventEmitter<{
     nodeId: string,
     position: Pointer,
@@ -45,6 +46,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() clickWorkspace: EventEmitter<any> = new EventEmitter();
   @Output() groupMoveCompleted: EventEmitter<{ nodeIds: string[], diff: Pointer }> = new EventEmitter();
   @Output() nicknameUpdated = new EventEmitter<{ nodeId: string; nickname: string }>();
+  @Output() panChanged = new EventEmitter<{ x: number; y: number }>();
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
   @Input() historyEmit: Observable<any>;
@@ -54,7 +56,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() showGrid: Observable<boolean>;
   @Input() snapGrid: Observable<boolean>;
   @Input() domainsList: String[];
-  @Input() toolsHiddenGlobally: Observable<any>;
+  @Input() toolsHiddenGlobally: Observable<any>; 
+  @Input() initialPan: { x: number; y: number } | null = null;
   isMultiselect = false;
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
@@ -92,6 +95,15 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   gridSubscription: Subscription;
   snapSubscription: Subscription;
   globalHiddenTools: Tool[] = [];
+
+  pan = { x: 0, y: 0 };
+
+  private isMiddleMouseDown = false;
+  private lastPointer = { x: 0, y: 0 };
+  //helper offsets for control points
+  endCtrlOffsetPoint = 0;
+  midCtrlOffsetPoint = 5;
+
 
   constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) {  }
 
@@ -262,7 +274,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.historySubscription = this.historyEmit.subscribe((result) => {
       // console.log(result);
       if (result) {
-        const container = this.stackWorkFlow.nativeElement;
+        const container = this.workflowCanvas.nativeElement;
         //console.log('action:',result.action.name);
         switch (result.action.name) {
           case 'updatePosition':
@@ -714,7 +726,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public updateControlPointPositionArrow(ArrowId: string): void {
-    const container = this.stackWorkFlow.nativeElement;
+    const container = this.workflowCanvas.nativeElement;
     const line = document.querySelector(`path#${ArrowId}`);
     const pathData = line.getAttribute('d');  
     
@@ -725,8 +737,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     console.log(currentPathPoints);
 
-    document.getElementById('control1-' + this.selectedArrow.lineId).style.transform = `translate3d(${control1.x - 25}px, ${control1.y - 25}px, 0px)`;
-    document.getElementById('control2-' + this.selectedArrow.lineId).style.transform = `translate3d(${control2.x - 25}px, ${control2.y - 25}px, 0px)`; 
+    document.getElementById('control1-' + this.selectedArrow.lineId).style.transform = `translate3d(${control1.x - this.midCtrlOffsetPoint}px, ${control1.y - this.midCtrlOffsetPoint}px, 0px)`;
+    document.getElementById('control2-' + this.selectedArrow.lineId).style.transform = `translate3d(${control2.x - this.midCtrlOffsetPoint}px, ${control2.y - this.midCtrlOffsetPoint}px, 0px)`; 
   }
   
   public updatePointPositionArrow(ArrowId: string): void {
@@ -770,7 +782,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
       
       event.stopPropagation();
 
-      const container = this.stackWorkFlow.nativeElement;
+      const container = this.workflowCanvas.nativeElement;
 
       //deselect, we are reselecting
       if (this.selectedArrow) {          
@@ -826,6 +838,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.selectedArrow.controlPoints.push(control2);
       }
         */
+
+      
       
 
       // 1. Add start dot
@@ -849,7 +863,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
               this.dotForDrag = null;
               this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });              
           });
-          dot1.style.transform = `translate3d(${poiterStart.x - 20}px, ${poiterStart.y - 20}px, 0px)`;
+          dot1.style.transform = `translate3d(${poiterStart.x - this.endCtrlOffsetPoint}px, ${poiterStart.y - this.endCtrlOffsetPoint}px, 0px)`;
           document.querySelector(`#node-${this.selectedArrow.start.nodeId}`).classList.add('has-selected-arrow');
           document.querySelector(`#node-${this.selectedArrow.end.nodeId}`).classList.add('has-selected-arrow');
       }
@@ -872,7 +886,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
               this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
               event.stopPropagation();
           });
-          dot2.style.transform = `translate3d(${poiterEnd.x - 20}px, ${poiterEnd.y - 20}px, 0px)`;
+          dot2.style.transform = `translate3d(${poiterEnd.x - this.endCtrlOffsetPoint}px, ${poiterEnd.y - this.endCtrlOffsetPoint}px, 0px)`;
 
           // 3. Add start control point
           const controlPoint1 = document.createElement('div');
@@ -894,7 +908,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
               this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
               event.stopPropagation();
           });
-          controlPoint1.style.transform = `translate3d(${control1.x - 25}px, ${control1.y - 25}px, 0px)`;
+          controlPoint1.style.transform = `translate3d(${control1.x - this.midCtrlOffsetPoint}px, ${control1.y - this.midCtrlOffsetPoint}px, 0px)`;
 
           // 4. Add end control point
           const controlPoint2 = document.createElement('div');
@@ -916,7 +930,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
               this.arrowUpdated.emit({ newData: this.selectedArrow, oldData: old, disableHistory: false });
               event.stopPropagation();
           });
-          controlPoint2.style.transform = `translate3d(${control2.x - 25}px, ${control2.y - 25}px, 0px)`;
+          controlPoint2.style.transform = `translate3d(${control2.x - this.midCtrlOffsetPoint}px, ${control2.y - this.midCtrlOffsetPoint}px, 0px)`;
 
           this.selectArrow.emit(this.selectedArrow);
           line.setAttribute('stroke-width', '4');
@@ -1091,7 +1105,7 @@ private getPointsFromPath(pathData) {
   public handleNodeMove(evt, node) {
     this.isMoving = true;
     if (this.connectedLines.length) {
-      const container = this.stackWorkFlow.nativeElement;
+      const container = this.workflowCanvas.nativeElement;
 
       let pointers = evt.event.target;
       if (!pointers.classList.contains('pointers')) {
@@ -1106,7 +1120,7 @@ private getPointsFromPath(pathData) {
         this.arrowHelper.updateExistedArrow(item, container,this.isMoving);
         if (dot && dot.dataset.line === item.lineId) {
           const pos = dot.dataset.position;
-          dot.style.transform = `translate3d(${item[pos].x - 20}px, ${item[pos].y - 20}px, 0px)`;
+          dot.style.transform = `translate3d(${item[pos].x - this.endCtrlOffsetPoint}px, ${item[pos].y - this.endCtrlOffsetPoint}px, 0px)`;
         }
         /* */
       });
@@ -1115,7 +1129,7 @@ private getPointsFromPath(pathData) {
 
   public redrawArrows() {
    //console.log('redrawArrows',this.listOfArrows);
-    const container = this.stackWorkFlow.nativeElement;
+    const container = this.workflowCanvas.nativeElement;
     const ids = [];
     this.listOfArrows.forEach((item) => {
       const startNode = this.nodes[item.start.nodeId];
@@ -1131,10 +1145,19 @@ private getPointsFromPath(pathData) {
     }
   }
 
+  private toWorkflowPoint(evt: MouseEvent, container: HTMLElement) {
+    const rect = container.getBoundingClientRect();
+
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
+    };
+  }
+
   public handleMouseOverPointer(evt, node, pos) {
     if ( this.activeArrow ) {
       // console.log(evt.x, evt.y);
-      const container = this.stackWorkFlow.nativeElement;
+      const container = this.workflowCanvas.nativeElement;
       const data = this.arrowHelper.getArrowPointer(evt.target, container, pos, { x: evt.x, y: evt.y});
       this.activeArrow.end.nodeId = node.id;
       this.activeArrow.end.x = data.pointer.x;
@@ -1169,7 +1192,7 @@ private getPointsFromPath(pathData) {
 
     if (!this.activeArrow) {
       const target = evt.target;
-      const container = this.stackWorkFlow.nativeElement;
+      const container = this.workflowCanvas.nativeElement;
       this.isDrawingArrow = true;
       /* */
       this.activeArrow = this.arrowHelper.culcStartPosition(target, container, node, direction);
@@ -1180,13 +1203,15 @@ private getPointsFromPath(pathData) {
     if (this.activeArrow) {      
 
       if (!this.activeArrow.end.nodeId) {
-        const container = this.stackWorkFlow.nativeElement;
+        const container = this.workflowCanvas.nativeElement;
         const rectContainer = container.getBoundingClientRect();
 
         const X = rectContainer.x;
         const Y = rectContainer.y;
 
-        const pos = { y: evt.y - Y - containerOffset, x: evt.x - X - containerOffset };
+        //TEST PAN
+        //const pos = { y: evt.y - Y - containerOffset, x: evt.x - X - containerOffset };
+        const pos = this.toWorkflowPoint(evt, container);
 
         this.activeArrow.end.x = pos.x;
         this.activeArrow.end.y = pos.y;
@@ -1195,7 +1220,7 @@ private getPointsFromPath(pathData) {
         this.svgD3.select('path#' + this.activeArrow.lineId)
           .attr('d', lineGenerator([ [this.activeArrow.start.x, this.activeArrow.start.y], [pos.x, pos.y] ]));
       } else {
-        const container = this.stackWorkFlow.nativeElement;
+        const container = this.workflowCanvas.nativeElement;
         const data = this.arrowHelper.getArrowPointer(
           this.activeArrow.end.elRef, container, this.activeArrow.end.pos, { x: evt.x, y: evt.y});
         this.activeArrow.end.x = data.pointer.x;
@@ -1211,7 +1236,7 @@ private getPointsFromPath(pathData) {
 
       //console.log('this.dotForDrag',this.dotForDrag);
 
-        const container = this.stackWorkFlow.nativeElement;
+        const container = this.workflowCanvas.nativeElement;
         const position = this.dotForDrag.dataset.position;
 
         //console.log('selectedArrow',this.selectedArrow);       
@@ -1230,7 +1255,7 @@ private getPointsFromPath(pathData) {
           this.selectedArrow[position].pos = result.pos;
           this.selectedArrow[position].offset = data.offset;
           this.arrowHelper.updateExistedArrow(this.selectedArrow);
-          this.dotForDrag.style.transform = `translate3d(${data.pointer.x - 20}px, ${data.pointer.y - 20}px, 0px)`;
+          this.dotForDrag.style.transform = `translate3d(${data.pointer.x - this.endCtrlOffsetPoint}px, ${data.pointer.y - this.endCtrlOffsetPoint}px, 0px)`;
 
           this.updateControlPointPositionArrow(this.selectedArrow.lineId);
         } else if (position === 'control1' || position === 'control2') {
@@ -1240,7 +1265,9 @@ private getPointsFromPath(pathData) {
           const X = rectContainer.x;
           const Y = rectContainer.y;
 
-          const pos = { y: evt.y - Y - containerOffset, x: evt.x - X - containerOffset };
+          //TEST PAN
+          //const pos = { y: evt.y - Y - containerOffset, x: evt.x - X - containerOffset };
+          const pos = this.toWorkflowPoint(evt, container);
           //console.log(pos.x,pos.y,evt.x,evt.y);
 
 
@@ -1285,7 +1312,7 @@ private getPointsFromPath(pathData) {
 
           this.arrowHelper.updateExistedArrowBezier(this.selectedArrow, container, pos.x, pos.y, position, this.currentPathPoints);
 
-          this.dotForDrag.style.transform = `translate3d(${pos.x - 25}px, ${pos.y - 25}px, 0px)`;
+          this.dotForDrag.style.transform = `translate3d(${pos.x - this.midCtrlOffsetPoint}px, ${pos.y - this.midCtrlOffsetPoint}px, 0px)`;
         }
       
     
@@ -1400,8 +1427,20 @@ private getPointsFromPath(pathData) {
   }
 
   ngAfterViewInit() {
-    const container = this.stackWorkFlow.nativeElement;
+    const container = this.workflowCanvas.nativeElement;
+
+    //initial pan
+    if (this.initialPan) {
+      this.pan = {
+        x: this.initialPan.x ?? 0,
+        y: this.initialPan.y ?? 0
+      };
+    }
+  
     this.svgPaint.nativeElement.addEventListener('mousedown', (evt) => {
+      //don't responde to middle mouse button
+      if (evt.button == 1) return;
+
       // console.log(evt.target['id']);
       if ((evt.target === evt.currentTarget) || evt.target['id'] === 'builder_grid_rect') {
         // console.log(evt.target, evt.currentTarget);
@@ -1559,6 +1598,41 @@ private getPointsFromPath(pathData) {
         this.completeGroupMove({ x: dx, y: dy });
       }
     });
+
+    //panning 
+
+    const viewport = this.stackWorkFlow.nativeElement;
+
+    viewport.addEventListener('mousedown', (event: MouseEvent) => {
+      if (event.button !== 1) return; // middle mouse only
+      viewport.classList.add('is-panning');
+      event.preventDefault();
+
+      this.isMiddleMouseDown = true;
+      this.lastPointer.x = event.clientX;
+      this.lastPointer.y = event.clientY;
+    });
+
+    window.addEventListener('mousemove', (event: MouseEvent) => {
+      if (!this.isMiddleMouseDown) return;
+
+      const dx = event.clientX - this.lastPointer.x;
+      const dy = event.clientY - this.lastPointer.y;
+
+      this.lastPointer.x = event.clientX;
+      this.lastPointer.y = event.clientY;
+
+      this.pan.x += dx;
+      this.pan.y += dy;
+    });
+
+    window.addEventListener('mouseup', (event: MouseEvent) => {
+      if (event.button !== 1) return;
+      this.isMiddleMouseDown = false;
+      this.panChanged.emit({ x: this.pan.x, y: this.pan.y });
+      viewport.classList.remove('is-panning');
+    });
+
   }
 
   private completeGroupMove(different: Pointer): void {
@@ -1611,17 +1685,24 @@ private getPointsFromPath(pathData) {
   }
 
   private getSelectedNodes(area: Area): void {
-    const endX = area.x + area.width;
-    const endY = area.y + area.height;
+    const worldX = area.x - this.pan.x;
+    const worldY = area.y - this.pan.y;
+
+    const endX = worldX + area.width;
+    const endY = worldY + area.height;
+
     const selectedNodes = this.showNodes.filter(item => {
       const elRef = document.querySelector(`#node-${item.id}`) as HTMLDivElement;
-      return item.position.x + elRef.offsetWidth > area.x - containerOffset && item.position.x < endX - containerOffset
-        && item.position.y + elRef.offsetHeight > area.y - containerOffset && item.position.y < endY - containerOffset;
+
+      return item.position.x + elRef.offsetWidth > worldX - containerOffset &&
+            item.position.x < endX - containerOffset &&
+            item.position.y + elRef.offsetHeight > worldY - containerOffset &&
+            item.position.y < endY - containerOffset;
     });
 
+    // UI rectangle stays in viewport space
     this.moveSelectedArea.nativeElement.style.display = 'block';
     this.moveSelectedArea.nativeElement.style.transform = `translate3d(0px, 0px, 0px)`;
-
     this.moveSelectedArea.nativeElement.style.top = area.y + 'px';
     this.moveSelectedArea.nativeElement.style.left = area.x + 'px';
     this.moveSelectedArea.nativeElement.style.width = area.width + 'px';
@@ -1630,21 +1711,18 @@ private getPointsFromPath(pathData) {
     this.selectedNodes = selectedNodes.map((item) => {
       const elRef = document.querySelector(`#node-${item.id}`) as HTMLDivElement;
       elRef.classList.add('selected');
-      //
       return { node: item, elRef };
     });
 
-    const lines = this.listOfArrows.filter((itemArrow) => {
-      let start = false;
-      let end = false;
-      // itemArrow.start.nodeId === item.id || itemArrow.end.nodeId === item.id;
-
-      start = selectedNodes.findIndex((node) => itemArrow.start.nodeId === node.id) !== -1;
-      end = selectedNodes.findIndex((node) => itemArrow.end.nodeId === node.id) !== -1;
+    const lines = this.listOfArrows.filter(itemArrow => {
+      const start = selectedNodes.some(node => itemArrow.start.nodeId === node.id);
+      const end = selectedNodes.some(node => itemArrow.end.nodeId === node.id);
       return start || end;
     });
+
     this.connectedLines = lines;
   }
+
 
   ngOnDestroy() {
     if (this.nodesSubscription) {
