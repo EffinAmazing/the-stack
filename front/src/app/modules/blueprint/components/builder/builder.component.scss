@@ -10,8 +10,16 @@
     height: 660px;
     overflow: hidden;
     box-sizing: border-box;
-    background: #e5e5e5;  /* outside canvas */
+    background: #fff;  /* outside canvas */
     overflow: hidden;
+
+    /* bg */
+    background-image: radial-gradient(circle, rgba(0,0,0,0.12) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+
+.stackWorkflow.is-panning {
+  cursor: grabbing;
 }
 
 .workflow-canvas {
@@ -364,13 +372,15 @@
     left: 0;
     bottom: 0;
     right: 0;
-      /* Dot grid */
+    
+    /* Dot grid */
+    /*
     background-image: radial-gradient(circle, rgba(0,0,0,0.18) 1px, transparent 1px);
     background-size: 24px 24px;
     background-position: 0 0;
 
-    /* Optional: base color */
     background-color: #ffffff;
+    */
 }
 
 #paint{
@@ -387,6 +397,7 @@
         stroke: #1c57a4;
         fill: #1c57a4;
     }
+    overflow: visible;
 }
 
 /* Hide ephemeral chrome while .export-hide is applied on #stackWorkflow */

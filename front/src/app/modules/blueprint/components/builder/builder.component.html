@@ -2,12 +2,13 @@
     <div id="stackWorkflow" [ngClass]="{'stackWorkflow': true, 'drawingArrow': isDrawingArrow}" #stackWorkFlow (mousemove)="handleMouseMove($event)" 
       (click)="handleClickOnWorkspace()"
       (mouseup)="handleMouseUp()" 
-      (mouselout)="handleMouseUp()">
+      (mouselout)="handleMouseUp()"      
+      >
 
         <div
           #workflowCanvas 
           class="workflow-canvas"
-          [style.transform]="'translate(' + pan.x + 'px,' + pan.y + 'px)'"
+          [style.transform]="'translate(' + pan.x + 'px,' + pan.y + 'px)'"           
         >
 
         <div class="for-svg-bg"></div>

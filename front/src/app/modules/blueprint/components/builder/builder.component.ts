@@ -46,6 +46,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() clickWorkspace: EventEmitter<any> = new EventEmitter();
   @Output() groupMoveCompleted: EventEmitter<{ nodeIds: string[], diff: Pointer }> = new EventEmitter();
   @Output() nicknameUpdated = new EventEmitter<{ nodeId: string; nickname: string }>();
+  @Output() panChanged = new EventEmitter<{ x: number; y: number }>();
   @Input() loadedNodes: Observable<any>;
   @Input() loadedArrows: Observable<any>;
   @Input() historyEmit: Observable<any>;
@@ -55,7 +56,8 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() showGrid: Observable<boolean>;
   @Input() snapGrid: Observable<boolean>;
   @Input() domainsList: String[];
-  @Input() toolsHiddenGlobally: Observable<any>;
+  @Input() toolsHiddenGlobally: Observable<any>; 
+  @Input() initialPan: { x: number; y: number } | null = null;
   isMultiselect = false;
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   selectedArrow: any;
@@ -1426,6 +1428,15 @@ private getPointsFromPath(pathData) {
 
   ngAfterViewInit() {
     const container = this.workflowCanvas.nativeElement;
+
+    //initial pan
+    if (this.initialPan) {
+      this.pan = {
+        x: this.initialPan.x ?? 0,
+        y: this.initialPan.y ?? 0
+      };
+    }
+  
     this.svgPaint.nativeElement.addEventListener('mousedown', (evt) => {
       //don't responde to middle mouse button
       if (evt.button == 1) return;
@@ -1590,8 +1601,11 @@ private getPointsFromPath(pathData) {
 
     //panning 
 
-    container.addEventListener('mousedown', (event: MouseEvent) => {
+    const viewport = this.stackWorkFlow.nativeElement;
+
+    viewport.addEventListener('mousedown', (event: MouseEvent) => {
       if (event.button !== 1) return; // middle mouse only
+      viewport.classList.add('is-panning');
       event.preventDefault();
 
       this.isMiddleMouseDown = true;
@@ -1615,6 +1629,8 @@ private getPointsFromPath(pathData) {
     window.addEventListener('mouseup', (event: MouseEvent) => {
       if (event.button !== 1) return;
       this.isMiddleMouseDown = false;
+      this.panChanged.emit({ x: this.pan.x, y: this.pan.y });
+      viewport.classList.remove('is-panning');
     });
 
   }
@@ -1669,17 +1685,24 @@ private getPointsFromPath(pathData) {
   }
 
   private getSelectedNodes(area: Area): void {
-    const endX = area.x + area.width;
-    const endY = area.y + area.height;
+    const worldX = area.x - this.pan.x;
+    const worldY = area.y - this.pan.y;
+
+    const endX = worldX + area.width;
+    const endY = worldY + area.height;
+
     const selectedNodes = this.showNodes.filter(item => {
       const elRef = document.querySelector(`#node-${item.id}`) as HTMLDivElement;
-      return item.position.x + elRef.offsetWidth > area.x - containerOffset && item.position.x < endX - containerOffset
-        && item.position.y + elRef.offsetHeight > area.y - containerOffset && item.position.y < endY - containerOffset;
+
+      return item.position.x + elRef.offsetWidth > worldX - containerOffset &&
+            item.position.x < endX - containerOffset &&
+            item.position.y + elRef.offsetHeight > worldY - containerOffset &&
+            item.position.y < endY - containerOffset;
     });
 
+    // UI rectangle stays in viewport space
     this.moveSelectedArea.nativeElement.style.display = 'block';
     this.moveSelectedArea.nativeElement.style.transform = `translate3d(0px, 0px, 0px)`;
-
     this.moveSelectedArea.nativeElement.style.top = area.y + 'px';
     this.moveSelectedArea.nativeElement.style.left = area.x + 'px';
     this.moveSelectedArea.nativeElement.style.width = area.width + 'px';
@@ -1688,21 +1711,18 @@ private getPointsFromPath(pathData) {
     this.selectedNodes = selectedNodes.map((item) => {
       const elRef = document.querySelector(`#node-${item.id}`) as HTMLDivElement;
       elRef.classList.add('selected');
-      //
       return { node: item, elRef };
     });
 
-    const lines = this.listOfArrows.filter((itemArrow) => {
-      let start = false;
-      let end = false;
-      // itemArrow.start.nodeId === item.id || itemArrow.end.nodeId === item.id;
-
-      start = selectedNodes.findIndex((node) => itemArrow.start.nodeId === node.id) !== -1;
-      end = selectedNodes.findIndex((node) => itemArrow.end.nodeId === node.id) !== -1;
+    const lines = this.listOfArrows.filter(itemArrow => {
+      const start = selectedNodes.some(node => itemArrow.start.nodeId === node.id);
+      const end = selectedNodes.some(node => itemArrow.end.nodeId === node.id);
       return start || end;
     });
+
     this.connectedLines = lines;
   }
+
 
   ngOnDestroy() {
     if (this.nodesSubscription) {

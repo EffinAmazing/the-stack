@@ -80,6 +80,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   arrowHelper: ArrowsHelper = new ArrowsHelper();
   // subscriptions
   private stackRequest: Subscription;
+  private lastSavedPan: Pointer | null = null;
 
   /*
    * Deprecated on unload listener
@@ -181,6 +182,48 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       this.isError = true;
       this.emitErrorToDataLayer('Unknown error in build-stack.components ngOnInit',this.errMessageReturned);
     }
+  }
+
+  private getViewportCenterWorldPosition() {
+    const container = document.querySelector('#stackWorkflow') as HTMLElement;
+    const rect = container.getBoundingClientRect();
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    // pull pan from builder (minimal)
+    const pan = this.builderComponent.pan;
+
+    return {
+      x: centerX - pan.x,
+      y: centerY - pan.y
+    };
+  }
+
+  handlePanChanged(pan: Pointer) {
+    console.log('handlePanChanged');
+     if (!this.blueprint?.id) return;
+
+    // guard against spam
+    if (
+      this.lastSavedPan &&
+      this.lastSavedPan.x === pan.x &&
+      this.lastSavedPan.y === pan.y
+    ) {
+      return;
+    }
+
+    console.log('pan:',pan);
+
+    this.lastSavedPan = { ...pan };
+
+    this.service.updateBlueprintPan(this.blueprint.id, pan).subscribe({
+      next: () => {
+        // keep local blueprint state consistent
+        this.blueprint.pan = pan;
+      },
+      error: (err) => console.log(err)
+    });
   }
 
   private emitErrorToDataLayer(type,message) {
@@ -835,6 +878,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       if (result) {
         if (typeof result === 'object') {
           for (const key in result) {
+            
+            //TODO
+            //newnodeoffset
+ 
             if (result.hasOwnProperty(key)) {
               const item = result[key];
 
@@ -849,13 +896,19 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
                 // No hidden nodes, create a new one
                 const referenceNode = Object.values(this.nodes).find(node => node.toolId === item.id);
 
+                const center = this.getViewportCenterWorldPosition();
+
                 listToCreate.push({
                   blueprintId: this.blueprint.id,
                   toolId: item.id,
                   hide: false,
                   dependencies: [],
                   start: referenceNode?.start || null,
-                  end: referenceNode?.end || null
+                  end: referenceNode?.end || null,
+                  position: {
+                    x: center.x,
+                    y: center.y
+                  }
                 });
               }
             }

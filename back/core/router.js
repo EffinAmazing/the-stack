@@ -40,6 +40,7 @@ router.post('/blueprints/invite', passport.authenticate('jwt', { session: false 
 router.get('/blueprints/shared', passport.authenticate('jwt', { session: false }), blueprints.getSharedBluePrints.bind(blueprints));
 router.put('/blueprints/:id/signin', passport.authenticate('jwt', { session: false }), blueprints.signUserToBluePrint.bind(blueprints));
 router.get('/blueprints/:id/invited', passport.authenticate('jwt', { session: false }), blueprints.getInvitededUsers.bind(blueprints));
+router.put('/blueprints/:id/pan', blueprints.updateBlueprintPan.bind(blueprints));
 
 router.put("/toolsnodes/:id", servicePassport.optionalAthentication , toolsNodes.update.bind(toolsNodes));
 router.post("/toolsnodes/", toolsNodes.add.bind(toolsNodes));

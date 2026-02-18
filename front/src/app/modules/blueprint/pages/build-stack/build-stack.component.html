@@ -133,7 +133,9 @@
           (mouseoverNode)="handleMouseoverNode($event)" 
           (clickWorkspace)="handleClickWorkspace($event)" 
           (groupMoveCompleted)="handleGroupMove($event)" 
-          (nicknameUpdated)="handleNicknameUpdated($event)"
+          (nicknameUpdated)="handleNicknameUpdated($event)" 
+          (panChanged)="handlePanChanged($event)" 
+          [initialPan]="blueprint?.pan" 
           ></app-builder>
 
       </div>
