@@ -1454,6 +1454,15 @@ private getPointsFromPath(pathData) {
       // ignore clicks on nodes
       const target = evt.target as HTMLElement;
 
+      // ignore if clicking on arrow path element
+      if (
+        target.closest('path') ||
+        target.closest('.dot-drag-arrow') ||
+        target.closest('.control-drag-arrow')
+      ) {
+        return;
+      }
+
       if (target.closest('.node')) return;
       if (target.closest('.dot-drag-arrow')) return;
       if (target.closest('.control-drag-arrow')) return;
