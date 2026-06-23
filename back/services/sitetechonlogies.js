@@ -42,10 +42,27 @@ async function getTestDataFromFile(domain){
         };      
     } 
 
-    Technologies = A.Results[0].Result.Paths[0].Technologies;
+    const Paths = A.Results[0].Result.Paths;
 
-    const results = await async.map(Technologies, (item, cb)=>{        
-        cb(null, { 
+    // Merge technologies across all paths, deduplicate by name
+    const techMap = new Map();
+    for (const p of Paths) {
+        if (!p.Technologies) continue;
+        for (const t of p.Technologies) {
+            if (!techMap.has(t.Name)) {
+                techMap.set(t.Name, { ...t });
+            } else {
+                const existing = techMap.get(t.Name);
+                if (!existing.Categories && t.Categories) existing.Categories = t.Categories;
+                if (t.FirstDetected && (!existing.FirstDetected || t.FirstDetected < existing.FirstDetected)) existing.FirstDetected = t.FirstDetected;
+                if (t.LastDetected && (!existing.LastDetected || t.LastDetected > existing.LastDetected)) existing.LastDetected = t.LastDetected;
+            }
+        }
+    }
+    Technologies = Array.from(techMap.values());
+
+    const results = await async.map(Technologies, (item, cb)=>{
+        cb(null, {
             categories: item.Categories,
             name: item.Name,
             description: item.Description,
