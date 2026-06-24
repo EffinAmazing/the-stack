@@ -51,11 +51,6 @@ async function getTestDataFromFile(domain){
         for (const t of p.Technologies) {
             if (!techMap.has(t.Name)) {
                 techMap.set(t.Name, { ...t });
-            } else {
-                const existing = techMap.get(t.Name);
-                if (!existing.Categories && t.Categories) existing.Categories = t.Categories;
-                if (t.FirstDetected && (!existing.FirstDetected || t.FirstDetected < existing.FirstDetected)) existing.FirstDetected = t.FirstDetected;
-                if (t.LastDetected && (!existing.LastDetected || t.LastDetected > existing.LastDetected)) existing.LastDetected = t.LastDetected;
             }
         }
     }
