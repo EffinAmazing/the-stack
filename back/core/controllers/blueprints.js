@@ -182,18 +182,6 @@ class BluePrints {
                 if(data.nodes.length === 0){
                     this._tools.proceedTools(data.tools).then((result) => {
                         data.tools = result;
-
-                        // Log what the DB returns for analytics/social tools
-                        const analyticsKeywords = ['google analytics', 'facebook', 'meta pixel', 'ga4', 'hotjar', 'clarity'];
-                        const notable = result.filter(t => t && analyticsKeywords.some(kw => t.name && t.name.toLowerCase().includes(kw)));
-                        if (notable.length > 0) {
-                            console.log(`[proceedTools] ${domain}: Tools after DB merge (tag/categories may differ from BuiltWith response):`);
-                            notable.forEach(t => {
-                                console.log(`  "${t.name}" tag=${t.tag} cats=${JSON.stringify(t.categories)}`);
-                            });
-                        }
-                        console.log(`[proceedTools] ${domain}: ${result.length} tools total after DB merge`);
-
                         cb(null, data);
                     }).catch((err) => {
                         cb(err, null);
