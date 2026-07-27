@@ -44,6 +44,11 @@ async function getTestDataFromFile(domain){
 
     const Paths = A.Results[0].Result.Paths;
 
+    console.log(`[BuiltWith] ${domain}: ${Paths.length} paths returned`);
+    Paths.forEach((p, i) => {
+        console.log(`[BuiltWith] Path ${i}: ${p.Technologies ? p.Technologies.length : 0} technologies`);
+    });
+
     // Merge technologies across all paths, deduplicate by name
     const techMap = new Map();
     for (const p of Paths) {
@@ -55,6 +60,21 @@ async function getTestDataFromFile(domain){
         }
     }
     Technologies = Array.from(techMap.values());
+
+    console.log(`[BuiltWith] ${domain}: ${Technologies.length} total unique technologies after merging all paths`);
+
+    // Log analytics/social tools to verify what BuiltWith is returning
+    const analyticsKeywords = ['google analytics', 'facebook', 'meta pixel', 'ga4', 'tag manager'];
+    const notableTools = Technologies.filter(t =>
+        analyticsKeywords.some(kw => t.Name.toLowerCase().includes(kw))
+    );
+    if (notableTools.length > 0) {
+        console.log(`[BuiltWith] ${domain}: Notable tools found:`,
+            notableTools.map(t => `"${t.Name}" tag=${t.Tag} cats=${JSON.stringify(t.Categories)}`).join(' | ')
+        );
+    } else {
+        console.log(`[BuiltWith] ${domain}: No analytics/social tools matched keywords in response`);
+    }
 
     const results = await async.map(Technologies, (item, cb)=>{
         cb(null, {
