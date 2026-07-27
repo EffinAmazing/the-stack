@@ -136,6 +136,7 @@ class BluePrints {
             },
             (data, cb) => {
                 if ( data.nodes.length !== 0 ) {
+                    console.log(`[Blueprint] ${domain}: existing blueprint found with ${data.nodes.length} nodes — using cached data, skipping BuiltWith call`);
                     async.map(data.nodes, (item, _cb) => { _cb(null, item.toolId) }, (err, docs) => {
                         if(err) {
                             cb(err,null);
@@ -147,9 +148,10 @@ class BluePrints {
                                 }).catch(err=>cb(err, data))
                         }
                     });
-                   
+
                 } else {
                     // 2. get tools of domain
+                    console.log(`[Blueprint] ${domain}: new blueprint — calling BuiltWith API`);
                     ToolsServices.getToolsOfDomain(domain).then((result) => {
                         //console.log('ToolsServices.getToolsOfDomain', result);
                         const list = result.tech;

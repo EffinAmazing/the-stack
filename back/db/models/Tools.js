@@ -89,9 +89,12 @@ class ToolsModel extends AbstaractModel {
                     const mapped = await createItem(item);
                     return mapped;
                 } else {
+                    await this.modelDB.updateOne({ _id: dbItem._id }, { $set: { tag: item.tag, categories: item.categories } });
                     const mapped = this.mapDocument( dbItem );
                     mapped['start'] = start;
                     mapped['end'] = end;
+                    mapped['tag'] = item.tag;
+                    mapped['categories'] = item.categories;
                     return mapped;
                 }
             } catch(err) {
