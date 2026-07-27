@@ -19,7 +19,7 @@ import { LoadEmptyStackDialogComponent } from '../../components/load-empty-stack
 import { CreateCustomToolDialogComponent } from '../../components/create-custom-tool-dialog/create-custom-tool-dialog.component';
 import { Observable, BehaviorSubject, Subscription } from 'rxjs';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { forbiddenTags, hiddenCategories, forbiddenTools } from '../../../../core/config';
+import { forbiddenTags, hiddenCategories, forbiddenTools, WhitelistCategories } from '../../../../core/config';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SignupSigninPopupComponent } from '../../../../shared/components/signup-signin-popup/signup-signin-popup.component';
 import { ComponentCanDeactivate } from '../../../../core/guards/component-can-deactivate.guard';
@@ -251,8 +251,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       this.nodesList.forEach((nodeId) => {
         const item = this.nodes[nodeId];
         if (!item.hide && all - hidden > 50 ) {
-
-          if (item.tool.name !== this.domain) {
+          const isWhitelisted = item.tool.categories && item.tool.categories.some(cat => WhitelistCategories.includes(cat));
+          if (item.tool.name !== this.domain && !isWhitelisted) {
             item.hide = true;
             hidden++;
             this.nodesForUpdate.push(item.id);
@@ -280,17 +280,18 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
  
         //TODO
         //this IF statement is complex and should be simplified if possible
+        const isWhitelisted = item.tool.categories && item.tool.categories.some(cat => WhitelistCategories.includes(cat));
         if (
-          !item.hide && ( 
-             this.verifyOrderToHide(item.tool.categories) 
-          || (item.tool.tag == 'domain' && !item.tool.name.replace(/^www\./i, "").toLowerCase().includes(this.blueprint.domain.replace(/^www\./i, "").toLowerCase()))  
-          || forbiddenTools.includes(item.tool.name) 
-          || forbiddenTags.includes(item.tool.tag) || oldTool 
+          !item.hide && !isWhitelisted && (
+             this.verifyOrderToHide(item.tool.categories)
+          || (item.tool.tag == 'domain' && !item.tool.name.replace(/^www\./i, "").toLowerCase().includes(this.blueprint.domain.replace(/^www\./i, "").toLowerCase()))
+          || forbiddenTools.includes(item.tool.name)
+          || forbiddenTags.includes(item.tool.tag) || oldTool
           || (this.globalHiddenTools.length > 0 && this.globalHiddenTools.some(tool => tool.name === item.tool.name))
 
-        ) 
-          && ( 
-            item.tool.tag !== 'analytics' 
+        )
+          && (
+            item.tool.tag !== 'analytics'
             || oldTool
             || (item.tool.tag == 'analytics' && forbiddenTools.includes(item.tool.name))
             || (item.tool.tag == 'analytics' && (this.globalHiddenTools.length > 0 && this.globalHiddenTools.some(tool => tool.name === item.tool.name)))
