@@ -554,6 +554,7 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const dialogRef = this.detailsDialog.open(NodeDetailsComponent, {
       width: '620px',
+      maxHeight: '90vh',
       data: { node, domainsList: this.domainsList },
       panelClass: 'node-details-custom-wrapper'
     });

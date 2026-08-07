@@ -5,4 +5,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 @import "./assets/styles/global.scss";
 
+.cdk-overlay-container {
+    z-index: 1000000;
+}
 

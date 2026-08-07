@@ -282,7 +282,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
         //this IF statement is complex and should be simplified if possible
         const isWhitelisted = item.tool.categories && item.tool.categories.some(cat => WhitelistCategories.includes(cat));
         if (
-          !item.hide && !isWhitelisted && (
+          !item.hide && (!isWhitelisted || oldTool) && (
              this.verifyOrderToHide(item.tool.categories)
           || (item.tool.tag == 'domain' && !item.tool.name.replace(/^www\./i, "").toLowerCase().includes(this.blueprint.domain.replace(/^www\./i, "").toLowerCase()))
           || forbiddenTools.includes(item.tool.name)
