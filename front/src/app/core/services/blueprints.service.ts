@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { BluePrintResp, BluePrintTool, Tool } from '../../shared/models/tool';
 import { ResponseMappers } from '../../shared/mappers/response-mapper.helper';
@@ -104,5 +104,37 @@ export class BlueprintsService {
 
   addAppTool(app, blueprintId): Observable<{tools: Tool, nodes: BluePrintTool}> {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolsnodes/app`, { app, blueprintId }));
+  }
+
+  bulkSetToolVisibility(ids: string[], state: 'default' | 'show' | 'hide'): Observable<any> {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}tools/bulkSetVisibility`, { ids, state }));
+  }
+
+  getAdminCategories(params: { search?: string, status?: string, offset?: number }): Observable<any> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}admin/categories`, { params: this.ruleParams(params) }));
+  }
+
+  setCategoryStatus(name: string, status: 'whitelisted' | 'blocked' | null): Observable<any> {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}admin/categories/status`, { name, status }));
+  }
+
+  getAdminTags(params: { search?: string, status?: string, offset?: number }): Observable<any> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}admin/tags`, { params: this.ruleParams(params) }));
+  }
+
+  setTagStatus(name: string, status: 'blocked' | null): Observable<any> {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}admin/tags/status`, { name, status }));
+  }
+
+  getBlockImpact(kind: 'category' | 'tag', name: string): Observable<{ tools: number, alsoWhitelisted: number }> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}admin/block-impact`, { params: new HttpParams().set(kind, name) }));
+  }
+
+  private ruleParams(params: { search?: string, status?: string, offset?: number, limit?: number }): HttpParams {
+    let httpParams = new HttpParams();
+    Object.keys(params).forEach((key) => {
+      if (params[key] !== undefined && params[key] !== '') { httpParams = httpParams.set(key, String(params[key])); }
+    });
+    return httpParams;
   }
 }

@@ -49,3 +49,33 @@
     padding-top: 1em;
     padding-bottom: 0;
 }
+
+.filter-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 0; border-bottom: 1px solid #e5e5e5; }
+.filter-label { color: #666; font-size: 13px; }
+.filter-chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #bbb; border-radius: 16px; padding: 4px 14px; background: #fff; color: #444; font-size: 14px; cursor: pointer; text-decoration: none; }
+.filter-chip.active { border-color: #e2481e; color: #e2481e; }
+.chip-close { font-size: 18px; width: 18px; height: 18px; cursor: pointer; }
+.filter-hint { color: #666; font-size: 13px; }
+.badge { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #fff; border-radius: 3px; padding: 1px 6px; }
+.badge-blocked { background: #c62828; }
+.badge-whitelisted { background: #2e7d32; }
+.text-shown { color: #2e7d32; }
+.bulk-bar { display: flex; align-items: center; gap: 16px; padding: 10px 12px; background: #fdf0ea; }
+.bulk-bar .spacer { flex: 1; }
+.bulk-show { color: #2e7d32; border-color: #2e7d32; }
+.bulk-hide { color: #c62828; border-color: #c62828; }
+.error-message { color: #c62828; padding: 8px 0; }
+.cat-chip { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; border-radius: 10px; background: #f0f0f0; color: #444; font-size: 13px; }
+.cat-chip.cat-blocked { background: #fdecea; color: #c62828; }
+.cat-chip.cat-whitelisted { background: #e8f5e9; color: #2e7d32; }
+.tool-name.muted { color: #888; }
+.setting-toggle mat-icon { font-size: 16px; width: 16px; height: 16px; vertical-align: middle; }
+.setting-toggle .mat-button-toggle-checked.toggle-show { background: #e8f5e9; color: #2e7d32; }
+.setting-toggle .mat-button-toggle-checked.toggle-hide { background: #fdecea; color: #c62828; }
+.result { display: flex; align-items: center; gap: 8px; }
+.result-label { font-weight: 600; }
+.result-detail { font-size: 13px; color: #666; }
+.result-shown { color: #2e7d32; }
+.result-hidden { color: #c62828; }
+.result-auto { color: #666; }
+.selected-row { background: #fafafa; }
