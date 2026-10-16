@@ -3,6 +3,7 @@ const BluePrintModel = require('../../db/models/Blueprints');
 const ToolsServices = require('../../services/sitetechonlogies');
 const ToolsModel = require('../../db/models/Tools');
 const ToolsNodesModel = require('../../db/models/ToolsNodes');
+const CategoriesModel = require('../../db/models/Categories');
 const ArrowsModel = require('../../db/models/Arrows');
 const BluePrintAccessModel = require('../../db/models/BlueprintAccess');
 const UsersModel = require('../../db/models/Users');
@@ -19,6 +20,20 @@ class BluePrints {
         this._arrows = new ArrowsModel();
         this._bluePrintsAccess = new BluePrintAccessModel();
         this._users = new UsersModel();
+        this._categories = new CategoriesModel();
+    }
+
+    // Whitelisted/blocked category names for the builder sidebar (grouping and collapse only;
+    // node visibility was decided when the nodes were created).
+    attachCategoryRules(data, cb) {
+        this._categories.getRules().then((rules) => {
+            data.categoryRules = rules;
+            cb(null, data);
+        }).catch((err) => {
+            console.log(err);
+            data.categoryRules = { whitelisted: [], blocked: [] };
+            cb(null, data);
+        });
     }
 
     getDomainTools(req, res, next) {
@@ -134,6 +149,7 @@ class BluePrints {
                     cb(null, data)
                 }).catch((err)=>{ cb(null, data); })
             },
+            (data, cb) => this.attachCategoryRules(data, cb),
             (data, cb) => {
                 if ( data.nodes.length !== 0 ) {
                     console.log(`[Blueprint] ${domain}: existing blueprint found with ${data.nodes.length} nodes — using cached data, skipping BuiltWith call`);
@@ -152,6 +168,8 @@ class BluePrints {
                 } else {
                     // 2. get tools of domain
                     console.log(`[Blueprint] ${domain}: new blueprint — calling BuiltWith API`);
+                    // Tells the builder to run its first-load pass. Only set here, so existing stacks are never re-processed.
+                    data.isNew = true;
                     ToolsServices.getToolsOfDomain(domain).then((result) => {
                         //console.log('ToolsServices.getToolsOfDomain', result);
                         const list = result.tech;
@@ -312,6 +330,7 @@ class BluePrints {
                         cb(null, data)
                     }).catch((err)=>{ cb(null, data); })
                 },
+                (data, cb) => this.attachCategoryRules(data, cb),
                 (data, cb) => {
                     async.map(data.nodes, (item, _cb) => { _cb(null, item.toolId) }, (err, docs) => {
                         if(err) {

@@ -122,8 +122,11 @@ test('proceedTools registers new categories and tags without blocking', async ()
         { name: 'Fresh Tool', tag: 'newtag', categories: ['Another New Cat'] },
         { name: 'site.io', tag: 'domain', categories: ['WebSite'] }
     ]);
-    // registration is fire-and-forget; give it a moment
-    await new Promise(r => setTimeout(r, 300));
+    // registration is fire-and-forget; poll until it lands (fixed sleeps flake under a parallel suite)
+    const landed = async () => (await categories.modelDB.countDocuments({})) >= 4 && (await tags.modelDB.countDocuments({})) >= 2;
+    for (let i = 0; i < 50 && !(await landed()); i++) {
+        await new Promise(r => setTimeout(r, 100));
+    }
 
     const catNames = (await categories.modelDB.find({}).lean()).map(d => d.name).sort();
     assert.deepEqual(catNames, ['Another New Cat', 'Brand New Cat', 'CRM', 'WebSite']);
