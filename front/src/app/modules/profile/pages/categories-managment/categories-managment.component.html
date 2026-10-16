@@ -1,0 +1,79 @@
+<div class="main">
+  <div class="app-container">
+    <div class="stack-section-container">
+      <app-header [user]="user"></app-header>
+      <div class="mt-container">
+        <div class="my-stack-container">
+          <div class="stack-container-header">
+            <h2> Categories </h2>
+            <mat-form-field appearance="none" class="search-full-width">
+              <mat-label>Search by {{ kind === 'categories' ? 'Category' : 'Tag' }} name</mat-label>
+              <input type="text" matInput [(ngModel)]="search" (input)="handleSearch()" cdkFocusInitial>
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="rule-tabs">
+            <button class="rule-tab" [class.active]="kind === 'categories'" (click)="setKind('categories')">Categories <span class="tab-count">{{ tabTotals.categories }}</span></button>
+            <button class="rule-tab" [class.active]="kind === 'tags'" (click)="setKind('tags')">Tags <span class="tab-count">{{ tabTotals.tags }}</span></button>
+          </div>
+
+          <div class="filter-bar">
+            <span class="filter-label">Show:</span>
+            <button *ngFor="let f of filters" class="filter-chip" [class.active]="filter === f" (click)="setFilter(f)">
+              {{ f | titlecase }} <span class="chip-count">{{ counts[f] || 0 }}</span>
+            </button>
+            <span class="spacer"></span>
+            <span class="filter-hint">
+              <mat-icon>info_outline</mat-icon>
+              {{ kind === 'categories' ? 'Whitelisted beats Blocked when a tool is in both' : 'Tags can only be blocked. A whitelisted category beats a blocked tag.' }}
+            </span>
+          </div>
+
+          <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+          <table class="rules-table">
+            <thead>
+              <tr>
+                <th>{{ kind === 'categories' ? 'Category' : 'Tag' }}</th>
+                <th>Tools <mat-icon class="sort-icon">arrow_downward</mat-icon></th>
+                <th>Examples</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngIf="noCategory">
+                <ng-container *ngTemplateOutlet="ruleRow; context: { $implicit: noCategory, pinned: true }"></ng-container>
+              </ng-container>
+              <ng-container *ngFor="let row of rows">
+                <ng-container *ngTemplateOutlet="ruleRow; context: { $implicit: row, pinned: false }"></ng-container>
+              </ng-container>
+              <tr *ngIf="!rows.length && !noCategory"><td colspan="4" class="empty">Nothing matches.</td></tr>
+            </tbody>
+          </table>
+
+          <ng-template #ruleRow let-row let-pinned="pinned">
+            <tr [class.row-blocked]="row.status === 'blocked'">
+              <td class="rule-name">
+                <span [class.pinned-name]="pinned">{{ row.name }}</span>
+                <span *ngIf="row.status === 'blocked'" class="badge badge-blocked">Blocked</span>
+                <span *ngIf="row.status === 'whitelisted'" class="badge badge-whitelisted">Whitelisted</span>
+                <span *ngIf="row.isNew" class="badge badge-new">New</span>
+              </td>
+              <td><a [routerLink]="'/profile/tools'" [queryParams]="toolsLink(row)">{{ row.tools }} {{ row.tools === 1 ? 'tool' : 'tools' }}</a></td>
+              <td class="examples">{{ row.examples.join(', ') }}</td>
+              <td>
+                <mat-button-toggle-group class="status-toggle" [value]="row.status" [disabled]="saving[row.name]"
+                                         (change)="changeStatus(row, $event.value)">
+                  <mat-button-toggle *ngFor="let s of statuses" [value]="s" [ngClass]="'toggle-' + s">{{ statusLabel(s) }}</mat-button-toggle>
+                </mat-button-toggle-group>
+              </td>
+            </tr>
+          </ng-template>
+
+          <mat-paginator [length]="total" [pageSize]="limit" [pageIndex]="offset / limit" (page)="handlePage($event)"></mat-paginator>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
