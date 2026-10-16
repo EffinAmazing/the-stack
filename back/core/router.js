@@ -5,6 +5,7 @@ const Tools = require('./controllers/tools');
 const Arrows = require('./controllers/arrows');
 const Upload = require('./controllers/uploads');
 const Users = require('./controllers/users');
+const VisibilityRules = require('./controllers/visibility-rules');
 const passport = require('passport');
 const servicePassport = require('../services/passport');
 const requireAdmin = require('./middleware/require-admin');
@@ -16,6 +17,7 @@ const tools = new Tools();
 const arrows = new Arrows();
 const upload = new Upload();
 const users = new Users();
+const visibilityRules = new VisibilityRules();
 // console.log(blueprints);
 router.all('*', function(req, res, next){
     res.header("Access-Control-Allow-Origin", "*");
@@ -58,6 +60,12 @@ router.post('/tools/updateVisibility/:id', passport.authenticate('jwt', { sessio
 
 router.get('/admin/tools', passport.authenticate('jwt', { session: false }), requireAdmin, tools.getTools.bind(tools));
 router.get('/admin/tools/search', passport.authenticate('jwt', { session: false }), requireAdmin, tools.getByName.bind(tools));
+router.post('/tools/bulkSetVisibility', passport.authenticate('jwt', { session: false }), requireAdmin, tools.bulkSetVisibility.bind(tools));
+router.get('/admin/categories', passport.authenticate('jwt', { session: false }), requireAdmin, visibilityRules.getCategories.bind(visibilityRules));
+router.post('/admin/categories/status', passport.authenticate('jwt', { session: false }), requireAdmin, visibilityRules.setCategoryStatus.bind(visibilityRules));
+router.get('/admin/tags', passport.authenticate('jwt', { session: false }), requireAdmin, visibilityRules.getTags.bind(visibilityRules));
+router.post('/admin/tags/status', passport.authenticate('jwt', { session: false }), requireAdmin, visibilityRules.setTagStatus.bind(visibilityRules));
+router.get('/admin/block-impact', passport.authenticate('jwt', { session: false }), requireAdmin, visibilityRules.getBlockImpact.bind(visibilityRules));
 
 
 router.post("/arrows/", arrows.add.bind(arrows));
