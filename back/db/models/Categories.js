@@ -1,15 +1,17 @@
 const mongoose = require('mongoose');
-const AbstaractModel = require('./_abstract');
+const NamedRulesModel = require('./_named-rules');
 const async = require('async');
 
 
-class CategoriesModel extends AbstaractModel {
+class CategoriesModel extends NamedRulesModel {
     constructor(){
-        super('Categories');
+        super('Categories', ['whitelisted', 'blocked']);
 
         this.schema = mongoose.Schema({
             name: String,
-            toolsCount: Number
+            toolsCount: Number, // stale snapshot from reload-tools-categories.js; not used for rules
+            status: String,     // 'whitelisted' | 'blocked'; absent = Normal
+            firstSeen: Date     // set only on categories registered by proceedTools
         });
 
         
@@ -75,6 +77,11 @@ class CategoriesModel extends AbstaractModel {
         const listDocs = await this.modelDB.find().where('name').regex( new RegExp(filter.toLowerCase(), "i") ).exec();
         const cats = await async.map(listDocs, (item, cb) => { cb(null, this.mapDocument(item)) });
         return cats;
+    }
+
+    async getRules() {
+        const results = await Promise.all([this.namesWithStatus('whitelisted'), this.namesWithStatus('blocked')]);
+        return { whitelisted: results[0], blocked: results[1] };
     }
 }
 
