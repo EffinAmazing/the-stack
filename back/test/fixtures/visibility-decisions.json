@@ -1,0 +1,28 @@
+{
+  "rules": {
+    "whitelisted": ["CRM", "Marketing Automation"],
+    "blocked": ["Email Security", "Advertising", "WebSite", "CustomApp", "(No category)"],
+    "blockedTags": ["cms", "hosting", "custom"]
+  },
+  "cases": [
+    { "name": "admin-show-beats-blocked-category", "tool": { "categories": ["Email Security"], "tag": "mx", "hidden": false }, "expected": { "state": "show", "reason": "admin-show" } },
+    { "name": "admin-show-beats-blocked-tag", "tool": { "categories": ["Simple Website Builder"], "tag": "cms", "hidden": false }, "expected": { "state": "show", "reason": "admin-show" } },
+    { "name": "admin-show-beats-stale", "tool": { "categories": ["Scheduling"], "tag": "widgets", "hidden": false }, "stale": true, "expected": { "state": "show", "reason": "admin-show" } },
+    { "name": "admin-hide-beats-whitelist", "tool": { "categories": ["CRM"], "tag": "analytics", "hidden": true }, "expected": { "state": "hide", "reason": "admin-hide" } },
+    { "name": "whitelist-beats-blocked-category", "tool": { "categories": ["Email Security", "Marketing Automation"], "tag": "mx" }, "expected": { "state": "show", "reason": "whitelisted", "detail": "Marketing Automation" } },
+    { "name": "whitelist-beats-blocked-tag", "tool": { "categories": ["CRM"], "tag": "cms" }, "expected": { "state": "show", "reason": "whitelisted", "detail": "CRM" } },
+    { "name": "blocked-category", "tool": { "categories": ["Analytics", "Advertising"], "tag": "ads" }, "expected": { "state": "hide", "reason": "blocked-category", "detail": "Advertising" } },
+    { "name": "blocked-tag", "tool": { "categories": ["Simple Website Builder"], "tag": "cms" }, "expected": { "state": "hide", "reason": "blocked-tag", "detail": "cms" } },
+    { "name": "empty-categories-are-no-category", "tool": { "categories": [], "tag": "widgets" }, "expected": { "state": "hide", "reason": "blocked-category", "detail": "(No category)" } },
+    { "name": "missing-categories-are-no-category", "tool": { "tag": "widgets" }, "expected": { "state": "hide", "reason": "blocked-category", "detail": "(No category)" } },
+    { "name": "app-domain-tool-ignores-blocked-category", "tool": { "categories": ["WebSite"], "tag": "domain" }, "expected": { "state": null, "reason": "app-tool" } },
+    { "name": "app-custom-tool-ignores-blocked-tag", "tool": { "categories": [], "tag": "custom" }, "expected": { "state": null, "reason": "app-tool" } },
+    { "name": "app-tool-ignores-admin-hide", "tool": { "categories": ["CustomApp"], "tag": "customApp", "hidden": true }, "expected": { "state": null, "reason": "app-tool" } },
+    { "name": "app-tool-ignores-admin-show", "tool": { "categories": ["WebSite"], "tag": "domain", "hidden": false }, "expected": { "state": null, "reason": "app-tool" } },
+    { "name": "normal-tool-is-auto", "tool": { "categories": ["Scheduling"], "tag": "widgets" }, "expected": { "state": null, "reason": "auto" } },
+    { "name": "hidden-null-is-default", "tool": { "categories": ["Scheduling"], "tag": "widgets", "hidden": null }, "expected": { "state": null, "reason": "auto" } },
+    { "name": "stale-whitelisted-falls-to-soft-rules", "tool": { "categories": ["CRM"], "tag": "widgets" }, "stale": true, "expected": { "state": null, "reason": "auto" } },
+    { "name": "matching-is-case-sensitive", "tool": { "categories": ["email security"], "tag": "CMS" }, "expected": { "state": null, "reason": "auto" } },
+    { "name": "empty-tag-is-not-app-tag", "tool": { "categories": ["Advertising"], "tag": "" }, "expected": { "state": "hide", "reason": "blocked-category", "detail": "Advertising" } }
+  ]
+}
