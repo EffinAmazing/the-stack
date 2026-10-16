@@ -19,7 +19,6 @@ import { LoadEmptyStackDialogComponent } from '../../components/load-empty-stack
 import { CreateCustomToolDialogComponent } from '../../components/create-custom-tool-dialog/create-custom-tool-dialog.component';
 import { Observable, BehaviorSubject, Subscription } from 'rxjs';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { forbiddenTags, hiddenCategories, forbiddenTools, WhitelistCategories } from '../../../../core/config';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SignupSigninPopupComponent } from '../../../../shared/components/signup-signin-popup/signup-signin-popup.component';
 import { ComponentCanDeactivate } from '../../../../core/guards/component-can-deactivate.guard';
@@ -51,6 +50,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
   nodesList: string[] = [];
   showNodes: BluePrintTool[] = [];
   globalHiddenTools: Tool[] = [];
+  categoryRules: { whitelisted: string[], blocked: string[] } = { whitelisted: [], blocked: [] };
   toolsHiddenGlobally$: BehaviorSubject<any> = new BehaviorSubject({});
   categories: any = { 'None': [] };
   changedNodes$: BehaviorSubject<any> = new BehaviorSubject({});
@@ -203,6 +203,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     this.blueprint = data.blueprint;
     this.globalHiddenTools = data.hiddenTools;
     this.toolsHiddenGlobally$.next({nodes: data.hiddenTools});
+    this.categoryRules = data.categoryRules || { whitelisted: [], blocked: [] };
     data.nodes.forEach((item) => {  
       if (item.toolId) {
         const tool = data.tools.find((atool) =>  atool.id === item.toolId );
@@ -238,21 +239,26 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
       /* */
     });
 
-    if (data.nodes.length - hidden > 10 && hidden === 0) {
+    // First load of a stack the server just created (isNew). The server already applied the admin
+    // rules to its nodes; proceedNodes adds the soft rules. Existing stacks are never re-processed.
+    if (data.isNew && data.nodes.length - hidden > 10) {
       this.proceedNodes(data.nodes.length, hidden);
     } else {
       this.completedProceedNodes();
     }
   }
 
+  // Soft rules for a new stack. Admin rules (Show/Hide, whitelisted/blocked categories, blocked
+  // tags) were applied by the server when it created the nodes: node.hide is already set, and
+  // node.rule === 'show' marks tools that must stay visible (admin Show or whitelisted).
   private proceedNodes(all, hidden, force?) {
 
     if (force) {
+      // Still more than 50 visible: trim, sparing the stack's own domain and rule-shown tools.
       this.nodesList.forEach((nodeId) => {
         const item = this.nodes[nodeId];
         if (!item.hide && all - hidden > 50 ) {
-          const isWhitelisted = item.tool.categories && item.tool.categories.some(cat => WhitelistCategories.includes(cat));
-          if (item.tool.name !== this.domain && !isWhitelisted) {
+          if (item.tool.name !== this.domain && item.rule !== 'show') {
             item.hide = true;
             hidden++;
             this.nodesForUpdate.push(item.id);
@@ -264,7 +270,6 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     } else {
       this.nodesList.forEach((nodeId) => {
         const item = this.nodes[nodeId];
-        //
         let oldTool = false;
         if (item.end) {
           const endDate = new Date(item.end);
@@ -274,31 +279,14 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
           }
         }
 
-        //TESTING
-        //console.log('forbiddenTools',item.tool.name,item.tool,forbiddenTools.includes(item.tool.name) );
-        //console.log('forbiddenTags',item.tool.tag,item.tool,forbiddenTags.includes(item.tool.tag) );
- 
-        //TODO
-        //this IF statement is complex and should be simplified if possible
-        const isWhitelisted = item.tool.categories && item.tool.categories.some(cat => WhitelistCategories.includes(cat));
-        if (
-          !item.hide && (!isWhitelisted || oldTool) && (
-             this.verifyOrderToHide(item.tool.categories)
-          || (item.tool.tag == 'domain' && !item.tool.name.replace(/^www\./i, "").toLowerCase().includes(this.blueprint.domain.replace(/^www\./i, "").toLowerCase()))
-          || forbiddenTools.includes(item.tool.name)
-          || forbiddenTags.includes(item.tool.tag) || oldTool
-          || (this.globalHiddenTools.length > 0 && this.globalHiddenTools.some(tool => tool.name === item.tool.name))
+        const otherDomain = item.tool.tag == 'domain'
+          && !item.tool.name.replace(/^www\./i, "").toLowerCase().includes(this.blueprint.domain.replace(/^www\./i, "").toLowerCase());
 
-        )
-          && (
-            item.tool.tag !== 'analytics'
-            || oldTool
-            || (item.tool.tag == 'analytics' && forbiddenTools.includes(item.tool.name))
-            || (item.tool.tag == 'analytics' && (this.globalHiddenTools.length > 0 && this.globalHiddenTools.some(tool => tool.name === item.tool.name)))
-            ) && all - hidden > 5) {
-          
-          //console.log('found',item.tool.name);
-
+        // Stale tools and other domains' nodes; analytics only when stale; never below 5 visible.
+        if (!item.hide && item.rule !== 'show'
+          && (oldTool || otherDomain)
+          && (item.tool.tag !== 'analytics' || oldTool)
+          && all - hidden > 5) {
           item.hide = true;
           this.nodesForUpdate.push(item.id);
           hidden++;
@@ -490,22 +478,6 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     }
 
     return strPrice + (dotText ? '.' + dotText : '');
-  }
-
-  private verifyOrderToHide(categories) {
-    if (!categories) {
-      return true;
-    } else {
-      let hide = false;
-      if (categories.length === 0 ) { return true; }
-      categories.forEach((cat) => {
-        if ( hiddenCategories.includes(cat) ) {
-          hide = true;
-        }
-      });
-
-      return hide;
-    }
   }
 
   public handleSlectArrow(data) {
@@ -998,6 +970,11 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
     //update the tool in the database 
     this.service.updateToolVisibility(data.item, !data.isHidden).subscribe((res) => {
+      if (!res) {
+        // Server skipped it (domain/custom app tools are outside the visibility rules).
+        if (nodeItem && this.nodes[nodeItem.id]) this.nodes[nodeItem.id].isUpdatingToolVisibility = false;
+        return;
+      }
    
       let tool = res;
 
@@ -1065,9 +1042,9 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
               tool: nodeItem.tool,
             });
           }
-          // console.log(this.verifyOrderToHide(nodeItem.tool.categories), forbiddenTags.includes(nodeItem.tool.tag), oldTool, newItems >= maxNewVisibleItems);
-          if (( this.verifyOrderToHide(nodeItem.tool.categories) || forbiddenTags.includes(nodeItem.tool.tag) ) || 
-              newItems >= maxNewVisibleItems ) {
+          // node.hide: hidden by admin rules on the server. Otherwise at most maxNewVisibleItems new
+          // tools become visible; rule-shown tools (admin Show / whitelisted) are never cut by the cap.
+          if (nodeItem.hide || (newItems >= maxNewVisibleItems && nodeItem.rule !== 'show')) {
             nodeItem.hide = true;
             listToHide.push( nodeItem.id );
           } else {
@@ -1199,6 +1176,7 @@ public handleAddAdditionalApp() {
      /////this.nodes[data.item.id] = res;
      //update the tool in the database 
     this.service.updateToolVisibility(data.item, !data.isHidden).subscribe((res) => {
+      if (!res) { return; } // domain/custom app tools are skipped by the server
    
       this.nodes[data.item.id].hiddenGlobally = res.hidden;
 

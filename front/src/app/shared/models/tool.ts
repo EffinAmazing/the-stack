@@ -9,7 +9,7 @@ export interface Tool {
     nodeId?: string;
     created?: string;
     updated?: string;
-    hidden: Boolean;
+    hidden?: boolean | null; // admin setting: true = Hide, false = Show, null/absent = Default
 }
 
 export interface BluePrintTool {
@@ -31,6 +31,7 @@ export interface BluePrintTool {
     } >;
     domain: string;
     hiddenGlobally?: boolean;
+    rule?: 'show' | 'hide' | null; // admin rule decision, only on nodes the server just created
 }
 
 export interface BluePrint {
@@ -48,4 +49,6 @@ export interface BluePrintResp {
     blueprint: BluePrint;
     tools: Tool[];
     nodes: BluePrintTool[];
+    isNew?: boolean;
+    categoryRules?: { whitelisted: string[], blocked: string[] };
 }

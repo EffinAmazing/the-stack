@@ -1,3 +1,10 @@
+/*
+ * DEPRECATED (2026-10) — forbiddenTags, forbiddenTools, hiddenCategories and WhitelistCategories are
+ * no longer used. Visibility rules now live in the database (tools.hidden, categories.status,
+ * tags.status), are managed on the admin Tools/Categories pages and were seeded by
+ * back/migrate-visibility-rules.js from back/db/seed/visibility-rules-2026-10.json.
+ * Kept commented out for reference only.
+ *
 export const forbiddenTags: Array<string> = [
     'css',
     'feed',
@@ -458,6 +465,7 @@ export const hiddenCategories: Array<string> = [
     'Login',
     'Visitor Count Tracking'
 ];
+ */
 
 export const treckActions = [
     'addNode',
@@ -467,6 +475,7 @@ export const treckActions = [
     'removeArrow'
 ];
 
+/* DEPRECATED (2026-10) — see the note above forbiddenTags.
 export const WhitelistCategories = [
     'Marketing Automation',
     'CRM',
@@ -476,3 +485,4 @@ export const WhitelistCategories = [
     'Personalization',
     'Visitor Count Tracking'
 ];
+ */

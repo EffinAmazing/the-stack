@@ -47,7 +47,7 @@
                   >visibility_off</mat-icon
                 >
               </div>
-              <div class="actions" *ngIf="isUserAdmin">
+              <div class="actions" *ngIf="isUserAdmin && !isAppTool(nodes[nodeId])">
                 <div class="actions" (click)="toggleNodeGlobally(nodes[nodeId])">
                   <mat-icon class="visible" [ngClass]="{'loading': nodes[nodeId].isUpdatingToolVisibility}"  *ngIf="nodes[nodeId].hiddenGlobally"
                     >restore</mat-icon
