@@ -79,6 +79,14 @@ test('setting filter: explicit null counts as Default, false as Show', async () 
     assert.deepEqual(await names({ setting: 'show' }), ['Mailchimp']);
 });
 
+test('categories stored as null count as (No category) in filters, counts and impact', async () => {
+    // BuiltWith items without Categories end up stored as categories: null (Mongoose writes undefined as null).
+    await tools.modelDB.collection.insertOne({ name: 'Null Cats', tag: 'widgets', categories: null });
+    assert.deepEqual((await tools.queryTools({ category: '(No category)' })).list.map(t => t.name), ['NoField', 'Null Cats', 'Orphan']);
+    assert.equal((await tools.getCategoryCounts()).noCategory.tools, 3);
+    assert.deepEqual(await tools.getBlockImpact({ category: '(No category)' }, []), { tools: 3, alsoWhitelisted: 0 });
+});
+
 test('queryTools paginates and clamps bad numbers', async () => {
     const page = await tools.queryTools({ offset: '2', limit: '3' });
     assert.equal(page.total, 7); // example.com (domain) is excluded

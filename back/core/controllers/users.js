@@ -182,6 +182,12 @@ class Users {
                     message: 'Forbidden'
                 });
             }
+            if (String(user._id) === String(id)) {
+                return res.status(400).json({
+                    result: 'Error',
+                    message: 'You cannot delete your own account'
+                });
+            }
 
             this.model.delete(id, [], [])
             .then(done => {

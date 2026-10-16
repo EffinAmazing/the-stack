@@ -8,7 +8,8 @@ const CategoriesModel = require('./Categories');
 const TagsModel = require('./Tags');
 const { NO_CATEGORY, APP_TAGS, escapeRegex } = require('../../services/visibility-rules');
 
-const NO_CATEGORY_FILTER = { $or: [{ categories: { $exists: false } }, { categories: { $size: 0 } }] };
+// categories: null matches a missing field and a stored null (BuiltWith items without Categories).
+const NO_CATEGORY_FILTER = { $or: [{ categories: null }, { categories: { $size: 0 } }] };
 // Domain nodes and custom apps are outside visibility rules: never listed, counted or updated here.
 const NOT_APP_TOOL = { tag: { $nin: APP_TAGS } };
 // tools.hidden is the admin setting: true = Hide, false = Show, unset = Default.

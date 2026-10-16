@@ -92,18 +92,25 @@ export class CategoriesManagmentComponent implements OnInit, OnDestroy {
     this.load(evnt.pageIndex * this.limit);
   }
 
+  private loadRequestId = 0;
+
   load(offset: number) {
     this.offset = offset;
     this.errorMessage = '';
+    // Only the latest request may update the page: a slow response for the other tab must never
+    // render category rows under Tags (a status click there would write a tag rule).
+    const requestId = ++this.loadRequestId;
     const params = { search: this.search.trim(), status: this.filter, offset, limit: this.limit };
     const request = this.kind === 'categories' ? this.service.getAdminCategories(params) : this.service.getAdminTags(params);
     request.toPromise().then((res) => {
+      if (requestId !== this.loadRequestId) { return; }
       this.rows = res.list;
       this.total = res.total;
       this.counts = res.counts;
       this.noCategory = this.kind === 'categories' && this.filter === 'all' && !this.search.trim() ? res.noCategory : null;
       if (!this.search.trim()) { this.tabTotals[this.kind] = res.counts.all; }
     }).catch((err) => {
+      if (requestId !== this.loadRequestId) { return; }
       console.log(err);
       this.errorMessage = 'Could not load ' + this.kind + '.';
     });
