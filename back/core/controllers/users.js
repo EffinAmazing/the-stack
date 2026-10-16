@@ -2,6 +2,7 @@ const UserModel = require('../../db/models/Users');
 const BluePrintModel = require('../../db/models/Blueprints');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
+const { sanitizeUserUpdate } = require('../../services/user-update');
 
 const JWT_SECRET_KEY = process.env.AUTH_SECRET_KEY || "stack-builder";
 
@@ -145,29 +146,29 @@ class Users {
 
     update(req, res, next) {
         let id = req.params.id;
-        let data = req.body.data;
         const user = req.user;
 
-        if (user) {
-            this.model.updateOne(id, data)
-            .then(doc => {
-                res.json({
-                    result: doc
-                })
-            })
-            .catch(err => {
-                console.log(err);
-                res.status(500).json({
-                    result: 'Error',
-                    message: 'Server error'
-                }); 
-            });
-        } else {
-            res.status(401).json({
+        const parsed = sanitizeUserUpdate(req.body.data, user._id, id);
+        if (parsed.error) {
+            return res.status(400).json({
                 result: 'Error',
-                message: 'You need to be registered'
-            }); 
+                message: parsed.error
+            });
         }
+
+        this.model.updateOne(id, parsed.data)
+        .then(doc => {
+            res.json({
+                result: doc
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                result: 'Error',
+                message: 'Server error'
+            }); 
+        });
     }
 
     delete(req, res, next) {

@@ -8,6 +8,7 @@ import { ToolsManagmentComponent } from './pages/tools-managment/tools-managment
 import { ResetPasswordSendComponent } from './pages/reset-password-send/reset-password-send.component';
 import { ResetPasswordFormComponent } from './pages/reset-password-form/reset-password-form.component';
 import { AuthGuardGuard as AuthGuard } from '../../core/guards/auth-guard.guard';
+import { AdminGuard } from '../../core/guards/admin.guard';
 
 const routes: Routes = [
   {
@@ -25,12 +26,12 @@ const routes: Routes = [
   {
     path: 'users',
     component: UsersManagmentComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, AdminGuard]
   },
   {
     path: 'tools',
     component: ToolsManagmentComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, AdminGuard]
   },
   {
     path: 'forgot-password',
