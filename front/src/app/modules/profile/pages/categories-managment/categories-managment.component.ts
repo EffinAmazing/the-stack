@@ -40,6 +40,7 @@ export class CategoriesManagmentComponent implements OnInit, OnDestroy {
   displayedColumns = ['name', 'tools', 'examples', 'status'];
   saving: { [name: string]: boolean } = {};
   errorMessage = '';
+  loading = false;
   private search$ = new Subject<void>();
   private subscriptions: Subscription[] = [];
 
@@ -88,6 +89,12 @@ export class CategoriesManagmentComponent implements OnInit, OnDestroy {
     this.search$.next();
   }
 
+  clearSearch() {
+    if (!this.search) { return; }
+    this.search = '';
+    this.load(0);
+  }
+
   handlePage(evnt) {
     this.load(evnt.pageIndex * this.limit);
   }
@@ -102,8 +109,10 @@ export class CategoriesManagmentComponent implements OnInit, OnDestroy {
     const requestId = ++this.loadRequestId;
     const params = { search: this.search.trim(), status: this.filter, offset, limit: this.limit };
     const request = this.kind === 'categories' ? this.service.getAdminCategories(params) : this.service.getAdminTags(params);
+    this.loading = true;
     request.toPromise().then((res) => {
       if (requestId !== this.loadRequestId) { return; }
+      this.loading = false;
       this.rows = res.list;
       this.total = res.total;
       this.counts = res.counts;
@@ -111,6 +120,7 @@ export class CategoriesManagmentComponent implements OnInit, OnDestroy {
       if (!this.search.trim()) { this.tabTotals[this.kind] = res.counts.all; }
     }).catch((err) => {
       if (requestId !== this.loadRequestId) { return; }
+      this.loading = false;
       console.log(err);
       this.errorMessage = 'Could not load ' + this.kind + '.';
     });

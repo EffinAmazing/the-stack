@@ -8,8 +8,9 @@
             <h2> Categories </h2>
             <mat-form-field appearance="none" class="search-full-width">
               <mat-label>Search by {{ kind === 'categories' ? 'Category' : 'Tag' }} name</mat-label>
-              <input type="text" matInput [(ngModel)]="search" (input)="handleSearch()" cdkFocusInitial>
-              <mat-icon matSuffix>search</mat-icon>
+              <input type="text" matInput [(ngModel)]="search" (input)="handleSearch()" (keyup.escape)="clearSearch()" cdkFocusInitial>
+              <button *ngIf="search" mat-icon-button matSuffix aria-label="Clear search" (click)="clearSearch()"><mat-icon>close</mat-icon></button>
+              <mat-icon *ngIf="!search" matSuffix>search</mat-icon>
             </mat-form-field>
           </div>
 
@@ -29,6 +30,8 @@
               {{ kind === 'categories' ? 'Whitelisted beats Blocked when a tool is in both' : 'Tags can only be blocked. A whitelisted category beats a blocked tag.' }}
             </span>
           </div>
+
+          <div class="loading-slot"><mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar></div>
 
           <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
 

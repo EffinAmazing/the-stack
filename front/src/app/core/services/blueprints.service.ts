@@ -110,7 +110,7 @@ export class BlueprintsService {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}tools/bulkSetVisibility`, { ids, state }));
   }
 
-  getAdminCategories(params: { search?: string, status?: string, offset?: number }): Observable<any> {
+  getAdminCategories(params: { search?: string, status?: string, offset?: number, limit?: number }): Observable<any> {
     return this.mapper.mapResponse(this.http.get(`${this.serverURI}admin/categories`, { params: this.ruleParams(params) }));
   }
 

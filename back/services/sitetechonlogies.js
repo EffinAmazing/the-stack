@@ -30,8 +30,8 @@ async function getTestDataFromFile(domain){
     let A = response.data;
     let Technologies = [];
 
-    if (A.Results.length == 0) {
-        //BuiltWith returned no results
+    if (!A.Results || A.Results.length == 0) {
+        //BuiltWith returned no results, or only Errors (e.g. "Not a valid domain to lookup sorry")
         const errorCode = A.Errors && A.Errors.length > 0 ? A.Errors[0].Code : null;
         const errorMessage = A.Errors && A.Errors.length > 0 ? A.Errors[0].Message : null;
         return { 

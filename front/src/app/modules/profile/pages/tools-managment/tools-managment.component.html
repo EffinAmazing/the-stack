@@ -8,8 +8,9 @@
             <h2> Tools </h2>
             <mat-form-field appearance="none" class="search-full-width">
               <mat-label>Search by Tool name</mat-label>
-              <input type="text" matInput [(ngModel)]="toolSearchName" (input)="handleInputText()" cdkFocusInitial>
-              <mat-icon matSuffix>search</mat-icon>
+              <input type="text" matInput [(ngModel)]="toolSearchName" (input)="handleInputText()" (keyup.escape)="clearSearch()" cdkFocusInitial>
+              <button *ngIf="toolSearchName" mat-icon-button matSuffix aria-label="Clear search" (click)="clearSearch()"><mat-icon>close</mat-icon></button>
+              <mat-icon *ngIf="!toolSearchName" matSuffix>search</mat-icon>
             </mat-form-field>
           </div>
 
@@ -20,7 +21,20 @@
               <span *ngIf="categoryStatus(categoryFilter) !== 'normal'" class="badge" [ngClass]="'badge-' + categoryStatus(categoryFilter)">{{ categoryStatus(categoryFilter) }}</span>
               <mat-icon class="chip-close" (click)="clearFilter('category')">close</mat-icon>
             </span>
-            <a *ngIf="!categoryFilter" class="filter-chip" [routerLink]="'/profile/categories'">Category: Any</a>
+            <button *ngIf="!categoryFilter" class="filter-chip" [matMenuTriggerFor]="categoryMenu" (menuOpened)="loadCategoryOptions()">Category: Any</button>
+            <mat-menu #categoryMenu="matMenu" class="category-menu">
+              <div class="category-menu-search" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+                <input type="text" placeholder="Search categories" [(ngModel)]="categorySearch" (input)="handleCategorySearch()">
+              </div>
+              <div class="category-menu-options" (scroll)="handleCategoryOptionsScroll($event)">
+                <button mat-menu-item *ngIf="showNoCategoryOption()" (click)="pickCategory(noCategory)"><em>{{ noCategory }}</em></button>
+                <button mat-menu-item *ngFor="let option of categoryOptions" (click)="pickCategory(option.name)">
+                  {{ option.name }} <span class="option-count">{{ option.tools }}</span>
+                </button>
+                <div class="category-menu-empty" *ngIf="!categoryOptionsLoading && !categoryOptions.length">No categories match.</div>
+              </div>
+              <div class="loading-slot"><mat-progress-bar *ngIf="categoryOptionsLoading" mode="indeterminate"></mat-progress-bar></div>
+            </mat-menu>
             <span *ngIf="tagFilter" class="filter-chip active">
               Tag: {{ tagFilter }}
               <span *ngIf="tagBlocked(tagFilter)" class="badge badge-blocked">blocked</span>
@@ -35,19 +49,21 @@
               <button mat-menu-item (click)="setSettingFilter('show')">Show</button>
               <button mat-menu-item (click)="setSettingFilter('hide')">Hide</button>
             </mat-menu>
-            <span *ngIf="categoryFilter && categoryStatus(categoryFilter) === 'blocked'" class="filter-hint">
-              Set a tool to <strong class="text-shown">Show</strong> to make an exception to the block.
-            </span>
+            <span class="spacer"></span>
+            <div class="bulk-actions" *ngIf="selection.hasValue()">
+              <strong>{{ selection.selected.length }} selected</strong>
+              <button mat-stroked-button class="bulk-show" [disabled]="saving" (click)="setSelected('show')"><mat-icon>visibility</mat-icon> Show</button>
+              <button mat-stroked-button class="bulk-hide" [disabled]="saving" (click)="setSelected('hide')"><mat-icon>block</mat-icon> Hide</button>
+              <button mat-stroked-button [disabled]="saving" (click)="setSelected('default')"><mat-icon>undo</mat-icon> Reset</button>
+              <button mat-button (click)="selection.clear()">Clear</button>
+            </div>
           </div>
 
-          <div class="bulk-bar" *ngIf="selection.hasValue()">
-            <strong>{{ selection.selected.length }} selected</strong>
-            <button mat-stroked-button class="bulk-show" [disabled]="saving" (click)="setSelected('show')"><mat-icon>visibility</mat-icon> Show Selected</button>
-            <button mat-stroked-button class="bulk-hide" [disabled]="saving" (click)="setSelected('hide')"><mat-icon>block</mat-icon> Hide Selected</button>
-            <button mat-stroked-button [disabled]="saving" (click)="setSelected('default')"><mat-icon>undo</mat-icon> Reset to Default</button>
-            <span class="spacer"></span>
-            <button mat-button (click)="selection.clear()">Clear selection</button>
+          <div *ngIf="categoryFilter && categoryStatus(categoryFilter) === 'blocked'" class="filter-hint exception-hint">
+            Set a tool to <strong class="text-shown">Show</strong> to make an exception to the block.
           </div>
+
+          <div class="loading-slot"><mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar></div>
 
           <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
 

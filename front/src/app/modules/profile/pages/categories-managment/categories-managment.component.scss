@@ -1,8 +1,14 @@
+.mt-container { padding: 0; }
+.my-stack-container h2 { text-align: left; padding: 15px 24px; }
+.stack-container-header { display: flex; justify-content: space-between; align-items: center; border-bottom: solid 1px #dcdbdc; }
+.search-full-width { width: 320px; }
+.search-full-width ::ng-deep .mat-form-field-wrapper { padding-top: 1em; padding-bottom: 0; }
+.loading-slot { height: 4px; }
 .rule-tabs { display: flex; gap: 8px; border-bottom: 1px solid #e5e5e5; }
 .rule-tab { background: none; border: none; border-bottom: 3px solid transparent; padding: 12px 24px; font-size: 15px; font-weight: 600; text-transform: uppercase; color: #666; cursor: pointer; }
 .rule-tab.active { color: #e2481e; border-bottom-color: #e2481e; }
 .tab-count { font-weight: 400; margin-left: 8px; }
-.filter-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px 0; border-bottom: 1px solid #e5e5e5; }
+.filter-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px 24px; border-bottom: 1px solid #e5e5e5; }
 .filter-bar .spacer { flex: 1; }
 .filter-label { color: #666; font-size: 13px; }
 .filter-chip { border: 1px solid #bbb; border-radius: 16px; padding: 4px 14px; background: #fff; color: #444; font-size: 14px; cursor: pointer; }

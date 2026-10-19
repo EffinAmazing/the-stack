@@ -1347,7 +1347,7 @@ private getPointsFromPath(pathData) {
     const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 );
       const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
         width: '480px',
-        data: { title: 'Hide tool globally',  content: 'This will hide this tool for all users: ' + this.nodes[node.id].tool.name + '. Proceed?'}
+        data: { title: 'Hide tool globally',  content: 'This will hide ' + this.nodes[node.id].tool.name + ' on this stack and on stacks created from now on, for all users. Other existing stacks are not changed. Proceed?'}
       });
 
       dialogRef.afterClosed().subscribe(result => {

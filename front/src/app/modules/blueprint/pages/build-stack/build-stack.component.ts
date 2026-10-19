@@ -172,6 +172,26 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
           this.errMessageReturned = data;
           this.emitErrorToDataLayer('service.getBlueprint',this.errMessageReturned);
         }
+        // Stack just created on the account page: isNew and the rule-shown node ids arrive in the
+        // navigation state. Cleared right away, because history.state survives a page reload.
+        const navState = window.history.state;
+        if (navState && navState.isNew) {
+          if (data && typeof data === 'object') {
+            data.isNew = true;
+            const showNodeIds = new Set(navState.showNodeIds || []);
+            (data.nodes || []).forEach((node) => {
+              if (showNodeIds.has(node.id)) { node.rule = 'show'; }
+            });
+          }
+          if (navState.errorMessage) {
+            // BuiltWith returned an error on create: same popup as the builder's own create path.
+            this.inviteDialog.open(LoadEmptyStackDialogComponent, {
+              width: '520px',
+              data: { domain: data && data.blueprint ? data.blueprint.domain : '', errorMessage: navState.errorMessage }
+            });
+          }
+          window.history.replaceState(Object.assign({}, navState, { isNew: false, showNodeIds: [], errorMessage: null }), '');
+        }
         if (!this.toolsLoaded) {
           this.proceedBluePrintData(data);
           this.toolsLoaded = true;
@@ -955,6 +975,7 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
     this.service.updateNodeTool(data.item.id, { hide: data.item.hide }, this.blueprint.id).subscribe((res) => {
       res.tool = this.nodes[data.item.id].tool;
+      res.hiddenGlobally = this.nodes[data.item.id].hiddenGlobally; // client-side only; not in the server response
       this.nodes[data.item.id] = res;
       this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain  });
     });
@@ -1156,6 +1177,7 @@ public handleAddAdditionalApp() {
     console.log(' handleHideNode - ', data);
     this.service.updateNodeTool(data.item.id, { hide: data.item.hide }, this.blueprint.id).subscribe((res) => {
       res.tool = this.nodes[data.item.id].tool;
+      res.hiddenGlobally = this.nodes[data.item.id].hiddenGlobally; // client-side only; not in the server response
       this.nodes[data.item.id] = res;
     });
   }
@@ -1179,8 +1201,9 @@ public handleAddAdditionalApp() {
       if (!res) { return; } // domain/custom app tools are skipped by the server
    
       this.nodes[data.item.id].hiddenGlobally = res.hidden;
+      // Same refresh as handleGlobalHideNodeItem, so the tools list shows the new global state.
+      this.changedNodes$.next({ nodes: this.nodes, list: this.nodesList, domain: this.blueprint.domain  });
 
-     
     });
 
      

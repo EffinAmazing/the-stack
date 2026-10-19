@@ -421,7 +421,7 @@ export class ToolsListComponent implements OnInit {
 
     const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
       width: '480px',
-      data: { title: label + ' tool globally',  content: 'This will ' + label.toLowerCase() + ' this tool for all users: ' + this.nodes[node.id].tool.name + '. Proceed?'}
+      data: { title: label + ' tool globally',  content: 'This will ' + label.toLowerCase() + ' ' + this.nodes[node.id].tool.name + ' on this stack and on stacks created from now on, for all users. Other existing stacks are not changed. Proceed?'}
     });
 
 

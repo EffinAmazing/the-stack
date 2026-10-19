@@ -17,6 +17,7 @@ export class UsersManagmentComponent implements OnInit {
   limit = 10;
   total = 0;
   displayedColumns: string[] = ['email', 'firstName', 'lastName', 'role', 'verified', 'actions'];
+  errorMessage = '';
 
   constructor(
     private auth: AuthService,
@@ -57,6 +58,7 @@ export class UsersManagmentComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        this.errorMessage = '';
         this.usersService.deleteUser(user.id).toPromise().then((done) => {
           console.log(done);
           this.usersService.getUsersList(0).toPromise().then(res => {
@@ -67,9 +69,15 @@ export class UsersManagmentComponent implements OnInit {
           });
         }).catch(err => {
           console.log(err);
+          this.errorMessage = this.serverMessage(err, 'Could not delete the user.');
         });
       }
     });
+  }
+
+  // Server errors arrive as { result: 'Error', message } in the HttpErrorResponse body.
+  private serverMessage(err, fallback: string): string {
+    return (err && err.error && err.error.message) || fallback;
   }
 
   handleClickEdit(user) {
@@ -81,6 +89,7 @@ export class UsersManagmentComponent implements OnInit {
     dialogRef.afterClosed().subscribe(data => {
       if (data) {
         console.log(data);
+        this.errorMessage = '';
         this.usersService.updateUsers(user.id, data).toPromise()
         .then(done => {
           this.usersService.getUsersList(0).toPromise().then(res => {
@@ -92,6 +101,7 @@ export class UsersManagmentComponent implements OnInit {
         })
         .catch(err => {
           console.log(err);
+          this.errorMessage = this.serverMessage(err, 'Could not save the user.');
         });
       }
     });

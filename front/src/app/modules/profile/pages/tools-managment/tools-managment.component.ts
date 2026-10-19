@@ -11,6 +11,7 @@ import { environment } from '../../../../../environments/environment';
 
 const host = environment.serverURI;
 const searchDelay = 500;
+const categoryPageSize = 20;
 
 type AdminSetting = 'default' | 'show' | 'hide';
 
@@ -43,7 +44,16 @@ export class ToolsManagmentComponent implements OnInit, OnDestroy {
   selection = new SelectionModel<string>(true, []);
   saving = false;
   errorMessage = '';
+  loading = false;
+  readonly noCategory = '(No category)';
+  categorySearch = '';
+  categoryOptions: { name: string, tools: number }[] = [];
+  categoryOptionsLoading = false;
+  categoryOptionsTotal = 0;
+  private loadRequestId = 0;
+  private categoryOptionsRequestId = 0;
   private search$ = new Subject<void>();
+  private categorySearch$ = new Subject<void>();
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -58,6 +68,7 @@ export class ToolsManagmentComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.push(this.search$.pipe(debounceTime(searchDelay)).subscribe(() => this.load(0)));
+    this.subscriptions.push(this.categorySearch$.pipe(debounceTime(searchDelay)).subscribe(() => this.loadCategoryOptions()));
     this.subscriptions.push(this.route.queryParamMap.subscribe((params) => {
       this.categoryFilter = params.get('category') || '';
       this.tagFilter = params.get('tag') || '';
@@ -73,6 +84,9 @@ export class ToolsManagmentComponent implements OnInit, OnDestroy {
     this.offset = offset;
     this.selection.clear();
     if (offset === 0 && this.paginator) { this.paginator.firstPage(); }
+    // Only the latest request may update the list (fast typing sends several).
+    const requestId = ++this.loadRequestId;
+    this.loading = true;
     this.toolsService.queryTools({
       name: this.toolSearchName.trim(),
       category: this.categoryFilter,
@@ -80,13 +94,59 @@ export class ToolsManagmentComponent implements OnInit, OnDestroy {
       setting: this.settingFilter,
       offset
     }).toPromise().then((res) => {
+      if (requestId !== this.loadRequestId) { return; }
+      this.loading = false;
+      this.errorMessage = '';
       this.rules = res.rules || this.rules;
       this.total = res.total;
       this.rows = res.list.map(tool => this.toRow(tool));
     }).catch((err) => {
+      if (requestId !== this.loadRequestId) { return; }
+      this.loading = false;
       console.log(err);
       this.errorMessage = 'Could not load tools.';
     });
+  }
+
+  // Category filter menu: searchable list of categories, most tools first, 20 more per scroll.
+  loadCategoryOptions(append = false) {
+    const requestId = ++this.categoryOptionsRequestId;
+    const offset = append ? this.categoryOptions.length : 0;
+    this.categoryOptionsLoading = true;
+    this.blueprintService.getAdminCategories({ search: this.categorySearch.trim(), status: 'all', offset, limit: categoryPageSize }).toPromise()
+    .then((res) => {
+      if (requestId !== this.categoryOptionsRequestId) { return; }
+      this.categoryOptionsLoading = false;
+      const page = res.list.map(row => ({ name: row.name, tools: row.tools }));
+      this.categoryOptions = append ? this.categoryOptions.concat(page) : page;
+      this.categoryOptionsTotal = res.total;
+    }).catch((err) => {
+      if (requestId !== this.categoryOptionsRequestId) { return; }
+      this.categoryOptionsLoading = false;
+      console.log(err);
+      if (!append) { this.categoryOptions = []; }
+    });
+  }
+
+  handleCategoryOptionsScroll(event: Event) {
+    const el = event.target as HTMLElement;
+    const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 40;
+    if (nearBottom && !this.categoryOptionsLoading && this.categoryOptions.length < this.categoryOptionsTotal) {
+      this.loadCategoryOptions(true);
+    }
+  }
+
+  handleCategorySearch() {
+    this.categorySearch$.next();
+  }
+
+  showNoCategoryOption(): boolean {
+    const search = this.categorySearch.trim().toLowerCase();
+    return !search || 'no category'.indexOf(search) !== -1;
+  }
+
+  pickCategory(name: string) {
+    this.router.navigate([], { relativeTo: this.route, queryParams: { category: name }, queryParamsHandling: 'merge' });
   }
 
   handlePage(evnt) {
@@ -95,6 +155,12 @@ export class ToolsManagmentComponent implements OnInit, OnDestroy {
 
   handleInputText() {
     this.search$.next();
+  }
+
+  clearSearch() {
+    if (!this.toolSearchName) { return; }
+    this.toolSearchName = '';
+    this.load(0);
   }
 
   setSettingFilter(value: '' | AdminSetting) {

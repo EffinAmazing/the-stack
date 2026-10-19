@@ -39,22 +39,26 @@
               >
                 <img [src]="getAssetsFolder() + 'assets/images/info.png'" />
               </button>
-              <div class="actions" (click)="toggleNodeFormStack(nodes[nodeId])">
-                <mat-icon class="visible" *ngIf="!nodes[nodeId].hide"
-                  >visibility</mat-icon
-                >
-                <mat-icon class="hidden" *ngIf="nodes[nodeId].hide"
-                  >visibility_off</mat-icon
-                >
-              </div>
-              <div class="actions" *ngIf="isUserAdmin && !isAppTool(nodes[nodeId])">
-                <div class="actions" (click)="toggleNodeGlobally(nodes[nodeId])">
-                  <mat-icon class="visible" [ngClass]="{'loading': nodes[nodeId].isUpdatingToolVisibility}"  *ngIf="nodes[nodeId].hiddenGlobally"
-                    >restore</mat-icon
-                  >
-                  <mat-icon class="hidden" [ngClass]="{'loading': nodes[nodeId].isUpdatingToolVisibility}"  *ngIf="!nodes[nodeId].hiddenGlobally"
-                    >block</mat-icon
-                  >
+              <div class="tool-actions">
+                <div class="actions" (click)="toggleNodeFormStack(nodes[nodeId])">
+                  <ng-container *ngIf="!nodes[nodeId].hide">
+                    <mat-icon class="visible">visibility</mat-icon>
+                    <span class="action-label">Hide on Stack</span>
+                  </ng-container>
+                  <ng-container *ngIf="nodes[nodeId].hide">
+                    <mat-icon class="hidden">visibility_off</mat-icon>
+                    <span class="action-label">Show on Stack</span>
+                  </ng-container>
+                </div>
+                <div class="actions" *ngIf="isUserAdmin && !isAppTool(nodes[nodeId])" (click)="toggleNodeGlobally(nodes[nodeId])">
+                  <ng-container *ngIf="nodes[nodeId].hiddenGlobally">
+                    <mat-icon class="visible" [ngClass]="{'loading': nodes[nodeId].isUpdatingToolVisibility}">public</mat-icon>
+                    <span class="action-label">Show Globally</span>
+                  </ng-container>
+                  <ng-container *ngIf="!nodes[nodeId].hiddenGlobally">
+                    <mat-icon class="hidden" [ngClass]="{'loading': nodes[nodeId].isUpdatingToolVisibility}">block</mat-icon>
+                    <span class="action-label">Hide Globally</span>
+                  </ng-container>
                 </div>
               </div>
             </div>
