@@ -22,11 +22,11 @@ exports.initPassport = function(){
         // database dummy - find user and verify password
         
   
-        console.log("initPassport Strategy", username, password);
+        console.log("initPassport Strategy", username);
         let dbModel = new UserModel();
            dbModel.checkCredantial(username, password)
                .then((user)=>{
-                 console.log( 'done', user);
+                 console.log( 'done', user ? user._id : user);
                  done(null,user);
                })
                .catch((err)=>{

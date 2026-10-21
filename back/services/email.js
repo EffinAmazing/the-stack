@@ -55,7 +55,7 @@ module.exports.sendResetPassword = async function(email, user, frontPath, code){
         html: textHTML
     }
 
-    console.log(msg);
+    console.log('send reset to - ', email);
 
     await sgMail.send(msg);
 }

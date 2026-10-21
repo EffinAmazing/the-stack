@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const AbstaractModel = require('./_abstract');
 const bcrypt = require('bcrypt');
 const uniqid = require('uniqid');
+const crypto = require('crypto');
 const BluePrintAccess = require('./BlueprintAccess');
 const emailService = require('../../services/email');
 const { UserModelError } = require('../../services/custom-errors');
@@ -10,6 +11,7 @@ const async = require('async');
 
 
 const SALT_FACTOR = 12;
+const RESET_CODE_BYTES = 16; // 32 hex characters
 
 class UserModel extends AbstaractModel{
     constructor(){
@@ -85,8 +87,10 @@ class UserModel extends AbstaractModel{
     }
 
     async checkCredantial(username, password){
+        if (typeof username !== 'string' || typeof password !== 'string') {
+            return false;
+        }
         let user = await this.modelDB.findOne({$or:[{email: username}, { username: username}]});
-        console.log(user);
         if (user) {
             let isMatch = await user.comparePassword(password);
             console.log('checkCredantial -> isMatch', isMatch);
@@ -108,7 +112,7 @@ class UserModel extends AbstaractModel{
             user = super.create(data, []);
             return user;
         } else {
-            throw new UserModelError(" User with this email is already registerred ", { data, type: 'EmailDuplication' });
+            throw new UserModelError(" User with this email is already registerred ", { data: { email: data.email }, type: 'EmailDuplication' }); // the error is logged; keep the password out
         }
     }
 
@@ -119,6 +123,7 @@ class UserModel extends AbstaractModel{
 
     async complete(id, code, data) {
        data['verified'] = true;
+       data['validationCode'] = ''; // an invite code works once
        let ok = await this.modelDB.updateOne({ _id: id, verified: false,  validationCode: code }, data).exec();
        return ok;
     }
@@ -126,7 +131,7 @@ class UserModel extends AbstaractModel{
     async sendResetPass(email, frontUrl) {
         let user = await this.modelDB.findOne({$or:[{email: email}, { username: email}]}).exec();
         if (user) {
-            let validationCode = uniqid.time().substr(-4);
+            let validationCode = crypto.randomBytes(RESET_CODE_BYTES).toString('hex');
             await this.modelDB.updateOne({ _id: user._id }, { validationCode }).exec();
             await emailService.sendResetPassword(email, user, frontUrl, validationCode);
             return true;
@@ -136,6 +141,11 @@ class UserModel extends AbstaractModel{
     }
 
     async resetPassword(code, password) {
+        // Only codes issued by sendResetPass are accepted; the old 4-character codes
+        // (including the ones left over from sign-up) never match this length.
+        if (typeof code !== 'string' || code.length !== RESET_CODE_BYTES * 2 || typeof password !== 'string') {
+            throw new UserModelError('User with this email is not found!', { type: 'UserNotFound' });
+        }
         let user = await this.modelDB.findOne({ verified: true,  validationCode: code });
         if (user) {
             await this.modelDB.updateOne({ _id: user._id }, { password: password, validationCode: '' }).exec();
