@@ -500,10 +500,24 @@ class BluePrints {
         }
     }
 
+    // Admins, the owner, or a user the blueprint was shared with (the builder shows them
+    // "Delete stack"). Unowned blueprints from public lookups have neither, so only admins.
+    async canRemoveBluePrint(user, id) {
+        if (user.role === 0) return true;
+        const blueprint = await this._bluePrints.one(id);
+        if (blueprint.userId && blueprint.userId.toString() == user._id.toString()) return true;
+        const level = await this._bluePrintsAccess.hasUserAccess(user._id, blueprint.id);
+        return !!level;
+    }
+
     removeBluePrint(req, res, next){
         const id = req.params.id;
+        const user = req.user;
         if(id) {
             async.waterfall([
+                (cb)=>{
+                    this.canRemoveBluePrint(user, id).then((allowed)=>{ cb(allowed ? null : new Error('Forbidden')); }).catch(()=>{ cb(new Error('Forbidden')) })
+                },
                 (cb)=>{
                     this._arrows.removeAllByBlueprintId(id).then(()=>{ cb(null);  }).catch((err)=>{ cb(err) })
                 },
@@ -518,7 +532,7 @@ class BluePrints {
                 }
             ], function(err, result){
                 if(err) {
-                    resres.status(500).json({
+                    res.status(err.message === 'Forbidden' ? 403 : 500).json({
                         result: "Error",
                         message: err.message
                     })

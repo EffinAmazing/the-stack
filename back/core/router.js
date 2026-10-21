@@ -37,7 +37,7 @@ router.post("/blueprints/tools", passport.authenticate('jwt', { session: false }
 router.post("/blueprints/", blueprints.updateBlueprint);
 router.put("/blueprints/:id", blueprints.updateBlueprint);
 router.get("/blueprints/tools/:id", passport.authenticate('jwt', { session: false }), blueprints.getBluePrint.bind(blueprints));
-router.delete('/blueprints/:id', blueprints.removeBluePrint.bind(blueprints));
+router.delete('/blueprints/:id', passport.authenticate('jwt', { session: false }), blueprints.removeBluePrint.bind(blueprints));
 router.get('/blueprints/list', passport.authenticate('jwt', { session: false }), blueprints.getBluePrintsForUser.bind(blueprints));
 router.post('/blueprints/invite', passport.authenticate('jwt', { session: false }), blueprints.inviteUsers.bind(blueprints));
 router.get('/blueprints/shared', passport.authenticate('jwt', { session: false }), blueprints.getSharedBluePrints.bind(blueprints));
