@@ -119,6 +119,7 @@ class UserModel extends AbstaractModel{
 
     async complete(id, code, data) {
        data['verified'] = true;
+       data['validationCode'] = ''; // an invite code works once
        let ok = await this.modelDB.updateOne({ _id: id, verified: false,  validationCode: code }, data).exec();
        return ok;
     }

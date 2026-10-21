@@ -2,7 +2,7 @@ const UserModel = require('../../db/models/Users');
 const BluePrintModel = require('../../db/models/Blueprints');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
-const { sanitizeUserUpdate } = require('../../services/user-update');
+const { sanitizeUserUpdate, sanitizeSignupData } = require('../../services/user-update');
 
 const JWT_SECRET_KEY = process.env.AUTH_SECRET_KEY || "stack-builder";
 
@@ -44,12 +44,17 @@ class Users {
     }
 
     signup(req, res, next) {
-        let data = req.body.data;
+        const parsed = sanitizeSignupData(req.body.data);
 
-        if (data) {
-            this.model.create(data).then((user)=>{
+        if (!parsed.error) {
+            this.model.create(parsed.data).then((user)=>{
                 res.json({
-                    result: user
+                    result: {
+                        _id: user._id,
+                        email: user.email,
+                        firstName: user.firstName,
+                        lastName: user.lastName
+                    }
                 })
             }).catch(err=>{
                 console.log(err);
@@ -93,12 +98,12 @@ class Users {
     }
 
     completeRegistration(req, res, next) {
-        let data = req.body.data;
+        const parsed = sanitizeSignupData(req.body.data);
         let code = req.body.code;
         let id = req.params.id
 
-        if (data) {
-            this.model.complete(id, code, data)
+        if (!parsed.error && typeof code === 'string' && code) {
+            this.model.complete(id, code, parsed.data)
             .then(result => {
                 res.json({
                     result: result
