@@ -250,7 +250,7 @@ class Users {
                 })
             }).catch(err => {
                 console.log(' send ');
-                console.log(err, err.response.body);
+                console.log(err, err.response ? err.response.body : '');
                 res.status(500).json({
                     result: 'Error',
                     type: err.type ? err.type : 'ServerError',
