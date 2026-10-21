@@ -75,11 +75,12 @@ class Users {
     getUserByCode(req, res, next) {
         let code = req.query.code;
 
-        if ( code ) {
+        if ( typeof code === 'string' && code ) {
             this.model.getByCode(code)
             .then((result) => {
+                // The invite sign-up page only needs the id (for complete) and the email (prefill).
                 res.json({
-                    result: result
+                    result: result ? { _id: result._id, email: result.email } : null
                 });
             })
             .catch(err => {
