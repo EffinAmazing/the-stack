@@ -8,6 +8,7 @@ const Users = require('./controllers/users');
 const passport = require('passport');
 const servicePassport = require('../services/passport');
 const stripMongoOperators = require('./middleware/strip-mongo-operators');
+const requireAdmin = require('./middleware/require-admin');
 const router = express.Router();
 
 const blueprints = new BlueprintsController();
@@ -54,11 +55,11 @@ router.get('/tools/search', toolsNodes.getListOfTools.bind(toolsNodes));
 router.post('/toolsnodes/custom', toolsNodes.createCustom.bind(toolsNodes));
 router.put('/toolsnodes/custom/:id', toolsNodes.updateCustom.bind(toolsNodes));
 router.get('/tools/categories', toolsNodes.getListOfCategories.bind(toolsNodes));
-router.post('/tools/updateVisibility/:id', passport.authenticate('jwt', { session: false }), tools.updateVisibility.bind(tools));
+router.post('/tools/updateVisibility/:id', passport.authenticate('jwt', { session: false }), requireAdmin, tools.updateVisibility.bind(tools));
 
 
-router.get('/admin/tools', passport.authenticate('jwt', { session: false }), tools.getTools.bind(tools));
-router.get('/admin/tools/search', passport.authenticate('jwt', { session: false }), tools.getByName.bind(tools));
+router.get('/admin/tools', passport.authenticate('jwt', { session: false }), requireAdmin, tools.getTools.bind(tools));
+router.get('/admin/tools/search', passport.authenticate('jwt', { session: false }), requireAdmin, tools.getByName.bind(tools));
 
 
 router.post("/arrows/", arrows.add.bind(arrows));
@@ -72,9 +73,9 @@ router.post('/users/signup', users.signup.bind(users));
 router.post('/users/signin', users.signin.bind(users));
 router.get('/users/bycode', users.getUserByCode.bind(users));
 router.post('/users/complete/:id', users.completeRegistration.bind(users));
-router.get('/users', passport.authenticate('jwt', { session: false }), users.getList.bind(users));
-router.put('/users/:id', passport.authenticate('jwt', { session: false }), users.update.bind(users));
-router.delete('/users/:id', passport.authenticate('jwt', { session: false }), users.delete.bind(users));
+router.get('/users', passport.authenticate('jwt', { session: false }), requireAdmin, users.getList.bind(users));
+router.put('/users/:id', passport.authenticate('jwt', { session: false }), requireAdmin, users.update.bind(users));
+router.delete('/users/:id', passport.authenticate('jwt', { session: false }), requireAdmin, users.delete.bind(users));
 router.post('/users/:id/reinvite', passport.authenticate('jwt', { session: false }), users.resendInvite.bind(users));
 router.get('/users/:id/blueprints', passport.authenticate('jwt', { session: false }), users.getUserByBluePrint.bind(users));
 router.post('/users/forgotpassword',  users.sendResetPass.bind(users));
