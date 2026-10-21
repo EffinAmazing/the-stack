@@ -97,7 +97,19 @@
             vertical-align: middle;
         }
         
-        .actions{    
+        .tool-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 16px;
+            margin-top: 6px;
+            padding-left: 25px; // lines up under the name, past the 20px logo + 5px gap
+
+            .actions {
+                margin-left: 0;
+            }
+        }
+
+        .actions{
             display: inline-block;
             cursor: pointer;
             vertical-align: middle;
@@ -116,6 +128,16 @@
             .loading {
                 animation: pulse 1s ease-in-out infinite;
                 opacity: 0.6;
+            }
+
+            mat-icon, .action-label {
+                vertical-align: middle;
+            }
+
+            .action-label {
+                margin-left: 4px;
+                font-size: 12px;
+                white-space: nowrap;
             }
         }
     }

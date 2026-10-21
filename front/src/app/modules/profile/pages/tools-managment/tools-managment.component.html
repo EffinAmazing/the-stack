@@ -1,58 +1,137 @@
 <div class="main">
-    
-    <div class="app-container">
-      
-      <div class="stack-section-container">
-          <app-header [user]="user"></app-header>
-          <div class="mt-container"> 
-              <div class="my-stack-container">
-                  <div class="stack-container-header">
-                    <h2> Tools </h2>
-                    <mat-form-field appearance="none" class="search-full-width">
-                        <mat-label>Search by Tool name</mat-label>
-                        <input type="text" matInput placeholder="" [(ngModel)]="toolSearchName" (input)="handleInputText($event)" cdkFocusInitial>
-                        <mat-icon matSuffix>search</mat-icon>
-                    </mat-form-field>
-                  </div>
-                  <table mat-table [dataSource]="tools" class="tools-table">
-                      <ng-container matColumnDef="name">
-                          <th mat-header-cell *matHeaderCellDef> Name </th>
-                          <td mat-cell class="tool-name" *matCellDef="let item"> {{ item.name }} </td>
-                      </ng-container>                    
-
-                      <ng-container matColumnDef="logo">
-                        <th mat-header-cell *matHeaderCellDef> Logo </th>
-                        <td mat-cell *matCellDef="let item">
-                            <mat-icon mat-list-icon><img class="logo-tool"
-                            [src]="processImageSrc(item.logo)"></mat-icon>
-                        </td>
-                      </ng-container> 
-
-                      <ng-container matColumnDef="description">
-                        <th mat-header-cell *matHeaderCellDef> Description </th>
-                        <td mat-cell class="description" *matCellDef="let item"> {{ item.description }} </td>
-                      </ng-container>                        
-
-                      <ng-container matColumnDef="hidden">
-                        <th mat-header-cell *matHeaderCellDef> Hidden Globally </th>
-                        <td mat-cell *matCellDef="let item">                           
-                            <div class="actions">
-                                <mat-icon class="visible-tool visibility-toggle" *ngIf="item.hidden === true" (click)="handleShowHideGlobally(item)">restore</mat-icon>
-                                <mat-icon class="hidden-tool visibility-toggle" *ngIf="item.hidden === false || item.hidden === undefined" (click)="handleShowHideGlobally(item)">block</mat-icon>
-                            </div>                             
-                        </td>
-                      </ng-container> 
-
-                      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                  </table>
-  
-                  <mat-paginator #paginator [length]="total"
-                  [pageSize]="limit" (page)="handlePage($event)">
-                  </mat-paginator>
-              </div>
+  <div class="app-container">
+    <div class="stack-section-container">
+      <app-header [user]="user"></app-header>
+      <div class="mt-container">
+        <div class="my-stack-container">
+          <div class="stack-container-header">
+            <h2> Tools </h2>
+            <mat-form-field appearance="none" class="search-full-width">
+              <mat-label>Search by Tool name</mat-label>
+              <input type="text" matInput [(ngModel)]="toolSearchName" (input)="handleInputText()" (keyup.escape)="clearSearch()" cdkFocusInitial>
+              <button *ngIf="toolSearchName" mat-icon-button matSuffix aria-label="Clear search" (click)="clearSearch()"><mat-icon>close</mat-icon></button>
+              <mat-icon *ngIf="!toolSearchName" matSuffix>search</mat-icon>
+            </mat-form-field>
           </div>
+
+          <div class="filter-bar">
+            <span class="filter-label">Filter:</span>
+            <span *ngIf="categoryFilter" class="filter-chip active">
+              Category: {{ categoryFilter }}
+              <span *ngIf="categoryStatus(categoryFilter) !== 'normal'" class="badge" [ngClass]="'badge-' + categoryStatus(categoryFilter)">{{ categoryStatus(categoryFilter) }}</span>
+              <mat-icon class="chip-close" (click)="clearFilter('category')">close</mat-icon>
+            </span>
+            <button *ngIf="!categoryFilter" class="filter-chip" [matMenuTriggerFor]="categoryMenu" (menuOpened)="loadCategoryOptions()">Category: Any</button>
+            <mat-menu #categoryMenu="matMenu" class="category-menu">
+              <div class="category-menu-search" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+                <input type="text" placeholder="Search categories" [(ngModel)]="categorySearch" (input)="handleCategorySearch()">
+              </div>
+              <div class="category-menu-options" (scroll)="handleCategoryOptionsScroll($event)">
+                <button mat-menu-item *ngIf="showNoCategoryOption()" (click)="pickCategory(noCategory)"><em>{{ noCategory }}</em></button>
+                <button mat-menu-item *ngFor="let option of categoryOptions" (click)="pickCategory(option.name)">
+                  {{ option.name }} <span class="option-count">{{ option.tools }}</span>
+                </button>
+                <div class="category-menu-empty" *ngIf="!categoryOptionsLoading && !categoryOptions.length">No categories match.</div>
+              </div>
+              <div class="loading-slot"><mat-progress-bar *ngIf="categoryOptionsLoading" mode="indeterminate"></mat-progress-bar></div>
+            </mat-menu>
+            <span *ngIf="tagFilter" class="filter-chip active">
+              Tag: {{ tagFilter }}
+              <span *ngIf="tagBlocked(tagFilter)" class="badge badge-blocked">blocked</span>
+              <mat-icon class="chip-close" (click)="clearFilter('tag')">close</mat-icon>
+            </span>
+            <button class="filter-chip" [class.active]="settingFilter" [matMenuTriggerFor]="settingMenu">
+              Admin setting: {{ settingFilter ? (settingFilter | titlecase) : 'Any' }}
+            </button>
+            <mat-menu #settingMenu="matMenu">
+              <button mat-menu-item (click)="setSettingFilter('')">Any</button>
+              <button mat-menu-item (click)="setSettingFilter('default')">Default</button>
+              <button mat-menu-item (click)="setSettingFilter('show')">Show</button>
+              <button mat-menu-item (click)="setSettingFilter('hide')">Hide</button>
+            </mat-menu>
+            <span class="spacer"></span>
+            <div class="bulk-actions" *ngIf="selection.hasValue()">
+              <strong>{{ selection.selected.length }} selected</strong>
+              <button mat-stroked-button class="bulk-show" [disabled]="saving" (click)="setSelected('show')"><mat-icon>visibility</mat-icon> Show</button>
+              <button mat-stroked-button class="bulk-hide" [disabled]="saving" (click)="setSelected('hide')"><mat-icon>block</mat-icon> Hide</button>
+              <button mat-stroked-button [disabled]="saving" (click)="setSelected('default')"><mat-icon>undo</mat-icon> Reset</button>
+              <button mat-button (click)="selection.clear()">Clear</button>
+            </div>
+          </div>
+
+          <div *ngIf="categoryFilter && categoryStatus(categoryFilter) === 'blocked'" class="filter-hint exception-hint">
+            Set a tool to <strong class="text-shown">Show</strong> to make an exception to the block.
+          </div>
+
+          <div class="loading-slot"><mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar></div>
+
+          <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+          <table mat-table [dataSource]="rows" class="tools-table">
+            <ng-container matColumnDef="select">
+              <th mat-header-cell *matHeaderCellDef>
+                <mat-checkbox (change)="$event ? masterToggle() : null"
+                              [checked]="isAllSelected()"
+                              [indeterminate]="selection.hasValue() && !isAllSelected()"></mat-checkbox>
+              </th>
+              <td mat-cell *matCellDef="let row">
+                <mat-checkbox (click)="$event.stopPropagation()"
+                              (change)="$event ? selection.toggle(row.tool.id) : null"
+                              [checked]="selection.isSelected(row.tool.id)"></mat-checkbox>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef> Name </th>
+              <td mat-cell class="tool-name" [class.muted]="row.result.kind === 'hidden'" *matCellDef="let row"> {{ row.tool.name }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="logo">
+              <th mat-header-cell *matHeaderCellDef> Logo </th>
+              <td mat-cell *matCellDef="let row">
+                <mat-icon mat-list-icon><img class="logo-tool" [src]="processImageSrc(row.tool.logo)"></mat-icon>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="categories">
+              <th mat-header-cell *matHeaderCellDef> Categories </th>
+              <td mat-cell *matCellDef="let row">
+                <span *ngFor="let cat of row.tool.categories" class="cat-chip" [ngClass]="'cat-' + categoryStatus(cat)">{{ cat }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="setting">
+              <th mat-header-cell *matHeaderCellDef> Admin setting </th>
+              <td mat-cell *matCellDef="let row">
+                <mat-button-toggle-group class="setting-toggle" [value]="row.setting" [disabled]="saving"
+                                         (change)="setVisibility([row.tool.id], $event.value)">
+                  <mat-button-toggle value="default">Default</mat-button-toggle>
+                  <mat-button-toggle value="show" class="toggle-show"><mat-icon>visibility</mat-icon> Show</mat-button-toggle>
+                  <mat-button-toggle value="hide" class="toggle-hide"><mat-icon>block</mat-icon> Hide</mat-button-toggle>
+                </mat-button-toggle-group>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="result">
+              <th mat-header-cell *matHeaderCellDef> Result on new stacks </th>
+              <td mat-cell *matCellDef="let row">
+                <div class="result" [ngClass]="'result-' + row.result.kind">
+                  <mat-icon>{{ row.result.kind === 'shown' ? 'visibility' : (row.result.kind === 'hidden' ? 'block' : 'auto_awesome') }}</mat-icon>
+                  <div>
+                    <div class="result-label">{{ row.result.label }}</div>
+                    <div class="result-detail">{{ row.result.detail }}</div>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.selected-row]="selection.isSelected(row.tool.id)"></tr>
+          </table>
+
+          <mat-paginator #paginator [length]="total" [pageSize]="limit" (page)="handlePage($event)"></mat-paginator>
+        </div>
       </div>
     </div>
   </div>
-  
+</div>

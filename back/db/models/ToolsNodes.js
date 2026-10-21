@@ -1,8 +1,20 @@
 var mongoose = require('mongoose');
 var async = require('async');
 var AbstaractModel = require('./_abstract');
+var CategoriesModel = require('./Categories');
+var TagsModel = require('./Tags');
+const { decideTool, isStale, loadRules } = require('../../services/visibility-rules');
+
+// New stacks keep at least this many tools visible when admin rules hide tools (same as the old first-load pass).
+const MIN_VISIBLE = 5;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
+/*
+ * DEPRECATED (2026-10) — no longer used. Category/tag visibility rules now live in the database
+ * (categories.status, tags.status), managed on the admin Categories page and seeded by
+ * back/migrate-visibility-rules.js from back/db/seed/visibility-rules-2026-10.json.
+ * Kept commented out for reference only.
+ *
 const BlockedCategories = [
     'Copyright',
     'CSS Media Queries',
@@ -99,6 +111,7 @@ const BlockedCategories = [
     'Login',
     'Visitor Count Tracking'
 ]
+*/
 
 class ToolsNodesModel extends AbstaractModel {
     constructor(){
@@ -151,12 +164,31 @@ class ToolsNodesModel extends AbstaractModel {
 
     }
 
+    // Admin visibility rules for nodes being created now. Returns { [toolId]: 'show' | 'hide' | null }.
+    async decideNewNodes(tools) {
+        const rules = await loadRules(new CategoriesModel(), new TagsModel());
+        const decisions = {};
+        tools.forEach((tool) => {
+            decisions[String(tool.id)] = decideTool(tool, rules, isStale(tool.end)).state;
+        });
+        return decisions;
+    }
+
     async createNodesForTools(blueprintId, tools, domain = '') {
+        const decisions = await this.decideNewNodes(tools);
+        // New stack: like the old first-load pass, rule hides never leave fewer than MIN_VISIBLE tools visible.
+        let hiddenCount = 0;
         let arrIds = [];
         let dataList = await async.map(tools, (item, cb)=>{ 
+            let hide = false;
+            if (decisions[String(item.id)] === 'hide' && tools.length - hiddenCount > MIN_VISIBLE) {
+                hide = true;
+                hiddenCount++;
+            }
             let data = {
                 blueprintId: blueprintId,
-                toolId: item.id
+                toolId: item.id,
+                hide: hide
             }
             arrIds.push(item.id);
             if (domain) {
@@ -181,23 +213,12 @@ class ToolsNodesModel extends AbstaractModel {
         }
 
         let docs = await this.modelDB.create(dataList);
-        let mappedDocs = await async.map(docs, (item, cb)=>{ cb( null, this.mapDocument(item) ); });
+        let mappedDocs = await async.map(docs, (item, cb)=>{
+            const node = this.mapDocument(item);
+            node.rule = decisions[String(node.toolId)] || null;
+            cb( null, node );
+        });
         return mappedDocs;
-    }
-
-    async isBlockedCat(categories) {
-        let isInArray = false;
-        if (!categories) return true;
-        if ( categories && categories.length === 0 )  return true;
-
-        for await (const cat of BlockedCategories) {
-            if (categories.includes(cat)) {
-                isInArray = true;
-                break;
-            }
-        }
-
-        return isInArray;
     }
 
     async filterToolsByNodes(blueprintId, tools, domain = '') {
@@ -209,16 +230,17 @@ class ToolsNodesModel extends AbstaractModel {
         const existingToolIds = new Set(existingDocs.map(doc => doc.toolId.toString()));
 
         const toolsToCreate = tools.filter(tool => !existingToolIds.has(tool.id.toString()));
+        const decisions = await this.decideNewNodes(toolsToCreate);
 
         //console.log('toolsToCreate',toolsToCreate);
 
         const newNodes = await Promise.all(toolsToCreate.map(async (tool) => {
             try {
-                const isInArray = await this.isBlockedCat(tool.categories);
+                const rule = decisions[String(tool.id)] || null;
                 const data = {
                     blueprintId,
                     toolId: tool.id,
-                    hide: isInArray,
+                    hide: rule === 'hide',
                     ...(domain && { domain }),
                     ...(tool.start && { start: new Date(tool.start) }),
                     ...(tool.end && { end: new Date(tool.end) }),
@@ -227,6 +249,7 @@ class ToolsNodesModel extends AbstaractModel {
                 const doc = await this.modelDB.create(data);
                 const node = this.mapDocument(doc);
                 node.tool = tool;
+                node.rule = rule;
                 return node;
             } catch (err) {
                 console.error(`Failed to create node for tool "${tool.name}":`, err);

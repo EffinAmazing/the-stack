@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SignUPFormData } from '../../shared/models/users';
-import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse, HttpParams } from '@angular/common/http';
 import { ResponseMappers } from '../../shared/mappers/response-mapper.helper';
 import {  environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
@@ -31,6 +31,11 @@ export class ToolsService {
   //TODO
   //update tool
 
-
-
+  queryTools(params: { name?: string, category?: string, tag?: string, setting?: string, offset: number }): Observable<any> {
+    let httpParams = new HttpParams().set('offset', String(params.offset || 0));
+    ['name', 'category', 'tag', 'setting'].forEach((key) => {
+      if (params[key]) { httpParams = httpParams.set(key, params[key]); }
+    });
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}admin/tools`, { params: httpParams }));
+  }
 }

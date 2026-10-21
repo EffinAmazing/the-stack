@@ -95,7 +95,7 @@
             
             <div class="hide-item-from-stack" (click)="hideNodeFormStack(node)"> <mat-icon>clear</mat-icon> </div>
 
-            <div *ngIf="isUserAdmin" class="admin-hide-tool-button" (click)="hideNodeGlobally(node)"> <mat-icon>block</mat-icon> </div>
+            <div *ngIf="isUserAdmin && !isAppTool(node)" class="admin-hide-tool-button" (click)="hideNodeGlobally(node)"> <mat-icon>block</mat-icon> </div>
 
     </div>
     <div #selectMany [ngClass]="{'select-many-elements': true, 'visible': isMultiselect }"> </div>

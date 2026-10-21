@@ -1,0 +1,18 @@
+<h2 mat-dialog-title>Block {{ data.kind }}: {{ data.name }}</h2>
+<mat-dialog-content>
+  <p>
+    The <strong>{{ data.tools }} {{ data.tools === 1 ? 'tool' : 'tools' }}</strong>
+    {{ data.kind === 'category' ? 'in this category' : 'with this tag' }}, and any found on future BuiltWith scans,
+    will be hidden when they're added to a stack <strong>from now on</strong>.
+  </p>
+  <p>Existing stacks are not changed. Tools already on a stack keep their current visibility.</p>
+  <div class="whitelist-note" *ngIf="data.alsoWhitelisted > 0">
+    <mat-icon>verified</mat-icon>
+    <span><strong>{{ data.alsoWhitelisted }} of these tools</strong> are also in a whitelisted category and will still be
+      added visibly. Hide them individually on the Tools page if needed.</span>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="false">Cancel</button>
+  <button mat-flat-button class="block-confirm" [mat-dialog-close]="true">Block {{ data.kind }}</button>
+</mat-dialog-actions>

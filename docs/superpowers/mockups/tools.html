@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Tools Management Mockup</title>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  :root {
+    --toolbar: #eaeaea;
+    --text: #333333;
+    --cell: rgba(0,0,0,.87);
+    --muted: rgba(0,0,0,.54);
+    --line: rgba(0,0,0,.12);
+    --accent: #ff4100;          /* app's primary stack-button orange */
+    --accent-tint: #fff3ee;
+    --hide: #c62828;
+    --hide-tint: #fdecea;
+    --show: #2e7d32;
+    --show-tint: #e8f5e9;
+  }
+  html, body { margin: 0; background: #fff; font-family: "proxima-nova", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; color: var(--text); }
+  .toolbar { height: 64px; background: var(--toolbar); display: flex; align-items: center; padding: 0 16px; font-size: 20px; font-weight: 500; }
+  .toolbar .spacer { flex: 1; }
+  .toolbar nav { display: flex; align-items: center; font-size: 14px; font-weight: 500; }
+  .toolbar nav a { padding: 0 16px; line-height: 36px; }
+  .toolbar nav a.active { color: var(--accent); }
+  .toolbar nav .div { width: 1px; height: 20px; background: #bbb; }
+  .toolbar .user { display: flex; align-items: center; gap: 6px; }
+  .toolbar .user .material-icons { font-size: 36px; }
+
+  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dcdbdc; }
+  .header h2 { font-size: 28px; font-weight: 400; margin: 0; padding: 15px 24px; }
+  .search { width: 260px; margin-right: 24px; border-bottom: 1px solid rgba(0,0,0,.42); display: flex; align-items: center; padding: 6px 0; color: var(--muted); }
+  .search span:first-child { flex: 1; }
+
+  .filters { display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-bottom: 1px solid var(--line); }
+  .filters .lbl { color: var(--muted); font-size: 12px; margin-right: 4px; }
+  .chip { height: 30px; padding: 0 10px 0 14px; border-radius: 15px; border: 1px solid var(--accent); background: var(--accent-tint); color: var(--accent); display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
+  .chip .material-icons { font-size: 16px; }
+  .chip.off { border-color: rgba(0,0,0,.2); background: #fff; color: var(--muted); padding: 0 14px; }
+  .chip .tag { margin: 0; }
+
+  /* bulk action bar */
+  .bulk[hidden] { display: none; }
+  .bulk { display: flex; align-items: center; gap: 12px; padding: 10px 24px; background: var(--accent-tint); border-bottom: 1px solid #ffd8c8; }
+  .bulk .count { font-weight: 600; color: var(--text); margin-right: 8px; }
+  .bulk button { font: inherit; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 4px; cursor: pointer; background: #fff; }
+  .bulk .btn-show { color: var(--show); border: 1px solid var(--show); }
+  .bulk .btn-hide { color: var(--hide); border: 1px solid var(--hide); }
+  .bulk .btn-default { color: var(--cell); border: 1px solid rgba(0,0,0,.3); }
+  .bulk .btn-clear { background: none; border: none; color: var(--muted); margin-left: auto; }
+  .bulk .material-icons { font-size: 18px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { height: 56px; text-align: left; font-size: 12px; font-weight: 500; color: var(--muted); border-bottom: 1px solid var(--line); padding: 0 .5rem; }
+  td { height: 64px; font-size: 14px; color: var(--cell); border-bottom: 1px solid var(--line); padding: 0 .5rem; }
+  th:first-child, td:first-child { padding-left: 24px; width: 48px; }
+  td.name { width: 15%; font-weight: 500; }
+  td.logo-cell { width: 56px; }
+  td.cats { width: 24%; }
+  td.vis { width: 240px; }
+  th:last-child, td:last-child { padding-right: 24px; }
+  tr.selected td { background: #fafafa; }
+  tr.is-hidden td.name, tr.is-hidden td.cats { color: rgba(0,0,0,.45); }
+
+  .cb { width: 18px; height: 18px; border: 2px solid rgba(0,0,0,.54); border-radius: 2px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; }
+  .cb.on, .cb.mixed { background: var(--accent); border-color: var(--accent); }
+  .cb.on::after { content: "check"; font-family: "Material Icons"; color: #fff; font-size: 16px; font-weight: 700; }
+  .cb.mixed::after { content: ""; width: 10px; height: 2px; background: #fff; }
+
+  .logo { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 15px; }
+
+  .cat { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #f0f0f0; color: rgba(0,0,0,.7); margin: 2px 4px 2px 0; }
+  .cat.b { background: var(--hide-tint); color: var(--hide); }
+  .cat.w { background: var(--show-tint); color: var(--show); }
+
+  .seg { display: inline-flex; border: 1px solid rgba(0,0,0,.2); border-radius: 4px; overflow: hidden; }
+  .seg > span { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 12px; font-size: 12px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); border-left: 1px solid rgba(0,0,0,.2); }
+  .seg > span:first-child { border-left: none; }
+  .seg .material-icons { font-size: 16px; }
+  .seg .on-default { background: #f2f2f2; color: var(--cell); }
+  .seg .on-show { background: var(--show-tint); color: var(--show); }
+  .seg .on-hide { background: var(--hide-tint); color: var(--hide); }
+
+  .result { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .result .material-icons { font-size: 18px; }
+  .result.shown { color: var(--show); }
+  .result.hidden { color: var(--hide); }
+  .result.auto { color: var(--muted); }
+  .result small { display: block; color: var(--muted); font-size: 12px; margin-top: 1px; }
+  .result b { font-weight: 600; }
+
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 3px; color: #fff; background: var(--hide); }
+
+  .paginator { display: flex; justify-content: flex-end; align-items: center; gap: 32px; height: 56px; padding: 0 8px; font-size: 12px; color: var(--muted); }
+  .paginator .material-icons { color: rgba(0,0,0,.54); padding: 0 8px; }
+  .paginator .material-icons.dis { color: rgba(0,0,0,.26); }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <span>My Stacks</span>
+  <span class="spacer"></span>
+  <nav>
+    <a class="active">Tools</a><span class="div"></span><a>Categories</a><span class="div"></span><a>Users</a><span class="div"></span>
+    <a class="user">Jordan Admin <span class="material-icons">account_circle</span></a><span class="div"></span><a>Logout</a>
+  </nav>
+</div>
+
+<div class="header">
+  <h2>Tools</h2>
+  <div class="search"><span>Search by Tool name</span><span class="material-icons">search</span></div>
+</div>
+
+<div class="filters" id="filters"></div>
+
+<div class="bulk" id="bulk" hidden>
+  <span class="count" id="count"></span>
+  <button class="btn-show"><span class="material-icons">visibility</span>Show Selected</button>
+  <button class="btn-hide"><span class="material-icons">block</span>Hide Selected</button>
+  <button class="btn-default"><span class="material-icons">undo</span>Reset to Default</button>
+  <button class="btn-clear">Clear selection</button>
+</div>
+
+<table>
+  <thead><tr>
+    <th><span class="cb" id="master"></span></th>
+    <th>Name</th><th>Logo</th><th>Categories</th><th>Admin setting</th><th>Result on new stacks</th>
+  </tr></thead>
+  <tbody id="rows"></tbody>
+</table>
+
+<div class="paginator">
+  <span>Items per page: 10</span>
+  <span id="range"></span>
+  <span><span class="material-icons dis">chevron_left</span><span class="material-icons">chevron_right</span></span>
+</div>
+
+<script>
+  // Category rules (sample): b = blocked, w = whitelisted
+  // Real imported statuses (from config.ts / ToolsNodes.js) + Email Security blocked by an admin (mockup 5)
+  const rules = { "Email Security": "b",
+                  "Advertising": "b", "Cookie Management": "b", "Transactional Email": "b", "JavaScript Library": "b",
+                  "Framework": "b", "Fonts": "b", "Forms and Surveys": "b", "Site Search": "b",
+                  "Marketing Automation": "w", "CRM": "w", "A/B Testing": "w", "Personalization": "w",
+                  "Audience Measurement": "w", "Conversion Optimization": "w", "Visitor Count Tracking": "w" };
+  const blockedTags = ["hosting","cms","javascript","framework","ns","ssl","Web Server","cdn","CDN","copyright","css"];
+  // [name, color, categories, setting, tag]  setting: d = default, s = show, h = hide
+  const all = [
+    ["Airtable", "#18bfff", ["Productivity", "Forms and Surveys"], "d"],
+    ["Calendly", "#006bff", ["Scheduling"], "d"],
+    ["Drift", "#0b3048", ["Live Chat", "Marketing Automation"], "h"],
+    ["Google Ads", "#4285f4", ["Advertising"], "s"],
+    ["HubSpot", "#ff7a59", ["Marketing Automation", "CRM"], "d", "cms"],
+    ["Hotjar", "#fd3a5c", ["Analytics", "Conversion Optimization"], "d"],
+    ["Mailchimp", "#e5b100", ["Email Marketing", "Email Security", "Transactional Email"], "s"],
+    ["OneTrust", "#3c8a3f", ["Cookie Management"], "d"],
+    ["Optimizely", "#0037ff", ["A/B Testing"], "d"],
+    ["Webflow", "#4353ff", ["Simple Website Builder"], "d", "cms"],
+  ];
+  const emailSec = [
+    ["Agari", "#0a6ebd", ["Email Security"], "d"],
+    ["Barracuda", "#0067b1", ["Email Security"], "d"],
+    ["DMARC Analyzer", "#5b6770", ["Email Security", "Site Search"], "d"],
+    ["Klaviyo", "#232426", ["Email Security", "Marketing Automation"], "d"],
+    ["Mailchimp", "#e5b100", ["Email Marketing", "Email Security", "Transactional Email"], "s"],
+    ["Mimecast", "#1d1d6b", ["Email Security"], "d"],
+    ["Proofpoint", "#ef4e23", ["Email Security"], "d"],
+    ["SendGrid", "#1a82e2", ["Email Security", "Transactional Email"], "s"],
+    ["SPF Record", "#777", ["Email Security"], "d"],
+    ["Valimail", "#00a19b", ["Email Security"], "d"],
+  ];
+  const state = location.hash.slice(1) || "default";
+  const tools = state === "category" ? emailSec : all;
+  const selected = state === "all" ? tools.map((_, i) => i) : state === "selected" ? [1, 5, 7] : [];
+
+  document.getElementById("filters").innerHTML = state === "category"
+    ? `<span class="lbl">Filter:</span><span class="chip">Category: Email Security <span class="tag">BLOCKED</span><span class="material-icons">close</span></span>
+       <span class="lbl" style="margin-left:12px">Set a tool to <b style="color:var(--show)">Show</b> to make an exception to the block.</span>`
+    : `<span class="lbl">Filter:</span><span class="chip off">Category: Any</span><span class="chip off">Admin setting: Any</span>`;
+  document.getElementById("range").textContent = state === "category" ? "1 – 10 of 212" : "1 – 10 of 2,431";
+
+  function outcome(cats, setting, tag) {
+    if (setting === "s") return ["shown", "visibility", "Shown", "Admin exception"];
+    if (setting === "h") return ["hidden", "block", "Hidden", "Hidden by admin"];
+    const w = cats.find(c => rules[c] === "w");
+    if (w) return ["shown", "visibility", "Shown", `Whitelisted: ${w}`];
+    const b = cats.find(c => rules[c] === "b");
+    if (b) return ["hidden", "block", "Hidden", `Blocked category: ${b}`];
+    if (tag && blockedTags.includes(tag)) return ["hidden", "block", "Hidden", `Blocked tag: ${tag}`];
+    return ["auto", "auto_mode", "Auto", "Standard stack rules"];
+  }
+
+  document.getElementById("rows").innerHTML = tools.map(([name, color, cats, setting, tag], i) => {
+    const sel = selected.includes(i);
+    const [cls, icon, label, why] = outcome(cats, setting, tag);
+    const catHtml = cats.map(c => `<span class="cat ${rules[c] || ""}">${c}</span>`).join("");
+    return `<tr class="${sel ? "selected" : ""} ${cls === "hidden" ? "is-hidden" : ""}">
+      <td><span class="cb ${sel ? "on" : ""}"></span></td>
+      <td class="name">${name}</td>
+      <td class="logo-cell"><div class="logo" style="background:${color}">${name[0]}</div></td>
+      <td class="cats">${catHtml}</td>
+      <td class="vis"><span class="seg">
+        <span class="${setting === "d" ? "on-default" : ""}">Default</span>
+        <span class="${setting === "s" ? "on-show" : ""}"><span class="material-icons">visibility</span>Show</span>
+        <span class="${setting === "h" ? "on-hide" : ""}"><span class="material-icons">block</span>Hide</span>
+      </span></td>
+      <td><div class="result ${cls}"><span class="material-icons">${icon}</span><div><b>${label}</b><small>${why}</small></div></div></td>
+    </tr>`;
+  }).join("");
+
+  const master = document.getElementById("master");
+  if (selected.length === tools.length) master.classList.add("on");
+  else if (selected.length) master.classList.add("mixed");
+
+  if (selected.length) {
+    document.getElementById("bulk").hidden = false;
+    document.getElementById("count").textContent = `${selected.length} selected`;
+  }
+</script>
+</body>
+</html>

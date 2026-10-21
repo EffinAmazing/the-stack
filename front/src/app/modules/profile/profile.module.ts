@@ -16,6 +16,8 @@ import { AccountComponent } from './pages/account/account.component';
 import { SharedModule } from '../../shared/shared.module';
 import { UsersManagmentComponent } from './pages/users-managment/users-managment.component';
 import { ToolsManagmentComponent } from './pages/tools-managment/tools-managment.component';
+import { CategoriesManagmentComponent } from './pages/categories-managment/categories-managment.component';
+import { BlockRuleDialogComponent } from './components/block-rule-dialog/block-rule-dialog.component';
 import { ConfirmActionComponent } from './components/confirm-action/confirm-action.component';
 import { UpdateUserFormComponent } from './components/update-user-form/update-user-form.component';
 import { InvitedUsersComponent } from './components/invited-users/invited-users.component';
@@ -38,8 +40,11 @@ import { ResetPasswordFormComponent } from './pages/reset-password-form/reset-pa
     InvitedUsersComponent,
     InviteToStackComponent,
     ResetPasswordSendComponent,
-    ResetPasswordFormComponent
+    ResetPasswordFormComponent,
+    CategoriesManagmentComponent,
+    BlockRuleDialogComponent
   ],
+  entryComponents: [BlockRuleDialogComponent],
   imports: [
     CommonModule,
     ProfileRoutingModule,

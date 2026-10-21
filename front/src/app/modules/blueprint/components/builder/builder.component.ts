@@ -84,6 +84,11 @@ export class BuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   // subscriptions
   indexNode = 0;
   isUserAdmin: Boolean;
+
+  // Domain nodes and custom apps are outside the admin visibility rules (server skips them).
+  isAppTool(node: any): boolean {
+    return !!(node && node.tool && ['domain', 'customApp', 'custom'].indexOf(node.tool.tag) !== -1);
+  }
   nodesSubscription: Subscription;
   arrowSubscription: Subscription;
   addedNewNodeSubcription: Subscription;
@@ -1342,7 +1347,7 @@ private getPointsFromPath(pathData) {
     const arrowsToRemove = this.listOfArrows.filter((arrow) => arrow.lineId.indexOf(node.id) !== -1 );
       const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
         width: '480px',
-        data: { title: 'Hide tool globally',  content: 'This will hide this tool for all users: ' + this.nodes[node.id].tool.name + '. Proceed?'}
+        data: { title: 'Hide tool globally',  content: 'This will hide ' + this.nodes[node.id].tool.name + ' on this stack and on stacks created from now on, for all users. Other existing stacks are not changed. Proceed?'}
       });
 
       dialogRef.afterClosed().subscribe(result => {

@@ -76,7 +76,11 @@ export class AccountComponent implements OnInit {
       // this.router.navigateByUrl('/blueprints/build?domain=' + this.domain.value);
       this.submitingDomain = true;
       this.blueprints.postDomainTools(this.domain.value).toPromise().then((result) => {
-        this.router.navigateByUrl('/blueprints/build/' + result.blueprint.id);
+        // Hand the server's isNew flag and rule-shown nodes to the builder for its first-load pass
+        // (node.rule is only in this create response; it isn't stored).
+        const showNodeIds = (result.nodes || []).filter(node => node.rule === 'show').map(node => node.id);
+        const errorMessage = result.blueprint.errorCode ? result.blueprint.errorMessage : null;
+        this.router.navigateByUrl('/blueprints/build/' + result.blueprint.id, { state: { isNew: !!result.isNew, showNodeIds, errorMessage } });
         this.submitingDomain = false;
       }).catch((err) => {
         console.log(err);

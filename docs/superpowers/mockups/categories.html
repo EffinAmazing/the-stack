@@ -1,0 +1,215 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Categories Management Mockup</title>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  :root {
+    --toolbar: #eaeaea;
+    --text: #333333;
+    --cell: rgba(0,0,0,.87);
+    --muted: rgba(0,0,0,.54);
+    --line: rgba(0,0,0,.12);
+    --accent: #ff4100;          /* app's primary stack-button orange */
+    --accent-tint: #fff3ee;
+    --hide: #c62828;
+    --hide-tint: #fdecea;
+    --show: #2e7d32;
+    --show-tint: #e8f5e9;
+  }
+  html, body { margin: 0; background: #fff; font-family: "proxima-nova", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; color: var(--text); }
+  .toolbar { height: 64px; background: var(--toolbar); display: flex; align-items: center; padding: 0 16px; font-size: 20px; font-weight: 500; }
+  .toolbar .spacer { flex: 1; }
+  .toolbar nav { display: flex; align-items: center; font-size: 14px; font-weight: 500; }
+  .toolbar nav a { padding: 0 16px; line-height: 36px; }
+  .toolbar nav a.active { color: var(--accent); }
+  .toolbar nav .div { width: 1px; height: 20px; background: #bbb; }
+  .toolbar .user { display: flex; align-items: center; gap: 6px; }
+  .toolbar .user .material-icons { font-size: 36px; }
+
+  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dcdbdc; }
+  .header h2 { font-size: 28px; font-weight: 400; margin: 0; padding: 15px 24px; }
+  .search { width: 260px; margin-right: 24px; border-bottom: 1px solid rgba(0,0,0,.42); display: flex; align-items: center; padding: 6px 0; color: var(--muted); }
+  .search span:first-child { flex: 1; }
+
+  tr.pinned td { background: #fafafa; }
+  tr.pinned td.name { font-style: italic; }
+  .tabs { display: flex; gap: 4px; padding: 0 24px; border-bottom: 1px solid var(--line); }
+  .tabs span { padding: 14px 18px 12px; font-size: 14px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid transparent; }
+  .tabs span.on { color: var(--accent); border-bottom-color: var(--accent); }
+  .tabs .n { font-weight: 400; margin-left: 4px; }
+  .filters { display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-bottom: 1px solid var(--line); }
+  .filters .lbl { color: var(--muted); font-size: 12px; margin-right: 4px; }
+  .chip { height: 30px; padding: 0 14px; border-radius: 15px; border: 1px solid rgba(0,0,0,.2); display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--cell); background: #fff; }
+  .chip.on { background: var(--accent-tint); border-color: var(--accent); color: var(--accent); }
+  .chip .n { color: var(--muted); font-weight: 400; }
+  .chip.on .n { color: var(--accent); }
+  .filters .note { margin-left: auto; color: var(--muted); font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+  .filters .note .material-icons { font-size: 16px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { height: 56px; text-align: left; font-size: 12px; font-weight: 500; color: var(--muted); border-bottom: 1px solid var(--line); padding: 0 .5rem; }
+  th .material-icons { font-size: 14px; vertical-align: -2px; }
+  td { height: 60px; font-size: 14px; color: var(--cell); border-bottom: 1px solid var(--line); padding: 0 .5rem; }
+  th:first-child, td:first-child { padding-left: 24px; }
+  td.name { font-weight: 500; width: 32%; }
+  td.count { width: 13%; }
+  td.count a { color: var(--cell); text-decoration: underline; text-decoration-color: rgba(0,0,0,.25); }
+  td.examples { color: rgba(0,0,0,.55); font-size: 13px; }
+  th.status, td.status { width: 330px; padding-right: 24px; }
+  tr.blocked td.name, tr.blocked td.count a, tr.blocked td.examples { color: rgba(0,0,0,.45); }
+
+  .tag { display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 3px; vertical-align: 1px; color: #fff; }
+  .tag.blocked { background: var(--hide); }
+  .tag.white { background: var(--show); }
+  .tag.new { background: #1e6fd9; }
+
+  .seg { display: inline-flex; border: 1px solid rgba(0,0,0,.2); border-radius: 4px; overflow: hidden; }
+  .seg > span { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 12px; font-size: 12px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); border-left: 1px solid rgba(0,0,0,.2); }
+  .seg > span:first-child { border-left: none; }
+  .seg .material-icons { font-size: 16px; }
+  .seg .on-white { background: var(--show-tint); color: var(--show); }
+  .seg .on-normal { background: #f2f2f2; color: var(--cell); }
+  .seg .on-block { background: var(--hide-tint); color: var(--hide); }
+
+  .paginator { display: flex; justify-content: flex-end; align-items: center; gap: 32px; height: 56px; padding: 0 8px; font-size: 12px; color: var(--muted); }
+  .paginator .material-icons { color: rgba(0,0,0,.54); padding: 0 8px; }
+  .paginator .material-icons.dis { color: rgba(0,0,0,.26); }
+
+  /* confirm dialog (matches app's ConfirmActionDialog, 480px) */
+  .scrim[hidden] { display: none; }
+  .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.32); display: flex; align-items: center; justify-content: center; }
+  .dialog { width: 480px; background: #fff; border-radius: 4px; box-shadow: 0 11px 15px -7px rgba(0,0,0,.2), 0 24px 38px 3px rgba(0,0,0,.14); padding: 24px; box-sizing: border-box; }
+  .dialog h3 { margin: 0 0 16px; font-size: 20px; font-weight: 500; }
+  .dialog p { margin: 0 0 12px; line-height: 1.5; color: rgba(0,0,0,.75); }
+  .dialog .info { display: flex; gap: 10px; background: #f6f6f6; border-radius: 4px; padding: 12px; font-size: 13px; color: rgba(0,0,0,.7); line-height: 1.45; margin: 16px 0 8px; }
+  .dialog .info .material-icons { font-size: 18px; color: var(--show); }
+  .dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+  .dialog button { font: inherit; font-weight: 500; height: 36px; padding: 0 16px; border-radius: 4px; border: none; background: none; text-transform: uppercase; letter-spacing: .03em; }
+  .dialog .primary { background: var(--hide); color: #fff; }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <span>My Stacks</span>
+  <span class="spacer"></span>
+  <nav>
+    <a>Tools</a><span class="div"></span><a class="active">Categories</a><span class="div"></span><a>Users</a><span class="div"></span>
+    <a class="user">Jordan Admin <span class="material-icons">account_circle</span></a><span class="div"></span><a>Logout</a>
+  </nav>
+</div>
+
+<div class="header">
+  <h2>Categories</h2>
+  <div class="search"><span id="searchLbl">Search by Category name</span><span class="material-icons">search</span></div>
+</div>
+
+<div class="tabs"><span id="tabCats">Categories<span class="n">962</span></span><span id="tabTags">Tags<span class="n">37</span></span></div>
+
+<div class="filters" id="filters"></div>
+
+<table>
+  <thead><tr>
+    <th id="col1">Category</th>
+    <th>Tools <span class="material-icons">arrow_downward</span></th>
+    <th>Examples</th>
+    <th class="status">Status</th>
+  </tr></thead>
+  <tbody id="rows"></tbody>
+</table>
+
+<div class="paginator">
+  <span>Items per page: <span id="ipp">10</span></span>
+  <span id="range"></span>
+  <span><span class="material-icons dis">chevron_left</span><span class="material-icons" id="next">chevron_right</span></span>
+</div>
+
+<div class="scrim" id="confirm" hidden>
+  <div class="dialog">
+    <h3>Block category: Email Security</h3>
+    <p>The <strong>212 tools</strong> in this category, and any found on future BuiltWith scans, will be hidden when they're added to a stack <strong>from now on</strong>.</p>
+    <p>Existing stacks are not changed. Tools already on a stack keep their current visibility.</p>
+    <div class="info"><span class="material-icons">verified</span><span><strong>14 of these tools</strong> are also in a whitelisted category (e.g. Marketing Automation) and will still be added visibly. Hide them individually on the Tools page if needed.</span></div>
+    <div class="actions"><button>Cancel</button><button class="primary">Block category</button></div>
+  </div>
+</div>
+
+<script>
+  // Categories: [name, toolCount, examples, status, pinned, isNew]  status: w / n / b
+  // Category names and statuses are real (imported lists); tool counts and examples are sample data.
+  const cats = [
+    ["(No category)", 143, "Tools BuiltWith returned without a category", "b", true],
+    ["Analytics", 418, "Google Analytics, Hotjar, Mixpanel", "n"],
+    ["Advertising", 386, "Google Ads, Criteo, Taboola", "b"],
+    ["JavaScript Library", 352, "jQuery, Lodash, Moment.js", "b"],
+    ["Framework", 297, "React, Bootstrap, Angular", "b"],
+    ["Email Security", 212, "DMARC, SPF, Proofpoint", "n", false, true],
+    ["Fonts", 188, "Google Fonts, Adobe Fonts", "b"],
+    ["Marketing Automation", 164, "HubSpot, Marketo, Pardot", "w"],
+    ["CRM", 121, "Salesforce, HubSpot CRM, Zoho", "w"],
+    ["Cookie Management", 87, "OneTrust, Cookiebot, Osano", "b"],
+    ["Audience Measurement", 76, "Comscore, Quantcast, Nielsen", "w"],
+  ];
+  // Tags: the 11 tags blocked today, with real production tool counts (2026-10-14). Examples are illustrative.
+  const tags = [
+    ["hosting", 1100, "Amazon Web Services, DigitalOcean, GoDaddy Hosting"],
+    ["cms", 847, "WordPress, Webflow, Squarespace"],
+    ["javascript", 803, "jQuery, core-js, Lodash"],
+    ["framework", 674, "Bootstrap, Tailwind CSS, Vue"],
+    ["ns", 242, "Cloudflare DNS, AWS Route 53, NS1"],
+    ["ssl", 128, "Let's Encrypt, DigiCert, Sectigo"],
+    ["Web Server", 100, "Nginx, Apache, IIS"],
+    ["cdn", 94, "Cloudflare, Fastly, jsDelivr"],
+    ["copyright", 31, "Copyright notice detection"],
+    ["css", 7, "Font Awesome, Animate.css"],
+    ["CDN", 1, "(capitalised variant of cdn)"],
+  ].map(r => [...r, "b"]);
+
+  const state = location.hash.slice(1) || "default";
+  const isTags = state === "tags";
+  if (state === "confirm") document.getElementById("confirm").hidden = false;
+  document.getElementById(isTags ? "tabTags" : "tabCats").classList.add("on");
+  document.getElementById("col1").textContent = isTags ? "Tag" : "Category";
+  document.getElementById("searchLbl").textContent = isTags ? "Search by Tag name" : "Search by Category name";
+  document.getElementById("ipp").textContent = isTags ? "25" : "10";
+  document.getElementById("range").textContent = isTags ? "1 – 11 of 11" : "1 – 10 of 962";
+  if (isTags) document.getElementById("next").classList.add("dis");
+
+  const icon = (n, c) => `<span class="material-icons" style="font-size:16px;color:${c}">${n}</span>`;
+  document.getElementById("filters").innerHTML = isTags
+    ? `<span class="lbl">Show:</span>
+       <span class="chip">All <span class="n">37</span></span>
+       <span class="chip">${icon("fiber_new", "#1e6fd9")}New <span class="n">0</span></span>
+       <span class="chip on">${icon("block", "var(--hide)")}Blocked <span class="n">11</span></span>
+       <span class="chip">Normal <span class="n">26</span></span>
+       <span class="note"><span class="material-icons">info_outline</span>Tags can only be blocked. A whitelisted category beats a blocked tag.</span>`
+    : `<span class="lbl">Show:</span>
+       <span class="chip on">All <span class="n">962</span></span>
+       <span class="chip">${icon("fiber_new", "#1e6fd9")}New <span class="n">18</span></span>
+       <span class="chip">${icon("verified", "var(--show)")}Whitelisted <span class="n">7</span></span>
+       <span class="chip">${icon("block", "var(--hide)")}Blocked <span class="n">92</span></span>
+       <span class="chip">Normal <span class="n">863</span></span>
+       <span class="note"><span class="material-icons">info_outline</span>Whitelisted beats Blocked when a tool is in both</span>`;
+
+  const rows = isTags ? tags.map(([name, n, ex, s]) => [name, n, ex, s]) : cats;
+  document.getElementById("rows").innerHTML = rows.map(([name, n, ex, s, pinned, isNew]) => {
+    const newTag = isNew ? '<span class="tag new">NEW</span>' : "";
+    const tag = newTag + (s === "b" ? '<span class="tag blocked">BLOCKED</span>' : s === "w" ? '<span class="tag white">WHITELISTED</span>' : "");
+    const seg = isTags
+      ? `<span class="${s === "n" ? "on-normal" : ""}">Normal</span>
+         <span class="${s === "b" ? "on-block" : ""}"><span class="material-icons">block</span>Block</span>`
+      : `<span class="${s === "w" ? "on-white" : ""}"><span class="material-icons">verified</span>Whitelist</span>
+         <span class="${s === "n" ? "on-normal" : ""}">Normal</span>
+         <span class="${s === "b" ? "on-block" : ""}"><span class="material-icons">block</span>Block</span>`;
+    return `<tr class="${s === "b" ? "blocked" : ""} ${pinned ? "pinned" : ""}">
+      <td class="name">${name}${tag}</td>
+      <td class="count"><a>${n.toLocaleString()} tool${n === 1 ? "" : "s"}</a></td>
+      <td class="examples">${ex}</td>
+      <td class="status"><span class="seg">${seg}</span></td>
+    </tr>`;
+  }).join("");
+</script>
+</body>
+</html>

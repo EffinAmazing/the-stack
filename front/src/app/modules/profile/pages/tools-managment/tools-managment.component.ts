@@ -1,152 +1,248 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { SelectionModel } from '@angular/cdk/collections';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+import { MatPaginator } from '@angular/material/paginator';
 import { AuthService } from '../../../../core/services/auth.service';
-import { UsersService } from '../../../../core/services/users.service';
 import { ToolsService } from '../../../../core/services/tools.service';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
-import { MatDialog } from '@angular/material/dialog';
-import { ConfirmActionComponent } from '../../components/confirm-action/confirm-action.component';
-import { MatPaginator } from '@angular/material/paginator';
 import { environment } from '../../../../../environments/environment';
 
 const host = environment.serverURI;
-const timeout = 500;
+const searchDelay = 500;
+const categoryPageSize = 20;
+
+type AdminSetting = 'default' | 'show' | 'hide';
+
+interface RuleLists { whitelisted: string[]; blocked: string[]; blockedTags: string[]; }
+
+interface ToolRow {
+  tool: any;
+  setting: AdminSetting;
+  result: { kind: 'shown' | 'hidden' | 'auto', label: string, detail: string };
+}
 
 @Component({
   selector: 'app-tools-managment',
   templateUrl: './tools-managment.component.html',
   styleUrls: ['./tools-managment.component.scss']
 })
-
-export class ToolsManagmentComponent implements OnInit {
+export class ToolsManagmentComponent implements OnInit, OnDestroy {
   @ViewChild('paginator') paginator: MatPaginator;
   user: any;
-  tools: Array<any> = [];
+  rows: ToolRow[] = [];
   limit = 10;
   total = 0;
-  displayedColumns: string[] = ['name','logo','description','hidden'];
-  runedTimeout = false;
+  offset = 0;
+  displayedColumns: string[] = ['select', 'name', 'logo', 'categories', 'setting', 'result'];
   toolSearchName = '';
-  cachedValue = '';
+  categoryFilter = '';
+  tagFilter = '';
+  settingFilter: '' | AdminSetting = '';
+  rules: RuleLists = { whitelisted: [], blocked: [], blockedTags: [] };
+  selection = new SelectionModel<string>(true, []);
+  saving = false;
+  errorMessage = '';
+  loading = false;
+  readonly noCategory = '(No category)';
+  categorySearch = '';
+  categoryOptions: { name: string, tools: number }[] = [];
+  categoryOptionsLoading = false;
+  categoryOptionsTotal = 0;
+  private loadRequestId = 0;
+  private categoryOptionsRequestId = 0;
+  private search$ = new Subject<void>();
+  private categorySearch$ = new Subject<void>();
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private auth: AuthService,
-    private usersService: UsersService,
     private toolsService: ToolsService,
-    public deleteDialog: MatDialog,
-    public editDialog: MatDialog,
-    public inviteUser: MatDialog,
-    private blueprintService: BlueprintsService
+    private blueprintService: BlueprintsService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {
     this.user = this.auth.getCurrentUser();
   }
 
-  getRoleName(roleId): string {
-    switch (roleId) {
-      case 0:
-        return 'Administrator';
-      case 1:
-        return 'Editor';
-    }
-  }
-
-  handlePage(evnt) {
-    console.log(evnt);
-    const offset = evnt.pageIndex * this.limit;
-
-    if (this.toolSearchName) {      
-      this.searchTools(offset);
-    } else {      
-      this.toolsService.getToolsList(offset).toPromise().then(res => {
-        this.tools = res.list;
-        this.total = res.total;
-      }).catch(err => {
-        console.log(err);
-      });
-    }
-  }
-
-  public handleInputText(evt) {
-    // console.log(evt.data, evt.target.value);
-    if (evt.target.value !== '') {
-      if (!this.runedTimeout) {
-        this.runedTimeout = true;
-        setTimeout(() => {
-          this.searchTools();
-        }, timeout);
-      }
-    }
-  }
-
-  private searchTools(offset = 0) {
-    if (this.toolSearchName !== this.cachedValue) {
-      this.cachedValue = this.toolSearchName;
-      this.runedTimeout = true;
-      this.paginator.firstPage();
-      setTimeout(() => {
-        this.runedTimeout = false;
-        this.searchTools(offset);
-      }, timeout);
-    } else {
-      this.runedTimeout = false;
-      console.log(this.toolSearchName);
-      //this.showSpinner = true;
-      //this.transparentListOfTools = true;
-      this.toolsService.searchToolsList(this.toolSearchName, offset).toPromise().then((res) => {
-
-        this.tools = res.list;
-        this.total = res.total;
-
-        
-
-        //this.tools = this.parseResults(result);
-        //console.log(this.tools);
-        //this.toolsDataLoaded = true;
-        //this.showSpinner = false;
-        //this.transparentListOfTools = false;
-      }).catch(err => {
-        //console.log(err);
-        //this.showSpinner = false;
-        //this.transparentListOfTools = false;
-      });
-    }
-  }
-
-
-
-  public handleShowHideGlobally(item) {
-    var hideTool = false;
-    if (item.hidden === undefined || item.hidden === false) {
-      hideTool = true;
-    } else if (item.hidden === true) {
-      hideTool = false;
-    }
-
-    this.blueprintService.updateToolVisibility({tool: item}, hideTool).subscribe((res) => {
-        //update tool item in the tools array
-      let tool = this.tools.find(tool => tool.id == item.id);
-      if (tool) tool.hidden = res.hidden;
-    });    
-  }
-
-
-  public processImageSrc(link) {
-    if (!link) return "";
-    
-    if (link.indexOf('http://') !== -1 || link.indexOf('https://') !== -1 ) {
-      return link;
-    } else {
-      return host + link;
-    }
-  }
-
   ngOnInit(): void {
-    this.toolsService.getToolsList(0).toPromise().then(res => {
-      console.log(res);
-      this.tools = res.list;
+    this.subscriptions.push(this.search$.pipe(debounceTime(searchDelay)).subscribe(() => this.load(0)));
+    this.subscriptions.push(this.categorySearch$.pipe(debounceTime(searchDelay)).subscribe(() => this.loadCategoryOptions()));
+    this.subscriptions.push(this.route.queryParamMap.subscribe((params) => {
+      this.categoryFilter = params.get('category') || '';
+      this.tagFilter = params.get('tag') || '';
+      this.load(0);
+    }));
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  load(offset: number) {
+    this.offset = offset;
+    this.selection.clear();
+    if (offset === 0 && this.paginator) { this.paginator.firstPage(); }
+    // Only the latest request may update the list (fast typing sends several).
+    const requestId = ++this.loadRequestId;
+    this.loading = true;
+    this.toolsService.queryTools({
+      name: this.toolSearchName.trim(),
+      category: this.categoryFilter,
+      tag: this.tagFilter,
+      setting: this.settingFilter,
+      offset
+    }).toPromise().then((res) => {
+      if (requestId !== this.loadRequestId) { return; }
+      this.loading = false;
+      this.errorMessage = '';
+      this.rules = res.rules || this.rules;
       this.total = res.total;
-    }).catch(err => {
+      this.rows = res.list.map(tool => this.toRow(tool));
+    }).catch((err) => {
+      if (requestId !== this.loadRequestId) { return; }
+      this.loading = false;
       console.log(err);
+      this.errorMessage = 'Could not load tools.';
     });
   }
 
+  // Category filter menu: searchable list of categories, most tools first, 20 more per scroll.
+  loadCategoryOptions(append = false) {
+    const requestId = ++this.categoryOptionsRequestId;
+    const offset = append ? this.categoryOptions.length : 0;
+    this.categoryOptionsLoading = true;
+    this.blueprintService.getAdminCategories({ search: this.categorySearch.trim(), status: 'all', offset, limit: categoryPageSize }).toPromise()
+    .then((res) => {
+      if (requestId !== this.categoryOptionsRequestId) { return; }
+      this.categoryOptionsLoading = false;
+      const page = res.list.map(row => ({ name: row.name, tools: row.tools }));
+      this.categoryOptions = append ? this.categoryOptions.concat(page) : page;
+      this.categoryOptionsTotal = res.total;
+    }).catch((err) => {
+      if (requestId !== this.categoryOptionsRequestId) { return; }
+      this.categoryOptionsLoading = false;
+      console.log(err);
+      if (!append) { this.categoryOptions = []; }
+    });
+  }
+
+  handleCategoryOptionsScroll(event: Event) {
+    const el = event.target as HTMLElement;
+    const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 40;
+    if (nearBottom && !this.categoryOptionsLoading && this.categoryOptions.length < this.categoryOptionsTotal) {
+      this.loadCategoryOptions(true);
+    }
+  }
+
+  handleCategorySearch() {
+    this.categorySearch$.next();
+  }
+
+  showNoCategoryOption(): boolean {
+    const search = this.categorySearch.trim().toLowerCase();
+    return !search || 'no category'.indexOf(search) !== -1;
+  }
+
+  pickCategory(name: string) {
+    this.router.navigate([], { relativeTo: this.route, queryParams: { category: name }, queryParamsHandling: 'merge' });
+  }
+
+  handlePage(evnt) {
+    this.load(evnt.pageIndex * this.limit);
+  }
+
+  handleInputText() {
+    this.search$.next();
+  }
+
+  clearSearch() {
+    if (!this.toolSearchName) { return; }
+    this.toolSearchName = '';
+    this.load(0);
+  }
+
+  setSettingFilter(value: '' | AdminSetting) {
+    this.settingFilter = value;
+    this.load(0);
+  }
+
+  clearFilter(key: 'category' | 'tag') {
+    const queryParams = {};
+    queryParams[key] = null;
+    this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
+  }
+
+  categoryStatus(name: string): 'whitelisted' | 'blocked' | 'normal' {
+    if (this.rules.whitelisted.indexOf(name) !== -1) { return 'whitelisted'; }
+    if (this.rules.blocked.indexOf(name) !== -1) { return 'blocked'; }
+    return 'normal';
+  }
+
+  tagBlocked(name: string): boolean {
+    return this.rules.blockedTags.indexOf(name) !== -1;
+  }
+
+  isAllSelected(): boolean {
+    return this.rows.length > 0 && this.rows.every(row => this.selection.isSelected(row.tool.id));
+  }
+
+  masterToggle() {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+    } else {
+      this.rows.forEach(row => this.selection.select(row.tool.id));
+    }
+  }
+
+  setVisibility(ids: string[], state: AdminSetting) {
+    if (!ids.length || this.saving) { return; }
+    this.saving = true;
+    this.errorMessage = '';
+    this.blueprintService.bulkSetToolVisibility(ids, state).toPromise().then((res) => {
+      const updated = {};
+      res.tools.forEach(tool => { updated[tool.id] = tool; });
+      this.rows = this.rows.map(row => updated[row.tool.id]
+        ? this.toRow(Object.assign({}, row.tool, { hidden: updated[row.tool.id].hidden, result: updated[row.tool.id].result }))
+        : row);
+      this.selection.clear();
+      this.saving = false;
+    }).catch((err) => {
+      console.log(err);
+      this.errorMessage = 'Could not save. Nothing was changed.';
+      this.rows = this.rows.map(row => this.toRow(row.tool)); // reset toggles
+      this.saving = false;
+    });
+  }
+
+  setSelected(state: AdminSetting) {
+    this.setVisibility(this.selection.selected, state);
+  }
+
+  processImageSrc(link) {
+    if (!link) { return ''; }
+    if (link.indexOf('http://') !== -1 || link.indexOf('https://') !== -1) {
+      return link;
+    }
+    return host + link;
+  }
+
+  // tool.hidden: true = Hide, false = Show, null/absent = Default.
+  private toRow(tool: any): ToolRow {
+    const setting: AdminSetting = tool.hidden === true ? 'hide' : (tool.hidden === false ? 'show' : 'default');
+    return { tool, setting, result: this.describe(tool.result || { state: null, reason: 'auto' }) };
+  }
+
+  // Formats the server's decideTool result for the "Result on new stacks" column.
+  private describe(decision: { state: string, reason: string, detail?: string }): ToolRow['result'] {
+    switch (decision.reason) {
+      case 'admin-show': return { kind: 'shown', label: 'Shown', detail: 'Admin exception' };
+      case 'admin-hide': return { kind: 'hidden', label: 'Hidden', detail: 'Hidden by admin' };
+      case 'whitelisted': return { kind: 'shown', label: 'Shown', detail: 'Whitelisted: ' + decision.detail };
+      case 'blocked-category': return { kind: 'hidden', label: 'Hidden', detail: 'Blocked category: ' + decision.detail };
+      case 'blocked-tag': return { kind: 'hidden', label: 'Hidden', detail: 'Blocked tag: ' + decision.detail };
+      default: return { kind: 'auto', label: 'Auto', detail: 'Standard stack rules' };
+    }
+  }
 }

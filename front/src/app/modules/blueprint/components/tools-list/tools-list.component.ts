@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter, 
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
 import { MatDialog } from '@angular/material/dialog';
 import { NodeDetailsComponent } from '../node-details/node-details.component';
-import { hiddenCategories, WhitelistCategories } from '../../../../core/config';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/services/auth.service';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -20,6 +19,8 @@ export class ToolsListComponent implements OnInit {
   @Input() loadedCategories: Observable<any>;
   @Input() updatedOutNodeData: Observable<BluePrintTool | null>;
   @Input() addedNewNode: Observable<BluePrintTool[] | null>;
+  // From the blueprint payload: whitelisted categories are pinned first, blocked ones collapsed.
+  @Input() categoryRules: { whitelisted: string[], blocked: string[] } = { whitelisted: [], blocked: [] };
   @Output() toogleVisibilityNode: EventEmitter<any> = new EventEmitter();
   @Output() toogleGlobalVisibilityNode: EventEmitter<any> = new EventEmitter();
   @Output() closeTools: EventEmitter<any> = new EventEmitter();
@@ -39,6 +40,11 @@ export class ToolsListComponent implements OnInit {
   copyBeforeStart: BluePrintTool | null = null;
   isUserAdmin: Boolean;
   globalHiddenTools: Tool[] = [];
+
+  // Domain nodes and custom apps are outside the admin visibility rules (server skips them).
+  isAppTool(node: BluePrintTool): boolean {
+    return !!(node && node.tool && ['domain', 'customApp', 'custom'].indexOf(node.tool.tag) !== -1);
+  }
 
   constructor(private detailsDialog: MatDialog, private confirm: MatDialog, public auth: AuthService) { }
 
@@ -114,7 +120,7 @@ export class ToolsListComponent implements OnInit {
               name: cat,
               nodes: [item.id],
               cost: 0,
-              needToBeCollapsed: cat !== 'None' && hiddenCategories.includes(cat)
+              needToBeCollapsed: cat !== 'None' && this.categoryRules.blocked.includes(cat)
             });
             categoriesChanged = true;
           }
@@ -142,7 +148,7 @@ export class ToolsListComponent implements OnInit {
       let none: any;
       for (const iterator of categories) {
         const lowerCase = iterator.toLocaleLowerCase();
-        const needToBeCollapsed = hiddenCategories.includes(iterator);
+        const needToBeCollapsed = this.categoryRules.blocked.includes(iterator);
         const item = {
           name: iterator,
           nodes: data[iterator],
@@ -164,7 +170,7 @@ export class ToolsListComponent implements OnInit {
 
         if (lowerCase !== 'none') {
           if (!needToBeCollapsed) {
-            if ( WhitelistCategories.includes(iterator) ) {
+            if ( this.categoryRules.whitelisted.includes(iterator) ) {
               whitelist.push(item);
             } else {
               this.categoriesList.push(item);
@@ -178,8 +184,8 @@ export class ToolsListComponent implements OnInit {
       }
 
       whitelist.sort((a, b) => {
-        const indexA = WhitelistCategories.indexOf(a.name);
-        const indexB = WhitelistCategories.indexOf(b.name);
+        const indexA = this.categoryRules.whitelisted.indexOf(a.name);
+        const indexB = this.categoryRules.whitelisted.indexOf(b.name);
 
         if (indexA < indexB) {return -1; }
         if (indexA > indexB) {return 1; }
@@ -415,7 +421,7 @@ export class ToolsListComponent implements OnInit {
 
     const dialogRef = this.confirm.open(ConfirmActionDialogComponent, {
       width: '480px',
-      data: { title: label + ' tool globally',  content: 'This will ' + label.toLowerCase() + ' this tool for all users: ' + this.nodes[node.id].tool.name + '. Proceed?'}
+      data: { title: label + ' tool globally',  content: 'This will ' + label.toLowerCase() + ' ' + this.nodes[node.id].tool.name + ' on this stack and on stacks created from now on, for all users. Other existing stacks are not changed. Proceed?'}
     });
 
 
