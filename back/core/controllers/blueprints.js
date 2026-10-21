@@ -116,7 +116,7 @@ class BluePrints {
             },
             (cb) => {
                 // 1. get blueprint of domain
-                console.log(user);
+                console.log(user ? user._id : user);
                 if (user) {
                     this._bluePrints.getByDomain(domain, user._id).then((result) => { cb(null, result); }).catch((err)=>{ cb(err, null); });
                 } else {

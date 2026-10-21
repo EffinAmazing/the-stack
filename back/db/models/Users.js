@@ -112,7 +112,7 @@ class UserModel extends AbstaractModel{
             user = super.create(data, []);
             return user;
         } else {
-            throw new UserModelError(" User with this email is already registerred ", { data, type: 'EmailDuplication' });
+            throw new UserModelError(" User with this email is already registerred ", { data: { email: data.email }, type: 'EmailDuplication' }); // the error is logged; keep the password out
         }
     }
 
