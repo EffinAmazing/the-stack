@@ -85,8 +85,10 @@ class UserModel extends AbstaractModel{
     }
 
     async checkCredantial(username, password){
+        if (typeof username !== 'string' || typeof password !== 'string') {
+            return false;
+        }
         let user = await this.modelDB.findOne({$or:[{email: username}, { username: username}]});
-        console.log(user);
         if (user) {
             let isMatch = await user.comparePassword(password);
             console.log('checkCredantial -> isMatch', isMatch);

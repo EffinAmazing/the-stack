@@ -14,7 +14,7 @@ class Users {
 
     signin(req, res, next) {
         passport.authenticate('local', {session: false}, (err, user, info) => {
-            console.log('err, user, info', err, user, info);
+            console.log('err, info', err, info);
             if (err || !user) {
                 res.json({
                     result: 'Error',
@@ -29,11 +29,15 @@ class Users {
                         })
                     }
 
-                    const token = jwt.sign(user.toJSON(), JWT_SECRET_KEY);
-                    delete user.password;
+                    // The JWT strategy only reads _id from the token (services/passport.js).
+                    const token = jwt.sign({ _id: String(user._id) }, JWT_SECRET_KEY);
+                    const sessionUser = user.toJSON();
+                    delete sessionUser.password;
+                    delete sessionUser.validationCode;
+                    delete sessionUser.__v;
                     res.json({
                         result: {
-                            user: user,
+                            user: sessionUser,
                             token: token
                         }
                     })
