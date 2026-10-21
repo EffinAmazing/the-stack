@@ -26,6 +26,12 @@ class BluePrints {
         console.log(' ************* getDomainTools ************* ');
         // 
         let domain = req.query.domain || req.body.domain;
+        if (typeof domain !== 'string' || !domain) {
+            return res.status(400).json({
+                result: "Error",
+                message: "Bad Request"
+            });
+        }
         async.waterfall([
             (cb)=>{
                 // 0. check domain
