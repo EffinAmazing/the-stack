@@ -7,6 +7,7 @@ const Upload = require('./controllers/uploads');
 const Users = require('./controllers/users');
 const passport = require('passport');
 const servicePassport = require('../services/passport');
+const stripMongoOperators = require('./middleware/strip-mongo-operators');
 const router = express.Router();
 
 const blueprints = new BlueprintsController();
@@ -22,6 +23,7 @@ router.all('*', function(req, res, next){
 	res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, DELETE, PATCH');
     next();
 })
+router.use(stripMongoOperators);
 
 router.get("/", function(req, res, next){
     res.json({
