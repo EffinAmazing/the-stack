@@ -1,5 +1,5 @@
 {
-  "_comment": "Frozen copy of the hardcoded visibility lists (front/src/app/core/config.ts, back/db/models/ToolsNodes.js) as of 2026-10-16. Input for back/migrate-visibility-rules.js. Do not edit.",
+  "_comment": "Frozen copy of the hardcoded visibility lists (front/src/app/core/config.ts, back/db/models/ToolsNodes.js) as of 2026-10-16, plus whitelisted Retargeting / Remarketing and Product Analytics (added 2026-10-21). Input for back/migrate-visibility-rules.js. Do not edit.",
   "whitelistedCategories": [
     "Marketing Automation",
     "CRM",
@@ -7,7 +7,9 @@
     "Conversion Optimization",
     "A/B Testing",
     "Personalization",
-    "Visitor Count Tracking"
+    "Visitor Count Tracking",
+    "Retargeting / Remarketing",
+    "Product Analytics"
   ],
   "blockedCategories": [
     "Copyright",
