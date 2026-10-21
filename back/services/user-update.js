@@ -25,4 +25,26 @@ function sanitizeUserUpdate(data, editorId, targetId) {
     return { data: clean };
 }
 
-module.exports = { sanitizeUserUpdate };
+// Fields a user may set on themselves when signing up or completing an invite (signup-form,
+// signup-signin-popup). Everything else (role, verified, validationCode, repeatPassword, ...)
+// is dropped; role and verified come from the schema defaults or the server.
+const SIGNUP_FIELDS = ['email', 'firstName', 'lastName', 'password'];
+
+function sanitizeSignupData(data) {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        return { error: 'Bad request' };
+    }
+
+    const clean = {};
+    for (const key of SIGNUP_FIELDS) {
+        if (data[key] === undefined) continue;
+        if (typeof data[key] !== 'string') {
+            return { error: 'Bad request' };
+        }
+        clean[key] = data[key];
+    }
+
+    return { data: clean };
+}
+
+module.exports = { sanitizeUserUpdate, sanitizeSignupData };

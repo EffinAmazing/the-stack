@@ -292,7 +292,7 @@ class ToolsNodes {
         const name = req.query.name;
         let limit = req.query.limit;
         let offset = req.query.offset;
-        if ( name || name === '' ) {
+        if ( typeof name === 'string' ) {
             this.categories.getList(name, offset, limit)
             .then( r => {
                 res.json({
