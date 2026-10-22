@@ -261,7 +261,8 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
     // First load of a stack the server just created (isNew). The server already applied the admin
     // rules to its nodes; proceedNodes adds the soft rules. Existing stacks are never re-processed.
-    if (data.isNew && data.nodes.length - hidden > 10) {
+    // Threshold counts all the stack's tools, not just those left visible by the rules (pre-rules behaviour).
+    if (data.isNew && data.nodes.length > 10) {
       this.proceedNodes(data.nodes.length, hidden);
     } else {
       this.completedProceedNodes();
