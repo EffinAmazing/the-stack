@@ -25,6 +25,11 @@
                         <input matInput placeholder="Tool" type="text" formControlName="name" cdkFocusInitial>
                         
                     </mat-form-field>
+                    <div *ngIf="existingTool" class="existing-tool-warning">
+                        <mat-icon>warning</mat-icon>
+                        <span>A tool named <strong>{{ existingTool.name }}</strong> already exists.</span>
+                        <a *ngIf="!data.admin && data.blueprintId" href="javascript:void(0)" class="existing-tool-link" (click)="useExistingTool()">Add existing tool</a>
+                    </div>
                 </div>
             </div>
             
@@ -36,14 +41,12 @@
                         <mat-icon class="icon-item-owners" (click)="removeCategory(item)">cancel</mat-icon></span></div>
                     <mat-form-field >
                         <mat-label>Category</mat-label>
-                        <input matInput placeholder="Category" type="text" [(ngModel)]="categoriesTemp" [ngModelOptions]="{standalone: true}"  [matAutocomplete]="auto" (ngModelChange)="getCatList($event)">
-                        <mat-autocomplete #auto="matAutocomplete" >
+                        <input #categoryInput #categoryTrigger="matAutocompleteTrigger" (click)="categoryTrigger.openPanel()" matInput placeholder="Search categories" type="text" [(ngModel)]="categoriesTemp" [ngModelOptions]="{standalone: true}"  [matAutocomplete]="auto" (ngModelChange)="getCatList($event)">                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="handleSelectCategory($event.option.value, categoryInput)">
                             <mat-option *ngFor="let option of filteredOptions | async" [value]="option.name">
                                {{option.name}}
                             </mat-option>
                         </mat-autocomplete>
                     </mat-form-field>
-                    <button mat-icon-button class="add-button-owner" (click)="handleAddCategory()"> <mat-icon>add</mat-icon> </button>
                 </div>
             </div>
 
@@ -67,6 +70,8 @@
                 </div>
             </div>
 
+            <!-- Cost, dates, owners, trained on and domain belong to a stack, so admin Create Tool leaves them out. -->
+            <ng-container *ngIf="!data.admin">
             <div class="form-field-box">
                 <div class="title">Monthly cost: </div>
                 <div class="data"> 
@@ -140,6 +145,7 @@
                     </mat-form-field>
                 </div>
             </div>
+            </ng-container>
         </form>
     </div>
 </div>

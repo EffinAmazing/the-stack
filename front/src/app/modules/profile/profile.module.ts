@@ -24,6 +24,7 @@ import { InvitedUsersComponent } from './components/invited-users/invited-users.
 import { InviteToStackComponent } from './components/invite-to-stack/invite-to-stack.component';
 import { ResetPasswordSendComponent } from './pages/reset-password-send/reset-password-send.component';
 import { ResetPasswordFormComponent } from './pages/reset-password-form/reset-password-form.component';
+import { CreateCustomToolDialogModule } from '../blueprint/components/create-custom-tool-dialog/create-custom-tool-dialog.module';
 
 
 @NgModule({
@@ -54,7 +55,8 @@ import { ResetPasswordFormComponent } from './pages/reset-password-form/reset-pa
     ReactiveFormsModule,
     FormsModule,
     SharedModule,
-    PopupsModalsModule
+    PopupsModalsModule,
+    CreateCustomToolDialogModule
   ]
 })
 export class ProfileModule { }

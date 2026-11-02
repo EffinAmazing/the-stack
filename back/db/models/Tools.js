@@ -12,6 +12,9 @@ const { NO_CATEGORY, APP_TAGS, escapeRegex } = require('../../services/visibilit
 const NO_CATEGORY_FILTER = { $or: [{ categories: null }, { categories: { $size: 0 } }] };
 // Domain nodes and custom apps are outside visibility rules: never listed, counted or updated here.
 const NOT_APP_TOOL = { tag: { $nin: APP_TAGS } };
+// The admin Tools page and its Show/Hide also cover custom tools (made with Create Tool).
+// decideTool still skips them; Hide removes them from Add Tool search (getToolsListByName).
+const ADMIN_LISTED_TOOL = { tag: { $nin: APP_TAGS.filter(tag => tag !== 'custom') } };
 // tools.hidden is the admin setting: true = Hide, false = Show, unset = Default.
 const VISIBILITY_UPDATES = {
     show: { $set: { hidden: false } },
@@ -179,8 +182,8 @@ class ToolsModel extends AbstaractModel {
         return mappedDocs;
     }
 
-    buildToolsFilter({ name, category, tag, setting } = {}) {
-        const and = [NOT_APP_TOOL];
+    buildToolsFilter({ name, category, tag, setting, includeCustom } = {}) {
+        const and = [includeCustom ? ADMIN_LISTED_TOOL : NOT_APP_TOOL];
         if (name) and.push({ name: new RegExp(escapeRegex(name), 'i') });
         if (category === NO_CATEGORY) and.push(NO_CATEGORY_FILTER);
         else if (category) and.push({ categories: category });
@@ -194,7 +197,7 @@ class ToolsModel extends AbstaractModel {
     async queryTools(params = {}) {
         const offset = toInt(params.offset, 0, 0);
         const limit = toInt(params.limit, 10, 1);
-        const filter = this.buildToolsFilter(params);
+        const filter = this.buildToolsFilter(Object.assign({}, params, { includeCustom: true }));
 
         const total = await this.modelDB.countDocuments(filter).exec();
         const list = await this.modelDB.find(filter).sort({ name: 1 }).skip(offset).limit(limit).exec();
@@ -219,7 +222,7 @@ class ToolsModel extends AbstaractModel {
         if (!update) throw new Error('Invalid state');
 
         const withTimestamp = Object.assign({}, update, { $set: Object.assign({}, update.$set, { updated: new Date() }) });
-        const filter = { $and: [{ _id: { $in: ids } }, NOT_APP_TOOL] };
+        const filter = { $and: [{ _id: { $in: ids } }, ADMIN_LISTED_TOOL] };
         const res = await this.modelDB.updateMany(filter, withTimestamp).exec();
         const tools = (await this.modelDB.find(filter).exec()).map(item => this.mapDocument(item));
         return { matched: res.n, modified: res.nModified, tools };
@@ -266,6 +269,17 @@ class ToolsModel extends AbstaractModel {
         return { tools: results[0], alsoWhitelisted: results[1] };
     }
 
+    // Create Tool's same-name warning: an existing tool with this exact name, ignoring case.
+    // Leaves out domain/app nodes and custom tools an admin hid (same as Add Tool search).
+    async findByExactName(name) {
+        const doc = await this.modelDB.findOne({ $and: [
+            ADMIN_LISTED_TOOL,
+            { $nor: [{ tag: 'custom', hidden: true }] },
+            { name: new RegExp('^' + escapeRegex(name.trim()) + '$', 'i') }
+        ] }).sort({ created: 1 }).exec();
+        return doc ? this.mapDocument(doc) : null;
+    }
+
     async getToolsListByName(name, offset, limit){
         if (!limit) limit = 15;
         if (!offset) offset = 0 
@@ -277,7 +291,8 @@ class ToolsModel extends AbstaractModel {
             offset = parseInt(offset);
             if (!offset) offset = 0;
         }
-        const listDocs = await this.modelDB.find().where('name').regex( new RegExp(name.toLowerCase(), "i") ).exec();        
+        // Admin Hide on a custom tool removes it from Add Tool search (stacks that have it keep it).
+        const listDocs = await this.modelDB.find({ $nor: [{ tag: 'custom', hidden: true }] }).where('name').regex( new RegExp(name.toLowerCase(), "i") ).exec();
         const tools = await async.map(listDocs, (item, cb) => { cb(null, this.mapDocument(item)) });
         return tools;
     }

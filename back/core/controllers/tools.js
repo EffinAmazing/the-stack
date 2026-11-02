@@ -87,6 +87,42 @@ class Tools {
         return this.attachResults(tools, await loadRules(this.categories, this.tags));
     }
 
+    // Admin Create Tool: same custom tool as the stack's Create Tool modal, without a stack node.
+    async createTool(req, res, next) {
+        const toolData = req.body && req.body.tool;
+        if (!toolData || typeof toolData.name !== 'string' || !toolData.name.trim()) {
+            return res.status(400).json({ result: 'Error', message: 'Bad request' });
+        }
+
+        const data = { name: toolData.name.trim() };
+        ['categories', 'description', 'link'].forEach((key) => {
+            if (typeof toolData[key] === 'string' && toolData[key]) data[key] = toolData[key];
+        });
+
+        try {
+            const tool = await this.model.createOne(data, req.files && req.files.icon);
+            res.json({ result: tool });
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ result: 'Error', message: 'Server error' });
+        }
+    }
+
+    // Create Tool's same-name warning (public, like /tools/search). Returns the tool, or null.
+    async findExisting(req, res, next) {
+        const name = req.query && req.query.name;
+        if (typeof name !== 'string' || !name.trim() || name.length > 200) {
+            return res.status(400).json({ result: 'Error', message: 'Bad request' });
+        }
+        try {
+            const tool = await this.model.findByExactName(name);
+            res.json({ result: tool }); // same tool fields /tools/search returns; the stack adds it as a node
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ result: 'Error', message: 'Server error' });
+        }
+    }
+
     getTools(req, res, next) {
         const name = typeof req.query.name === 'string' ? req.query.name.trim() : '';
         return this.listTools(req, res, name);

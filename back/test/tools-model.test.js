@@ -50,6 +50,32 @@ test('app tools are never listed or updated', async () => {
     assert.ok(!(await tools.getCategoryCounts()).rows.some(r => r.name === 'WebSite'));
 });
 
+test('custom tools are listed and their flag can be set, but stay out of category counts', async () => {
+    const custom = await tools.modelDB.create({ name: 'SalesMSG', tag: 'custom', categories: ['CRM'] });
+    const listed = await tools.queryTools({ name: 'salesmsg' });
+    assert.deepEqual(listed.list.map(t => t.name), ['SalesMSG']);
+    assert.equal((await tools.queryTools({ tag: 'custom' })).total, 1);
+
+    const out = await tools.bulkSetVisibility([String(custom._id)], 'hide');
+    assert.equal(out.matched, 1);
+    assert.equal((await tools.modelDB.findById(custom._id).lean()).hidden, true);
+
+    const crm = (await tools.getCategoryCounts()).rows.find(r => r.name === 'CRM');
+    assert.equal(crm.tools, 1); // HubSpot only
+});
+
+test('Add Tool search leaves out custom tools an admin set to Hide', async () => {
+    await tools.modelDB.create([
+        { name: 'SalesMSG', tag: 'custom', hidden: true },
+        { name: 'SalesMSG Pro', tag: 'custom', hidden: false },
+        { name: 'SalesMSG Lite', tag: 'custom' }
+    ]);
+    const names = (await tools.getToolsListByName('salesmsg')).map(t => t.name).sort();
+    assert.deepEqual(names, ['SalesMSG Lite', 'SalesMSG Pro']);
+    // Admin Hide on a BuiltWith tool doesn't remove it from search (unchanged).
+    assert.deepEqual((await tools.getToolsListByName('drift')).map(t => t.name), ['Drift']);
+});
+
 test('bulkSetVisibility rejects an unknown state', async () => {
     await assert.rejects(tools.bulkSetVisibility([], 'maybe'), /Invalid state/);
 });
@@ -140,4 +166,19 @@ test('proceedTools registers new categories and tags without blocking', async ()
     assert.deepEqual(catNames, ['Another New Cat', 'Brand New Cat', 'CRM', 'WebSite']);
     assert.ok((await categories.modelDB.find({}).lean()).every(d => d.firstSeen && !d.status));
     assert.deepEqual((await tags.modelDB.find({}).lean()).map(d => d.name).sort(), ['analytics', 'newtag']);
+});
+
+test('findByExactName ignores case, needs the whole name, and skips hidden custom and app tools', async () => {
+    await tools.modelDB.create([
+        { name: 'SalesMSG', tag: 'custom' },
+        { name: 'Gone', tag: 'custom', hidden: true },
+        { name: 'site.io', tag: 'domain' }
+    ]);
+    assert.equal((await tools.findByExactName('salesmsg')).name, 'SalesMSG');
+    assert.equal((await tools.findByExactName('  HubSpot ')).name, 'HubSpot');
+    assert.equal(await tools.findByExactName('Sales'), null);
+    assert.equal((await tools.findByExactName('c++ runtime')).name, 'C++ Runtime');
+    assert.equal(await tools.findByExactName('.*'), null);
+    assert.equal(await tools.findByExactName('Gone'), null);
+    assert.equal(await tools.findByExactName('site.io'), null);
 });

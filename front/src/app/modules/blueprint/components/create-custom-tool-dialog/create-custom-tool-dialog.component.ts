@@ -1,12 +1,12 @@
-import { Component, Inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, Inject, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
 import { environment } from '../../../../../environments/environment';
 import { ToolIconCropperComponent } from '../tool-icon-cropper/tool-icon-cropper.component';
-import {Observable} from 'rxjs';
-import {map, startWith, switchMap} from 'rxjs/operators';
+import {Observable, of, Subscription} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, map, startWith, switchMap} from 'rxjs/operators';
 
 const host = environment.serverURI;
 
@@ -25,6 +25,8 @@ export class CreateCustomToolDialogComponent {
   nodeResult = null;
   catOptions = [];
   filteredOptions: Observable<string[]> = new Observable();
+  existingTool: Tool | null = null;
+  private nameCheck: Subscription;
   @ViewChild('iconImage') iconImage: ElementRef<HTMLImageElement>;
   @ViewChild('canvasForIcon') canvasForIcon: ElementRef<HTMLCanvasElement>;
   @ViewChild('cancelButton') cancelButton: ElementRef<HTMLButtonElement>;
@@ -32,7 +34,8 @@ export class CreateCustomToolDialogComponent {
   constructor( public dialogRef: MatDialogRef<CreateCustomToolDialogComponent>,
                private service: BlueprintsService,
                public cropperDialog: MatDialog,
-               @Inject(MAT_DIALOG_DATA) public data: { blueprintId: string, node: BluePrintTool | void }) {
+               private zone: NgZone,
+               @Inject(MAT_DIALOG_DATA) public data: { blueprintId?: string, node?: BluePrintTool | void, admin?: boolean }) {
     this.toolForm = new FormGroup({
       name: new FormControl(data.node && data.node.tool && data.node.tool.name ? data.node.tool.name : '', [Validators.required]),
       categories: new FormControl(data.node && data.node.tool && data.node.tool.categories ? data.node.tool.categories.join(',') : ''),
@@ -47,6 +50,17 @@ export class CreateCustomToolDialogComponent {
     });
 
     
+
+    // Same-name warning while creating (not when editing an existing custom tool).
+    if (!data.node) {
+      this.nameCheck = this.toolForm.get('name').valueChanges.pipe(
+        map((value: string) => (value || '').trim()),
+        debounceTime(400),
+        distinctUntilChanged(),
+        switchMap(name => name ? this.service.findExistingTool(name).pipe(catchError(() => of(null))) : of(null))
+      ).subscribe(tool => { this.existingTool = tool; });
+      this.dialogRef.afterClosed().subscribe(() => this.nameCheck.unsubscribe());
+    }
 
     this.dialogRef.afterOpened().subscribe(() => {
       this.iconImage.nativeElement.addEventListener('load', (result) => {
@@ -205,11 +219,15 @@ export class CreateCustomToolDialogComponent {
     }
   }
 
-  public handleAddCategory() {
-    if ( this.categoriesTemp && this.categoriesTemp.length > 2 ) {
-      this.addCategory(this.categoriesTemp);
-      this.categoriesTemp = '';
+  // Categories can only come from the existing list: picking one adds it right away.
+  public handleSelectCategory(name: string, input: HTMLInputElement) {
+    if (name) {
+      this.addCategory(name);
     }
+    this.categoriesTemp = '';
+    input.value = '';
+    // Picking an option filtered the list to that name; reset it so the next click shows the full list.
+    this.getCatList('');
   }
 
   public handleAddOwner() {
@@ -236,7 +254,12 @@ export class CreateCustomToolDialogComponent {
   }
 
   private proceedFormSubmit(formData: FormData) {
-    if (this.data.node) {
+    if (this.data.admin) {
+      // Admin Create Tool: the tool only, no stack node. Closes with the new tool.
+      this.service.createAdminTool(formData).toPromise()
+        .then(res => { this.dialogRef.close(res); })
+        .catch(err => { console.log(err); this.isProcced = false; });
+    } else if (this.data.node) {
       formData.append('toolId', this.data.node.tool.id);
       this.service.updateCustom(this.data.node.id, formData).toPromise()
         .then(res => {
@@ -270,19 +293,25 @@ export class CreateCustomToolDialogComponent {
       if (value.description) { formData.append('tool[description]', value.description); }
       if (value.link) { formData.append('tool[link]', value.link); }
 
-      if (value.cost) { formData.append('node[cost]', value.cost); }
-      if (value.start) { formData.append('node[start]', value.start); }
-      if (value.end) { formData.append('node[end]', value.end); }
-      if (value.owner) { formData.append('node[owner]', value.owner); }
-      if (value.trainedOn) { formData.append('node[trainedOn]', value.trainedOn); }
-      formData.append('node[blueprintId]', this.data.blueprintId);
+      if (!this.data.admin) {
+        if (value.cost) { formData.append('node[cost]', value.cost); }
+        if (value.start) { formData.append('node[start]', value.start); }
+        if (value.end) { formData.append('node[end]', value.end); }
+        if (value.owner) { formData.append('node[owner]', value.owner); }
+        if (value.trainedOn) { formData.append('node[trainedOn]', value.trainedOn); }
+        formData.append('node[blueprintId]', this.data.blueprintId);
+      }
 
       this.isProcced = true;
       if (!this.data.node || this.imageUpdated ) {
+        // zone.js doesn't patch canvas.toBlob here, so bring the callback back into Angular's zone;
+        // otherwise the save and dialogRef.close() run unseen and the modal stays open.
         this.canvasForIcon.nativeElement.toBlob((result) => {
-          this.imageUpdated = false;
-          formData.append('icon', result, 'icon.png');
-          this.proceedFormSubmit(formData);
+          this.zone.run(() => {
+            this.imageUpdated = false;
+            formData.append('icon', result, 'icon.png');
+            this.proceedFormSubmit(formData);
+          });
         });
       } else {
         this.proceedFormSubmit(formData);
@@ -318,6 +347,11 @@ export class CreateCustomToolDialogComponent {
     console.log(item);
     return item && item.name ? item.name : '';
   }*/
+
+  // Same-name warning on a stack: add the existing tool instead of creating a duplicate.
+  public useExistingTool() {
+    this.dialogRef.close({ existingTool: this.existingTool });
+  }
 
   onNoClick(): void {
     if (this.nodeResult) {
