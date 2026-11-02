@@ -36,14 +36,12 @@
                         <mat-icon class="icon-item-owners" (click)="removeCategory(item)">cancel</mat-icon></span></div>
                     <mat-form-field >
                         <mat-label>Category</mat-label>
-                        <input matInput placeholder="Category" type="text" [(ngModel)]="categoriesTemp" [ngModelOptions]="{standalone: true}"  [matAutocomplete]="auto" (ngModelChange)="getCatList($event)">
-                        <mat-autocomplete #auto="matAutocomplete" >
+                        <input #categoryInput #categoryTrigger="matAutocompleteTrigger" (click)="categoryTrigger.openPanel()" matInput placeholder="Search categories" type="text" [(ngModel)]="categoriesTemp" [ngModelOptions]="{standalone: true}"  [matAutocomplete]="auto" (ngModelChange)="getCatList($event)">                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="handleSelectCategory($event.option.value, categoryInput)">
                             <mat-option *ngFor="let option of filteredOptions | async" [value]="option.name">
                                {{option.name}}
                             </mat-option>
                         </mat-autocomplete>
                     </mat-form-field>
-                    <button mat-icon-button class="add-button-owner" (click)="handleAddCategory()"> <mat-icon>add</mat-icon> </button>
                 </div>
             </div>
 

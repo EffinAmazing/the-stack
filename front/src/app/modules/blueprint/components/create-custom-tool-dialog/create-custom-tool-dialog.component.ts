@@ -205,11 +205,15 @@ export class CreateCustomToolDialogComponent {
     }
   }
 
-  public handleAddCategory() {
-    if ( this.categoriesTemp && this.categoriesTemp.length > 2 ) {
-      this.addCategory(this.categoriesTemp);
-      this.categoriesTemp = '';
+  // Categories can only come from the existing list: picking one adds it right away.
+  public handleSelectCategory(name: string, input: HTMLInputElement) {
+    if (name) {
+      this.addCategory(name);
     }
+    this.categoriesTemp = '';
+    input.value = '';
+    // Picking an option filtered the list to that name; reset it so the next click shows the full list.
+    this.getCatList('');
   }
 
   public handleAddOwner() {
