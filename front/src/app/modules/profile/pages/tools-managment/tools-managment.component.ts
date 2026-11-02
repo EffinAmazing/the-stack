@@ -4,6 +4,8 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatDialog } from '@angular/material/dialog';
+import { CreateCustomToolDialogComponent } from '../../../blueprint/components/create-custom-tool-dialog/create-custom-tool-dialog.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToolsService } from '../../../../core/services/tools.service';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
@@ -61,7 +63,8 @@ export class ToolsManagmentComponent implements OnInit, OnDestroy {
     private toolsService: ToolsService,
     private blueprintService: BlueprintsService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {
     this.user = this.auth.getCurrentUser();
   }
@@ -147,6 +150,18 @@ export class ToolsManagmentComponent implements OnInit, OnDestroy {
 
   pickCategory(name: string) {
     this.router.navigate([], { relativeTo: this.route, queryParams: { category: name }, queryParamsHandling: 'merge' });
+  }
+
+  // Admin Create Tool: same modal as on a stack, minus the stack-only fields.
+  // Afterwards the list shows the new tool by searching for its name.
+  openCreateTool() {
+    this.dialog.open(CreateCustomToolDialogComponent, { width: '620px', data: { admin: true } })
+      .afterClosed().subscribe((tool) => {
+        if (tool && tool.name) {
+          this.toolSearchName = tool.name;
+          this.load(0);
+        }
+      });
   }
 
   handlePage(evnt) {

@@ -90,6 +90,11 @@ export class BlueprintsService {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolsnodes/custom`, data));
   }
 
+  // Admin Create Tool: creates the custom tool only (no stack node).
+  createAdminTool(data: FormData): Observable<any> {
+    return this.mapper.mapResponse(this.http.post(`${this.serverURI}admin/tools`, data));
+  }
+
   updateCustom(nodeId: string, data: FormData): Observable<BluePrintTool> {
     return this.mapper.mapResponse(this.http.put(`${this.serverURI}toolsnodes/custom/${nodeId}`, data));
   }

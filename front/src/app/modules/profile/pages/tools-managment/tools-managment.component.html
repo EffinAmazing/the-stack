@@ -6,6 +6,7 @@
         <div class="my-stack-container">
           <div class="stack-container-header">
             <h2> Tools </h2>
+            <button class="stack-button create-tool-button" color="primary" (click)="openCreateTool()"><mat-icon>add</mat-icon> Create Tool</button>
             <mat-form-field appearance="none" class="search-full-width">
               <mat-label>Search by Tool name</mat-label>
               <input type="text" matInput [(ngModel)]="toolSearchName" (input)="handleInputText()" (keyup.escape)="clearSearch()" cdkFocusInitial>

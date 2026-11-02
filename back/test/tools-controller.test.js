@@ -70,3 +70,44 @@ test('updateVisibility maps flag to hide/show and returns the tool', async () =>
     assert.deepEqual(c.calls[1], [[validId], 'show']);
     assert.equal(res.body.result.hidden, false);
 });
+
+function controllerWithFakeCreate() {
+    const c = new ToolsController();
+    c.created = [];
+    c.model = {
+        createOne: async (data, icon) => {
+            c.created.push([data, icon]);
+            return Object.assign({ id: validId, logo: '/tools-logos/' + validId + '.png' }, data, { tag: 'custom' });
+        }
+    };
+    return c;
+}
+
+for (const [name, body] of [
+    ['tool missing', {}],
+    ['name missing', { tool: { categories: 'CRM' } }],
+    ['name blank', { tool: { name: '   ' } }],
+    ['name not a string', { tool: { name: ['a'] } }]
+]) {
+    test('createTool 400: ' + name, async () => {
+        const c = controllerWithFakeCreate();
+        const res = fakeRes();
+        await c.createTool({ body, files: {} }, res);
+        assert.equal(res.statusCode, 400);
+        assert.equal(c.created.length, 0);
+    });
+}
+
+test('createTool saves only tool fields and passes the icon', async () => {
+    const c = controllerWithFakeCreate();
+    const res = fakeRes();
+    const icon = { path: '/tmp/icon.png' };
+    await c.createTool({
+        body: { tool: { name: ' SalesMSG ', categories: 'CRM,Live Chat', description: 'd', link: 'https://salesmsg.com', hidden: true, tag: 'analytics' } },
+        files: { icon }
+    }, res);
+    assert.equal(res.statusCode, 200);
+    assert.deepEqual(c.created, [[{ name: 'SalesMSG', categories: 'CRM,Live Chat', description: 'd', link: 'https://salesmsg.com' }, icon]]);
+    assert.equal(res.body.result.name, 'SalesMSG');
+    assert.equal(res.body.result.tag, 'custom');
+});

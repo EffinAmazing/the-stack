@@ -1,4 +1,4 @@
-import { Component, Inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, Inject, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { Tool, BluePrintTool } from '../../../../shared/models/tool';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -32,7 +32,8 @@ export class CreateCustomToolDialogComponent {
   constructor( public dialogRef: MatDialogRef<CreateCustomToolDialogComponent>,
                private service: BlueprintsService,
                public cropperDialog: MatDialog,
-               @Inject(MAT_DIALOG_DATA) public data: { blueprintId: string, node: BluePrintTool | void }) {
+               private zone: NgZone,
+               @Inject(MAT_DIALOG_DATA) public data: { blueprintId?: string, node?: BluePrintTool | void, admin?: boolean }) {
     this.toolForm = new FormGroup({
       name: new FormControl(data.node && data.node.tool && data.node.tool.name ? data.node.tool.name : '', [Validators.required]),
       categories: new FormControl(data.node && data.node.tool && data.node.tool.categories ? data.node.tool.categories.join(',') : ''),
@@ -240,7 +241,12 @@ export class CreateCustomToolDialogComponent {
   }
 
   private proceedFormSubmit(formData: FormData) {
-    if (this.data.node) {
+    if (this.data.admin) {
+      // Admin Create Tool: the tool only, no stack node. Closes with the new tool.
+      this.service.createAdminTool(formData).toPromise()
+        .then(res => { this.dialogRef.close(res); })
+        .catch(err => { console.log(err); this.isProcced = false; });
+    } else if (this.data.node) {
       formData.append('toolId', this.data.node.tool.id);
       this.service.updateCustom(this.data.node.id, formData).toPromise()
         .then(res => {
@@ -274,19 +280,25 @@ export class CreateCustomToolDialogComponent {
       if (value.description) { formData.append('tool[description]', value.description); }
       if (value.link) { formData.append('tool[link]', value.link); }
 
-      if (value.cost) { formData.append('node[cost]', value.cost); }
-      if (value.start) { formData.append('node[start]', value.start); }
-      if (value.end) { formData.append('node[end]', value.end); }
-      if (value.owner) { formData.append('node[owner]', value.owner); }
-      if (value.trainedOn) { formData.append('node[trainedOn]', value.trainedOn); }
-      formData.append('node[blueprintId]', this.data.blueprintId);
+      if (!this.data.admin) {
+        if (value.cost) { formData.append('node[cost]', value.cost); }
+        if (value.start) { formData.append('node[start]', value.start); }
+        if (value.end) { formData.append('node[end]', value.end); }
+        if (value.owner) { formData.append('node[owner]', value.owner); }
+        if (value.trainedOn) { formData.append('node[trainedOn]', value.trainedOn); }
+        formData.append('node[blueprintId]', this.data.blueprintId);
+      }
 
       this.isProcced = true;
       if (!this.data.node || this.imageUpdated ) {
+        // zone.js doesn't patch canvas.toBlob here, so bring the callback back into Angular's zone;
+        // otherwise the save and dialogRef.close() run unseen and the modal stays open.
         this.canvasForIcon.nativeElement.toBlob((result) => {
-          this.imageUpdated = false;
-          formData.append('icon', result, 'icon.png');
-          this.proceedFormSubmit(formData);
+          this.zone.run(() => {
+            this.imageUpdated = false;
+            formData.append('icon', result, 'icon.png');
+            this.proceedFormSubmit(formData);
+          });
         });
       } else {
         this.proceedFormSubmit(formData);

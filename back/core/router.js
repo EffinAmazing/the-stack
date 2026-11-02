@@ -61,6 +61,7 @@ router.post('/tools/updateVisibility/:id', passport.authenticate('jwt', { sessio
 
 
 router.get('/admin/tools', passport.authenticate('jwt', { session: false }), requireAdmin, tools.getTools.bind(tools));
+router.post('/admin/tools', passport.authenticate('jwt', { session: false }), requireAdmin, tools.createTool.bind(tools));
 router.get('/admin/tools/search', passport.authenticate('jwt', { session: false }), requireAdmin, tools.getByName.bind(tools));
 router.post('/tools/bulkSetVisibility', passport.authenticate('jwt', { session: false }), requireAdmin, tools.bulkSetVisibility.bind(tools));
 router.get('/admin/categories', passport.authenticate('jwt', { session: false }), requireAdmin, visibilityRules.getCategories.bind(visibilityRules));
