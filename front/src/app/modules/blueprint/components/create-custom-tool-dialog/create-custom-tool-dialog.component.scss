@@ -71,3 +71,14 @@
         float: right;
     }
 }
+.existing-tool-warning {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: -12px 0 8px;
+    color: #e65100;
+    font-size: 13px;
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    .existing-tool-link { color: #ff4100; font-weight: 600; margin-left: 4px; }
+}

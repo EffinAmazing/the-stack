@@ -167,3 +167,18 @@ test('proceedTools registers new categories and tags without blocking', async ()
     assert.ok((await categories.modelDB.find({}).lean()).every(d => d.firstSeen && !d.status));
     assert.deepEqual((await tags.modelDB.find({}).lean()).map(d => d.name).sort(), ['analytics', 'newtag']);
 });
+
+test('findByExactName ignores case, needs the whole name, and skips hidden custom and app tools', async () => {
+    await tools.modelDB.create([
+        { name: 'SalesMSG', tag: 'custom' },
+        { name: 'Gone', tag: 'custom', hidden: true },
+        { name: 'site.io', tag: 'domain' }
+    ]);
+    assert.equal((await tools.findByExactName('salesmsg')).name, 'SalesMSG');
+    assert.equal((await tools.findByExactName('  HubSpot ')).name, 'HubSpot');
+    assert.equal(await tools.findByExactName('Sales'), null);
+    assert.equal((await tools.findByExactName('c++ runtime')).name, 'C++ Runtime');
+    assert.equal(await tools.findByExactName('.*'), null);
+    assert.equal(await tools.findByExactName('Gone'), null);
+    assert.equal(await tools.findByExactName('site.io'), null);
+});

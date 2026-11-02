@@ -269,6 +269,17 @@ class ToolsModel extends AbstaractModel {
         return { tools: results[0], alsoWhitelisted: results[1] };
     }
 
+    // Create Tool's same-name warning: an existing tool with this exact name, ignoring case.
+    // Leaves out domain/app nodes and custom tools an admin hid (same as Add Tool search).
+    async findByExactName(name) {
+        const doc = await this.modelDB.findOne({ $and: [
+            ADMIN_LISTED_TOOL,
+            { $nor: [{ tag: 'custom', hidden: true }] },
+            { name: new RegExp('^' + escapeRegex(name.trim()) + '$', 'i') }
+        ] }).sort({ created: 1 }).exec();
+        return doc ? this.mapDocument(doc) : null;
+    }
+
     async getToolsListByName(name, offset, limit){
         if (!limit) limit = 15;
         if (!offset) offset = 0 

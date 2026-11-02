@@ -90,6 +90,11 @@ export class BlueprintsService {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}toolsnodes/custom`, data));
   }
 
+  // Create Tool's same-name warning: the existing tool with this name (ignoring case), or null.
+  findExistingTool(name: string): Observable<Tool | null> {
+    return this.mapper.mapResponse(this.http.get(`${this.serverURI}tools/exists`, { params: { name } }));
+  }
+
   // Admin Create Tool: creates the custom tool only (no stack node).
   createAdminTool(data: FormData): Observable<any> {
     return this.mapper.mapResponse(this.http.post(`${this.serverURI}admin/tools`, data));

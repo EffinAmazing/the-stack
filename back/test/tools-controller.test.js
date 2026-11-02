@@ -111,3 +111,28 @@ test('createTool saves only tool fields and passes the icon', async () => {
     assert.equal(res.body.result.name, 'SalesMSG');
     assert.equal(res.body.result.tag, 'custom');
 });
+
+test('findExisting 400 without a usable name', async () => {
+    for (const query of [{}, { name: '' }, { name: '   ' }, { name: ['a'] }, { name: 'x'.repeat(201) }]) {
+        const c = new ToolsController();
+        c.model = { findByExactName: async () => { throw new Error('should not be called'); } };
+        const res = fakeRes();
+        await c.findExisting({ query }, res);
+        assert.equal(res.statusCode, 400);
+    }
+});
+
+test('findExisting returns the matching tool or null', async () => {
+    const c = new ToolsController();
+    const tool = { id: validId, name: 'SalesMSG', logo: '/l.png', categories: ['CRM'], tag: 'custom' };
+    c.model = { findByExactName: async (name) => tool };
+    const res = fakeRes();
+    await c.findExisting({ query: { name: 'salesmsg' } }, res);
+    assert.equal(res.statusCode, 200);
+    assert.deepEqual(res.body.result, tool);
+
+    c.model = { findByExactName: async () => null };
+    const none = fakeRes();
+    await c.findExisting({ query: { name: 'nothing' } }, none);
+    assert.equal(none.body.result, null);
+});

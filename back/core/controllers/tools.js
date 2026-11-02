@@ -108,6 +108,21 @@ class Tools {
         }
     }
 
+    // Create Tool's same-name warning (public, like /tools/search). Returns the tool, or null.
+    async findExisting(req, res, next) {
+        const name = req.query && req.query.name;
+        if (typeof name !== 'string' || !name.trim() || name.length > 200) {
+            return res.status(400).json({ result: 'Error', message: 'Bad request' });
+        }
+        try {
+            const tool = await this.model.findByExactName(name);
+            res.json({ result: tool }); // same tool fields /tools/search returns; the stack adds it as a node
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ result: 'Error', message: 'Server error' });
+        }
+    }
+
     getTools(req, res, next) {
         const name = typeof req.query.name === 'string' ? req.query.name.trim() : '';
         return this.listTools(req, res, name);

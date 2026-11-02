@@ -25,6 +25,11 @@
                         <input matInput placeholder="Tool" type="text" formControlName="name" cdkFocusInitial>
                         
                     </mat-form-field>
+                    <div *ngIf="existingTool" class="existing-tool-warning">
+                        <mat-icon>warning</mat-icon>
+                        <span>A tool named <strong>{{ existingTool.name }}</strong> already exists.</span>
+                        <a *ngIf="!data.admin && data.blueprintId" href="javascript:void(0)" class="existing-tool-link" (click)="useExistingTool()">Add existing tool</a>
+                    </div>
                 </div>
             </div>
             

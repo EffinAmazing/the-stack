@@ -773,6 +773,10 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
     });
 
     dialogRef.afterClosed().subscribe(result => {
+      if (result && result.existingTool) {
+        this.addSelectedTools({ [result.existingTool.id]: result.existingTool });
+        return;
+      }
       if ( result ) {
         if (!node) {
           this.addedNewNode$.next([ result ]);
@@ -824,50 +828,54 @@ export class BuildStackComponent implements OnInit, OnDestroy, ComponentCanDeact
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('res',result);
-      const listToCreate = [];
-      const listToUnhide = [];
       if (result) {
         if (typeof result === 'object') {
-          for (const key in result) {
-            if (result.hasOwnProperty(key)) {
-              const item = result[key];
-
-              // Find all hidden nodes of this tool type
-              const hiddenNodes = Object.values(this.nodes)
-                .filter(node => node.toolId === item.id && node.hide)
-                .map(node => node.id);
-
-              if (hiddenNodes.length > 0) {                
-                listToUnhide.push(...hiddenNodes);
-              } else {
-                // No hidden nodes, create a new one
-                const referenceNode = Object.values(this.nodes).find(node => node.toolId === item.id);
-
-                listToCreate.push({
-                  blueprintId: this.blueprint.id,
-                  toolId: item.id,
-                  hide: false,
-                  dependencies: [],
-                  start: referenceNode?.start || null,
-                  end: referenceNode?.end || null
-                });
-              }
-            }
-          }
-
-          this.proceedAddNewNodes(listToCreate, listToUnhide, result).then(nodes => {
-            if (nodes.length) {
-              this.addedNewNode$.next(nodes);
-            }
-          }).catch(err => console.log(err));
-
-
+          this.addSelectedTools(result);
         } else if (typeof result === 'string' && result === 'create') {
           this.handleCeateCustomTool();
         }
         
       }
     });
+  }
+
+  // Adds tools picked in Add Tool (or the existing tool offered by Create Tool's same-name warning):
+  // un-hides hidden nodes of the tool, otherwise creates a new node.
+  private addSelectedTools(result: { [id: string]: any }) {
+    const listToCreate = [];
+    const listToUnhide = [];
+    for (const key in result) {
+      if (result.hasOwnProperty(key)) {
+        const item = result[key];
+
+        // Find all hidden nodes of this tool type
+        const hiddenNodes = Object.values(this.nodes)
+          .filter(node => node.toolId === item.id && node.hide)
+          .map(node => node.id);
+
+        if (hiddenNodes.length > 0) {                
+          listToUnhide.push(...hiddenNodes);
+        } else {
+          // No hidden nodes, create a new one
+          const referenceNode = Object.values(this.nodes).find(node => node.toolId === item.id);
+
+          listToCreate.push({
+            blueprintId: this.blueprint.id,
+            toolId: item.id,
+            hide: false,
+            dependencies: [],
+            start: referenceNode?.start || null,
+            end: referenceNode?.end || null
+          });
+        }
+      }
+    }
+
+    this.proceedAddNewNodes(listToCreate, listToUnhide, result).then(nodes => {
+      if (nodes.length) {
+        this.addedNewNode$.next(nodes);
+      }
+    }).catch(err => console.log(err));
   }
 
   async proceedAddNewNodes(listToCreate, listToUnhide, tools) {

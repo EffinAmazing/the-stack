@@ -5,8 +5,8 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { BlueprintsService } from '../../../../core/services/blueprints.service';
 import { environment } from '../../../../../environments/environment';
 import { ToolIconCropperComponent } from '../tool-icon-cropper/tool-icon-cropper.component';
-import {Observable} from 'rxjs';
-import {map, startWith, switchMap} from 'rxjs/operators';
+import {Observable, of, Subscription} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, map, startWith, switchMap} from 'rxjs/operators';
 
 const host = environment.serverURI;
 
@@ -25,6 +25,8 @@ export class CreateCustomToolDialogComponent {
   nodeResult = null;
   catOptions = [];
   filteredOptions: Observable<string[]> = new Observable();
+  existingTool: Tool | null = null;
+  private nameCheck: Subscription;
   @ViewChild('iconImage') iconImage: ElementRef<HTMLImageElement>;
   @ViewChild('canvasForIcon') canvasForIcon: ElementRef<HTMLCanvasElement>;
   @ViewChild('cancelButton') cancelButton: ElementRef<HTMLButtonElement>;
@@ -48,6 +50,17 @@ export class CreateCustomToolDialogComponent {
     });
 
     
+
+    // Same-name warning while creating (not when editing an existing custom tool).
+    if (!data.node) {
+      this.nameCheck = this.toolForm.get('name').valueChanges.pipe(
+        map((value: string) => (value || '').trim()),
+        debounceTime(400),
+        distinctUntilChanged(),
+        switchMap(name => name ? this.service.findExistingTool(name).pipe(catchError(() => of(null))) : of(null))
+      ).subscribe(tool => { this.existingTool = tool; });
+      this.dialogRef.afterClosed().subscribe(() => this.nameCheck.unsubscribe());
+    }
 
     this.dialogRef.afterOpened().subscribe(() => {
       this.iconImage.nativeElement.addEventListener('load', (result) => {
@@ -334,6 +347,11 @@ export class CreateCustomToolDialogComponent {
     console.log(item);
     return item && item.name ? item.name : '';
   }*/
+
+  // Same-name warning on a stack: add the existing tool instead of creating a duplicate.
+  public useExistingTool() {
+    this.dialogRef.close({ existingTool: this.existingTool });
+  }
 
   onNoClick(): void {
     if (this.nodeResult) {
