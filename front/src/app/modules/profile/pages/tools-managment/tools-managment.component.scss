@@ -79,6 +79,7 @@
 .cat-chip { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; border-radius: 10px; background: #f0f0f0; color: #444; font-size: 13px; }
 .cat-chip.cat-blocked { background: #fdecea; color: #c62828; }
 .cat-chip.cat-whitelisted { background: #e8f5e9; color: #2e7d32; }
+.custom-badge { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: #e3f2fd; color: #1565c0; font-size: 11px; font-weight: 600; text-transform: uppercase; vertical-align: middle; }
 .tool-name.muted { color: #888; }
 .setting-toggle mat-icon { font-size: 16px; width: 16px; height: 16px; vertical-align: middle; }
 .setting-toggle .mat-button-toggle-checked.toggle-show { background: #e8f5e9; color: #2e7d32; }

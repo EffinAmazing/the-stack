@@ -50,6 +50,32 @@ test('app tools are never listed or updated', async () => {
     assert.ok(!(await tools.getCategoryCounts()).rows.some(r => r.name === 'WebSite'));
 });
 
+test('custom tools are listed and their flag can be set, but stay out of category counts', async () => {
+    const custom = await tools.modelDB.create({ name: 'SalesMSG', tag: 'custom', categories: ['CRM'] });
+    const listed = await tools.queryTools({ name: 'salesmsg' });
+    assert.deepEqual(listed.list.map(t => t.name), ['SalesMSG']);
+    assert.equal((await tools.queryTools({ tag: 'custom' })).total, 1);
+
+    const out = await tools.bulkSetVisibility([String(custom._id)], 'hide');
+    assert.equal(out.matched, 1);
+    assert.equal((await tools.modelDB.findById(custom._id).lean()).hidden, true);
+
+    const crm = (await tools.getCategoryCounts()).rows.find(r => r.name === 'CRM');
+    assert.equal(crm.tools, 1); // HubSpot only
+});
+
+test('Add Tool search leaves out custom tools an admin set to Hide', async () => {
+    await tools.modelDB.create([
+        { name: 'SalesMSG', tag: 'custom', hidden: true },
+        { name: 'SalesMSG Pro', tag: 'custom', hidden: false },
+        { name: 'SalesMSG Lite', tag: 'custom' }
+    ]);
+    const names = (await tools.getToolsListByName('salesmsg')).map(t => t.name).sort();
+    assert.deepEqual(names, ['SalesMSG Lite', 'SalesMSG Pro']);
+    // Admin Hide on a BuiltWith tool doesn't remove it from search (unchanged).
+    assert.deepEqual((await tools.getToolsListByName('drift')).map(t => t.name), ['Drift']);
+});
+
 test('bulkSetVisibility rejects an unknown state', async () => {
     await assert.rejects(tools.bulkSetVisibility([], 'maybe'), /Invalid state/);
 });

@@ -231,7 +231,17 @@ export class ToolsManagmentComponent implements OnInit, OnDestroy {
   // tool.hidden: true = Hide, false = Show, null/absent = Default.
   private toRow(tool: any): ToolRow {
     const setting: AdminSetting = tool.hidden === true ? 'hide' : (tool.hidden === false ? 'show' : 'default');
+    if (tool.tag === 'custom') {
+      return { tool, setting, result: this.describeCustom(setting) };
+    }
     return { tool, setting, result: this.describe(tool.result || { state: null, reason: 'auto' }) };
+  }
+
+  // Custom tools are added to stacks by hand, so rules skip them; Hide only removes them from Add Tool search.
+  private describeCustom(setting: AdminSetting): ToolRow['result'] {
+    return setting === 'hide'
+      ? { kind: 'hidden', label: 'Hidden', detail: 'Hidden from Add Tool search' }
+      : { kind: 'shown', label: 'Shown', detail: 'Shown in Add Tool search' };
   }
 
   // Formats the server's decideTool result for the "Result on new stacks" column.
